@@ -1,29 +1,191 @@
 body {
-    background-color: #202020;
+    background: #181818;
     color: white;
     font-family: Arial, sans-serif;
     text-align: center;
-    margin-top: 100px;
+    margin: 0;
+    padding-top: 80px;
 }
+
+
+/* Основные блоки */
+
+#login,
+#content {
+    background: #242424;
+    width: 90%;
+    max-width: 700px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+}
+
+
+/* Заголовки */
 
 h1 {
     color: #4CAF50;
+    font-size: 36px;
 }
+
+h2 {
+    color: #ddd;
+}
+
+
+/* Поля ввода */
+
+input,
+textarea {
+
+    width: 80%;
+    max-width: 500px;
+
+    padding: 12px;
+
+    background: #333;
+
+    border: 1px solid #555;
+
+    color: white;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+
+    outline: none;
+
+}
+
+
+input:focus,
+textarea:focus {
+
+    border-color: #4CAF50;
+
+}
+
+
+textarea {
+
+    height: 150px;
+
+    resize: vertical;
+
+}
+
+
+/* Кнопки */
 
 button {
-    padding: 10px 20px;
+
+    margin-top: 15px;
+
+    padding: 12px 25px;
+
     background: #4CAF50;
+
     border: none;
+
     color: white;
-    border-radius: 8px;
+
+    border-radius: 10px;
+
     cursor: pointer;
+
+    font-size: 16px;
+
+    transition: 0.2s;
+
 }
 
+
 button:hover {
+
     background: #45a049;
+
+    transform: scale(1.05);
+
 }
+
+
+
+/* Сообщение о пароле */
+
 #message {
-    margin-top: 10px;
+
+    margin-top: 15px;
+
     font-size: 18px;
+
     font-weight: bold;
+
+}
+
+
+
+/* Записи */
+
+#notes {
+
+    margin-top: 30px;
+
+}
+
+
+#notes div {
+
+    background: #303030;
+
+    padding: 20px;
+
+    margin: 15px auto;
+
+    border-radius: 12px;
+
+    text-align: left;
+
+    max-width: 600px;
+
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+
+}
+
+
+#notes h3 {
+
+    color: #4CAF50;
+
+    margin-top: 0;
+
+}
+
+
+#notes p {
+
+    color: #ddd;
+
+    white-space: pre-wrap;
+
+    line-height: 1.5;
+
+}
+
+
+/* Кнопка удаления */
+
+#notes button {
+
+    background: #e53935;
+
+    padding: 8px 15px;
+
+}
+
+
+#notes button:hover {
+
+    background: #c62828;
+
 }
