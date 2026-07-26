@@ -148,7 +148,7 @@ output += `
     async function deleteNote(id){
 
     let response = await fetch(
-        WORKER_URL,
+        my-password-check.minecraftpesok.workers.dev,
         {
             method:"POST",
             headers:{
