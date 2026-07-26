@@ -145,10 +145,10 @@ output += `
 
     document.getElementById("notes").innerHTML = output;
 
-    async function deleteNote(id){
+async function deleteNote(id){
 
     let response = await fetch(
-        my-password-check.minecraftpesok.workers.dev,
+        WORKER_URL,
         {
             method:"POST",
             headers:{
