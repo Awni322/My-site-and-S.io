@@ -1,6 +1,7 @@
-
 async function login(){
-alert("JS работает");
+
+    alert("Кнопка нажата");
+
     let password = document.getElementById("password").value;
 
     let response = await fetch(
@@ -16,12 +17,10 @@ alert("JS работает");
         }
     );
 
-
     if(response.ok){
-        alert("Доступ разрешён");
-        window.location.href="main.html";
+        alert("Пароль верный");
     }
     else{
-        alert("Неверный пароль");
+        alert("Пароль неверный");
     }
 }
