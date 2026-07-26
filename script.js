@@ -19,7 +19,8 @@ async function login(){
     );
 
 
-if(response.ok){
+if(response.ok)
+{
 
     message.innerHTML = "✅ Пароль верный";
     message.style.color = "green";
@@ -28,7 +29,9 @@ if(response.ok){
     document.getElementById("content").style.display = "block";
 
 
-    } else {
+    } 
+else 
+{
 
         message.innerHTML = "❌ Неверный пароль";
         message.style.color = "red";
