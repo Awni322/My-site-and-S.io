@@ -145,5 +145,29 @@ output += `
 
     document.getElementById("notes").innerHTML = output;
 
+    async function deleteNote(id){
+
+    let response = await fetch(
+        WORKER_URL,
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                action:"delete",
+                id:id
+            })
+        }
+    );
+
+
+    if(response.ok){
+
+        loadNotes();
+
+    }
+
+}
 
 }
