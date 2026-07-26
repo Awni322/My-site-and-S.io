@@ -19,19 +19,15 @@ async function login(){
     );
 
 
-if(response.ok)
-{
+    if(response.ok){
 
-    message.innerHTML = "✅ Пароль верный";
-    message.style.color = "green";
+        message.innerHTML = "✅ Пароль верный";
+        message.style.color = "green";
 
-    document.getElementById("login").style.display = "none";
-    document.getElementById("content").style.display = "block";
+        document.getElementById("login").style.display = "none";
+        document.getElementById("content").style.display = "block";
 
-
-    } 
-else 
-{
+    } else {
 
         message.innerHTML = "❌ Неверный пароль";
         message.style.color = "red";
