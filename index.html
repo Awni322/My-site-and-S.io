@@ -6,24 +6,56 @@
     <title>Мой сайт</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div id="login">
 
-<input id="password" type="password" placeholder="Введите пароль">
+    <input id="password" type="password" placeholder="Введите пароль">
 
-<button onclick="login()">Войти</button>
+    <button onclick="login()">Войти</button>
 
-<p id="message"></p>
+    <p id="message"></p>
 
 </div>
+
+
 <div id="content" style="display:none;">
 
-<h1>Мой сайт</h1>
+    <h1>Мой сайт</h1>
 
-<p>Тут основная информация.</p>
+
+    <h2>Новая запись</h2>
+
+    <input 
+        id="title" 
+        type="text" 
+        placeholder="Название"
+    >
+
+    <br><br>
+
+    <textarea 
+        id="text" 
+        placeholder="Текст записи"
+    ></textarea>
+
+    <br>
+
+    <button onclick="saveNote()">
+        Сохранить
+    </button>
+
+
+    <h2>Записи:</h2>
+
+    <div id="notes"></div>
+
 
 </div>
-    <script src="script.js"></script>
+
+
+<script src="script.js"></script>
+
 </body>
 </html>
