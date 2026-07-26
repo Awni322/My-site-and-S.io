@@ -27,7 +27,7 @@ if(response.ok){
     document.getElementById("login").style.display = "none";
     document.getElementById("content").style.display = "block";
 
-}
+
     } else {
 
         message.innerHTML = "❌ Неверный пароль";
