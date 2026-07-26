@@ -1,8 +1,9 @@
 async function login(){
 
-    alert("Кнопка нажата");
-
     let password = document.getElementById("password").value;
+    let message = document.getElementById("message");
+
+    message.innerHTML = "Проверка...";
 
     let response = await fetch(
         "https://my-password-check.minecraftpesok.workers.dev/",
@@ -17,10 +18,20 @@ async function login(){
         }
     );
 
+
     if(response.ok){
-        alert("Пароль верный");
-    }
-    else{
-        alert("Пароль неверный");
+
+        message.innerHTML = "✅ Пароль верный";
+        message.style.color = "green";
+
+        setTimeout(() => {
+            window.location.href = "main.html";
+        }, 1000);
+
+    } else {
+
+        message.innerHTML = "❌ Неверный пароль";
+        message.style.color = "red";
+
     }
 }
