@@ -164,10 +164,10 @@ async function deleteNote(id){
 
 
     if(response.ok){
-
         loadNotes();
-
     }
 
 }
 
+
+window.deleteNote = deleteNote;
