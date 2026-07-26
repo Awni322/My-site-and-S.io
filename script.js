@@ -120,19 +120,23 @@ async function loadNotes(){
     notes.forEach(note => {
 
 
-        output += `
+output += `
 
-        <div>
+<div>
 
-            <h3>📌 ${note.title}</h3>
+    <h3>📌 ${note.title}</h3>
 
-            <p>${note.content}</p>
+    <p>${note.content}</p>
 
-            <hr>
+    <button onclick="deleteNote(${note.id})">
+        Удалить
+    </button>
 
-        </div>
+    <hr>
 
-        `;
+</div>
+
+`;
 
 
     });
