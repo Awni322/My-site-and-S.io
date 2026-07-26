@@ -3,7 +3,7 @@ async function login(){
     let password = document.getElementById("password").value;
 
     let response = await fetch(
-        "АДРЕС_ТВОЕГО_WORKER",
+        "https://my-password-check.minecraftpesok.workers.dev/",
         {
             method:"POST",
             headers:{
