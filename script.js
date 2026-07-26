@@ -144,6 +144,7 @@ output += `
 
 
     document.getElementById("notes").innerHTML = output;
+    }
 
 async function deleteNote(id){
 
@@ -170,4 +171,3 @@ async function deleteNote(id){
 
 }
 
-}
