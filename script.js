@@ -1,6 +1,6 @@
-alert("JS работает");
-async function login(){
 
+async function login(){
+alert("JS работает");
     let password = document.getElementById("password").value;
 
     let response = await fetch(
