@@ -19,15 +19,15 @@ async function login(){
     );
 
 
-    if(response.ok){
+   if(response.ok){
 
-        message.innerHTML = "✅ Пароль верный";
-        message.style.color = "green";
+    message.innerHTML = "✅ Пароль верный";
+    message.style.color = "green";
 
-        setTimeout(() => {
-            window.location.href = "main.html";
-        }, 1000);
+    document.getElementById("login").style.display = "none";
+    document.getElementById("content").style.display = "block";
 
+}
     } else {
 
         message.innerHTML = "❌ Неверный пароль";
