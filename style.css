@@ -1,60 +1,211 @@
-body {
-    background: #181818;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding-top: 80px;
+/* =========================================================
+   Modern SaaS UI Design
+   Clean CSS architecture
+   Responsive • Accessible • Minimal
+   ========================================================= */
+
+
+/* =========================
+   Global variables
+   ========================= */
+
+:root {
+    --bg-primary: #0b1220;
+    --bg-secondary: #111827;
+    --surface: rgba(255, 255, 255, 0.08);
+    --surface-hover: rgba(255, 255, 255, 0.12);
+
+    --border: rgba(255, 255, 255, 0.12);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+
+    --accent: #22c55e;
+    --accent-hover: #16a34a;
+
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+
+    --shadow:
+        0 20px 50px rgba(0, 0, 0, 0.35);
+
+    --transition:
+        0.25s ease;
 }
 
 
-/* Основные блоки */
+/* =========================
+   Reset
+   ========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+
+body {
+
+    min-height: 100vh;
+
+    margin: 0;
+
+    padding: 60px 20px;
+
+    background:
+        radial-gradient(
+            circle at top,
+            rgba(34,197,94,0.18),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            var(--bg-primary),
+            var(--bg-secondary)
+        );
+
+    color: var(--text-primary);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    text-align: center;
+
+    line-height: 1.5;
+}
+
+
+/* =========================
+   Main application cards
+   ========================= */
 
 #login,
 #content {
-    background: #242424;
-    width: 90%;
-    max-width: 700px;
-    margin: auto;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 0 25px rgba(0,0,0,0.5);
+
+    width: 100%;
+
+    max-width: 760px;
+
+    margin: 0 auto;
+
+    padding: 40px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,0.10),
+            rgba(255,255,255,0.04)
+        );
+
+    border: 1px solid var(--border);
+
+    border-radius: var(--radius-lg);
+
+    backdrop-filter: blur(18px);
+
+    box-shadow: var(--shadow);
+
+    animation: fadeIn 0.5s ease;
 }
 
 
-/* Заголовки */
+/* =========================
+   Typography
+   ========================= */
 
 h1 {
-    color: #4CAF50;
-    font-size: 36px;
+
+    margin: 0 0 20px;
+
+    font-size: clamp(32px, 5vw, 46px);
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #4ade80,
+            #22c55e
+        );
+
+    -webkit-background-clip: text;
+
+    -webkit-text-fill-color: transparent;
 }
+
 
 h2 {
-    color: #ddd;
+
+    margin-top: 30px;
+
+    margin-bottom: 20px;
+
+    color: var(--text-secondary);
+
+    font-size: 24px;
+
+    font-weight: 700;
 }
 
 
-/* Поля ввода */
+/* =========================
+   Inputs
+   ========================= */
 
 input,
 textarea {
 
-    width: 80%;
-    max-width: 500px;
+    width: min(100%, 560px);
 
-    padding: 12px;
+    padding: 15px 18px;
 
-    background: #333;
+    margin: 8px 0;
 
-    border: 1px solid #555;
+    background:
+        rgba(15,23,42,0.65);
 
-    color: white;
+    color: var(--text-primary);
 
-    border-radius: 10px;
+    border:
+
+        1px solid var(--border);
+
+    border-radius: var(--radius-md);
+
+    outline: none;
 
     font-size: 16px;
 
-    outline: none;
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
+
+}
+
+
+input::placeholder,
+textarea::placeholder {
+
+    color: var(--text-muted);
+
+}
+
+
+input:hover,
+textarea:hover {
+
+    border-color:
+        rgba(255,255,255,0.25);
 
 }
 
@@ -62,130 +213,367 @@ textarea {
 input:focus,
 textarea:focus {
 
-    border-color: #4CAF50;
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 0 4px rgba(34,197,94,0.18);
+
+    transform: translateY(-1px);
 
 }
 
 
 textarea {
 
-    height: 150px;
+    min-height: 170px;
 
     resize: vertical;
 
 }
 
 
-/* Кнопки */
+/* =========================
+   Buttons
+   ========================= */
 
 button {
 
-    margin-top: 15px;
+    margin-top: 18px;
 
-    padding: 12px 25px;
-
-    background: #4CAF50;
+    padding: 14px 28px;
 
     border: none;
 
+    border-radius: 999px;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            var(--accent),
+            #16a34a
+        );
+
     color: white;
-
-    border-radius: 10px;
-
-    cursor: pointer;
 
     font-size: 16px;
 
-    transition: 0.2s;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px rgba(34,197,94,0.25);
+
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        background var(--transition);
 
 }
 
 
 button:hover {
 
-    background: #45a049;
+    background:
 
-    transform: scale(1.05);
+        linear-gradient(
+            135deg,
+            #4ade80,
+            var(--accent-hover)
+        );
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 15px 35px rgba(34,197,94,0.35);
 
 }
 
 
+button:active {
 
-/* Сообщение о пароле */
+    transform:
+        translateY(0);
+
+}
+
+
+button:focus-visible {
+
+    outline:
+
+        3px solid
+        rgba(34,197,94,0.45);
+
+    outline-offset: 3px;
+
+}
+
+
+/* =========================
+   Messages
+   ========================= */
 
 #message {
 
-    margin-top: 15px;
+    margin-top: 18px;
 
-    font-size: 18px;
+    min-height: 24px;
 
-    font-weight: bold;
+    color:
+
+        var(--accent);
+
+    font-size: 17px;
+
+    font-weight: 700;
 
 }
 
 
-
-/* Записи */
+/* =========================
+   Notes section
+   ========================= */
 
 #notes {
 
-    margin-top: 30px;
+    margin-top: 35px;
 
 }
 
 
 #notes div {
 
-    background: #303030;
+    max-width: 650px;
 
-    padding: 20px;
+    margin: 18px auto;
 
-    margin: 15px auto;
-
-    border-radius: 12px;
+    padding: 25px;
 
     text-align: left;
 
-    max-width: 600px;
+    background:
 
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        rgba(255,255,255,0.06);
+
+    border:
+
+        1px solid var(--border);
+
+    border-radius: var(--radius-md);
+
+    backdrop-filter: blur(12px);
+
+    box-shadow:
+
+        0 10px 30px rgba(0,0,0,0.25);
+
+    transition:
+
+        transform var(--transition),
+        background var(--transition),
+        border-color var(--transition);
+
+}
+
+
+#notes div:hover {
+
+    transform:
+        translateY(-5px);
+
+    background:
+
+        var(--surface-hover);
+
+    border-color:
+
+        rgba(255,255,255,0.22);
 
 }
 
 
 #notes h3 {
 
-    color: #4CAF50;
-
     margin-top: 0;
+
+    margin-bottom: 12px;
+
+    color:
+
+        #4ade80;
+
+    font-size: 21px;
 
 }
 
 
 #notes p {
 
-    color: #ddd;
+    margin: 0;
+
+    color:
+
+        var(--text-secondary);
 
     white-space: pre-wrap;
 
-    line-height: 1.5;
+    line-height: 1.7;
 
 }
 
 
-/* Кнопка удаления */
+/* =========================
+   Delete button
+   ========================= */
 
 #notes button {
 
-    background: #e53935;
+    margin-top: 18px;
 
-    padding: 8px 15px;
+    padding:
+
+        10px 18px;
+
+    background:
+
+        linear-gradient(
+            135deg,
+            var(--danger),
+            #b91c1c
+        );
+
+    box-shadow:
+
+        0 8px 20px rgba(239,68,68,0.25);
 
 }
 
 
 #notes button:hover {
 
-    background: #c62828;
+    background:
+
+        linear-gradient(
+            135deg,
+            #f87171,
+            var(--danger-hover)
+        );
+
+}
+
+
+/* =========================
+   Animation
+   ========================= */
+
+@keyframes fadeIn {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(15px);
+
+    }
+
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* =========================
+   Mobile optimization
+   ========================= */
+
+@media (max-width: 600px) {
+
+
+    body {
+
+        padding:
+
+            25px 14px;
+
+    }
+
+
+    #login,
+    #content {
+
+        padding:
+
+            25px 18px;
+
+        border-radius:
+
+            18px;
+
+    }
+
+
+    h1 {
+
+        font-size:
+
+            32px;
+
+    }
+
+
+    h2 {
+
+        font-size:
+
+            21px;
+
+    }
+
+
+    input,
+    textarea {
+
+        font-size:
+
+            16px;
+
+        padding:
+
+            14px;
+
+    }
+
+
+    button {
+
+        width:
+
+            100%;
+
+        padding:
+
+            15px;
+
+    }
+
+
+    #notes div {
+
+        padding:
+
+            20px;
+
+    }
 
 }
