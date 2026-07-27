@@ -577,3 +577,49 @@ button:focus-visible {
     }
 
 }
+.toggle-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    color: #e2e8f0;
+    font-size: 15px;
+    white-space: nowrap;
+    margin: 12px 0;
+}
+
+.toggle-container input {
+    display: none;
+}
+
+.toggle-slider {
+    width: 42px;
+    height: 22px;
+    background-color: #2a374a;
+    border-radius: 20px;
+    position: relative;
+    transition: background-color 0.3s;
+    border: 1px solid #3b82f633;
+}
+
+.toggle-slider::before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #94a3b8;
+    top: 2px;
+    left: 3px;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.toggle-container input:checked + .toggle-slider {
+    background-color: #2563eb;
+}
+
+.toggle-container input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+    background-color: #ffffff;
+}
