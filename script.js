@@ -28,7 +28,7 @@ async function login() {
             document.getElementById("content").style.display = "flex";
             loadNotes();
         } else {
-            message.innerHTML = "❌ Неверный пароль";
+            message.innerHTML = "❌ Неверный пароль напиши в тг: love40404";
             message.style.color = "#f87171";
         }
     } catch (e) {
