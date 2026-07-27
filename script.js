@@ -4,7 +4,7 @@ let currentNotesList = [];
 let activeCategory = "all"; 
 let noteIdToDelete = null;
 
-// Функция входа
+// Авторизация
 async function login() {
     let passwordInput = document.getElementById("password");
     let message = document.getElementById("message");
@@ -62,6 +62,7 @@ function handleImageUpload(e) {
     }
 }
 
+// Сохранение записи
 async function saveNote() {
     let title = document.getElementById("title").value;
     let content = document.getElementById("contentInput").value;
@@ -115,6 +116,7 @@ async function saveNote() {
     }
 }
 
+// Загрузка записей
 async function loadNotes() {
     try {
         let response = await fetch(WORKER_URL);
@@ -151,6 +153,7 @@ function handleSearch() {
     renderNotes(filtered);
 }
 
+// Быстрое копирование с карточки
 function copyToClipboard(text, buttonEl) {
     navigator.clipboard.writeText(text).then(() => {
         let originalText = buttonEl.innerText;
@@ -161,6 +164,7 @@ function copyToClipboard(text, buttonEl) {
     }).catch(err => console.error("Ошибка копирования: ", err));
 }
 
+// Копирование из модального окна
 function copyModalContent() {
     let text = document.getElementById("modalText").innerText;
     let btn = document.getElementById("btnModalCopy");
@@ -172,6 +176,7 @@ function copyModalContent() {
     });
 }
 
+// Рендер карточек
 function renderNotes(notes) {
     let output = "";
 
@@ -215,6 +220,7 @@ function renderNotes(notes) {
     document.getElementById("notes").innerHTML = output;
 }
 
+// Открытие модалки просмотра
 function openNoteModal(id) {
     let note = currentNotesList.find(n => n.id == id);
     if (!note) return;
@@ -222,6 +228,7 @@ function openNoteModal(id) {
     document.getElementById("modalTitle").innerText = note.title;
     document.getElementById("modalText").innerText = note.content;
 
+    // Ссылка на плейс Roblox
     let robloxContainer = document.getElementById("modalRobloxContainer");
     if (robloxContainer) {
         if (note.roblox_url && note.roblox_url.trim() !== "") {
@@ -249,6 +256,7 @@ function openNoteModal(id) {
     document.getElementById("modalOverlay").classList.add("active");
 }
 
+// Заполнение формы для редактирования
 function editNote(id) {
     let note = currentNotesList.find(n => n.id == id);
     if (!note) return;
@@ -272,6 +280,7 @@ function editNote(id) {
     currentImageBase64 = note.image;
 }
 
+// Сброс формы
 function resetForm() {
     document.getElementById("title").value = "";
     document.getElementById("contentInput").value = "";
@@ -295,6 +304,7 @@ function resetForm() {
     document.getElementById("btnCancel").style.display = "none";
 }
 
+// Закрепление
 async function togglePin(id, status) {
     await fetch(WORKER_URL, {
         method: "POST",
@@ -304,6 +314,7 @@ async function togglePin(id, status) {
     loadNotes();
 }
 
+// Удаление
 function deleteNote(id) {
     noteIdToDelete = id;
     const overlay = document.getElementById("confirmOverlay");
@@ -339,3 +350,17 @@ async function confirmDelete() {
 function closeModal() {
     document.getElementById("modalOverlay").classList.remove("active");
 }
+window.login = login;
+window.saveNote = saveNote;
+window.deleteNote = deleteNote;
+window.editNote = editNote;
+window.handleSearch = handleSearch;
+window.togglePin = togglePin;
+window.resetForm = resetForm;
+window.handleImageUpload = handleImageUpload;
+window.openNoteModal = openNoteModal;
+window.closeModal = closeModal;
+window.filterCategory = filterCategory;
+window.closeConfirmModal = closeConfirmModal;
+window.copyToClipboard = copyToClipboard;
+window.copyModalContent = copyModalContent;
