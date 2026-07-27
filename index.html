@@ -52,5 +52,21 @@
 </div>
 
 <script src="script.js"></script>
+    <!-- Модальное окно просмотра записи -->
+<div id="noteModal" class="modal-overlay" onclick="closeNoteModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeNoteModal()">✕</button>
+        <div class="modal-body">
+            <div class="modal-left" id="modalImageContainer">
+                <!-- Сюда вставляется картинка -->
+            </div>
+            <div class="modal-right">
+                <div id="modalPinBadge"></div>
+                <h2 id="modalTitle"></h2>
+                <div id="modalText"></div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
