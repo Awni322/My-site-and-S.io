@@ -171,7 +171,14 @@ async function deleteNote(id) {
         loadNotes();
     }
 }
-
+function updateFileName(input) {
+    const fileNameText = document.getElementById("fileNameText");
+    if (input.files && input.files[0]) {
+        fileNameText.innerText = "Файл: " + input.files[0].name;
+    } else {
+        fileNameText.innerText = "Прикрепить фото";
+    }
+}
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
