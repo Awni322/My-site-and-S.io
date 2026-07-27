@@ -360,7 +360,59 @@ async function deleteNote(id){
 }
 
 
+async function searchNotes(){
 
+    let text =
+    document.getElementById("search").value;
+
+
+    let response =
+    await fetch(
+        WORKER_URL + "?search=" + encodeURIComponent(text)
+    );
+
+
+    let notes =
+    await response.json();
+
+
+    let output = "";
+
+
+    notes.forEach(note => {
+
+
+        output += `
+
+        <div>
+
+            <h3>
+            📌 ${note.title}
+            </h3>
+
+            <p>
+            ${note.content}
+            </p>
+
+
+            <button onclick="deleteNote(${note.id})">
+            🗑 Удалить
+            </button>
+
+            <hr>
+
+        </div>
+
+        `;
+
+
+    });
+
+
+    document.getElementById("notes").innerHTML =
+    output;
+
+}
 
 
 window.deleteNote = deleteNote;
@@ -368,3 +420,5 @@ window.deleteNote = deleteNote;
 window.editNote = editNote;
 
 window.cancelEdit = cancelEdit;
+
+window.searchNotes = searchNotes;
