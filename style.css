@@ -366,3 +366,48 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
 }
+/* Кнопка скопировать в модальном окне просмотрщика */
+.btn-modal-copy {
+    margin-top: 15px;
+    padding: 12px 18px;
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-modal-copy:hover {
+    background: rgba(34, 197, 94, 0.3);
+    border-color: #22c55e;
+    transform: translateY(-1px);
+}
+
+/* Кнопка ссылки на Roblox */
+.roblox-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #00a2ff, #0066ff);
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
+}
+
+.roblox-link-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
+}
