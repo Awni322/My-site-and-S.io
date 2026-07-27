@@ -1,102 +1,44 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Архив</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
 
-
 <div id="login">
-
-    <input 
-        id="password" 
-        type="password" 
-        placeholder="Введите пароль"
-    >
-
-    <button onclick="login()">
-        Войти
-    </button>
-
+    <input id="password" type="password" placeholder="Введите пароль">
+    <button onclick="login()">Войти</button>
     <p id="message"></p>
-
 </div>
-
-
 
 <div id="content" style="display:none;">
-
-
     <h1>Архив</h1>
 
+    <h2 id="formTitle">Новая запись</h2>
+    <input id="title" type="text" placeholder="Название"><br><br>
+    <textarea id="text" placeholder="Текст записи"></textarea><br><br>
 
+    <!-- Поле для фото -->
+    <label>Прикрепить фото:</label><br>
+    <input type="file" id="imageInput" accept="image/*"><br><br>
 
-    <h2 id="formTitle">
-        Новая запись
-    </h2>
+    <!-- Чекбокс закрепления -->
+    <label>
+        <input type="checkbox" id="isPinned"> Закрепить запись
+    </label><br><br>
 
+    <button onclick="saveNote()">Сохранить</button>
+    <button id="cancelEdit" onclick="cancelEdit()" style="display:none;">Отмена</button>
 
-    <input 
-        id="title"
-        type="text"
-        placeholder="Название"
-    >
-
-
-    <br><br>
-
-
-    <textarea
-        id="text"
-        placeholder="Текст записи"
-    ></textarea>
-
-
-    <br>
-
-
-    <button onclick="saveNote()">
-        Сохранить
-    </button>
-
-
-    <button 
-        id="cancelEdit"
-        onclick="cancelEdit()"
-        style="display:none;"
-    >
-        Отмена
-    </button>
-
-
-
-    <h2>
-        Записи:
-    </h2>
-<input 
-    id="search"
-    type="text"
-    placeholder="Поиск записей..."
-    oninput="searchNotes()"
->
+    <h2>Записи:</h2>
+    <input id="search" type="text" placeholder="Поиск записей..." oninput="searchNotes()">
 
     <div id="notes"></div>
-
-
-
 </div>
 
-
-
 <script src="script.js"></script>
-
-
 </body>
-
 </html>
