@@ -254,39 +254,40 @@ ${note.content}
 
 
 
-function editNote(id,title,content){
+async function editNote(id){
 
 
-    editingId=id;
+    let response = await fetch(
+        WORKER_URL
+    );
+
+
+    let notes = await response.json();
+
+
+    let note = notes.find(
+        n => n.id === id
+    );
+
+
+    if(!note){
+        return;
+    }
 
 
 
     document.getElementById("title").value =
-    title;
+        note.title;
 
 
     document.getElementById("text").value =
-    content;
+        note.content;
 
 
 
-    document.getElementById("formTitle").innerHTML =
-    "Редактирование";
+    document.getElementById("title").dataset.id =
+        note.id;
 
-
-
-    document.getElementById("cancelEdit").style.display =
-    "inline-block";
-
-
-
-    window.scrollTo({
-
-        top:0,
-
-        behavior:"smooth"
-
-    });
 
 
 }
