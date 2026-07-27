@@ -1,5 +1,5 @@
 /* ==========================================
-   1. СБРОС И ГЛОБАЛЬНЫЕ СТИЛИ
+   1. СБРОС И ГЛОБАЛЬНЫЕ СТИЛИ (NEON DARK MATRIX)
    ========================================== */
 * {
     box-sizing: border-box;
@@ -8,13 +8,14 @@
 }
 
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #050b07; /* Глубокий практически чёрный с зеленым оттенком */
+    background-image: radial-gradient(circle at 50% 0%, #0a2012 0%, #050b07 70%);
     background-attachment: fixed;
-    color: #f1f5f9;
+    color: #e2e8f0;
     display: flex;
     justify-content: center;
-    padding: 30px 15px;
+    padding: 30px 20px;
     min-height: 100vh;
 }
 
@@ -22,32 +23,17 @@ body {
    2. АВТОРИЗАЦИЯ (LOGIN)
    ========================================== */
 #login {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 35px;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
-    max-width: 360px;
-    width: 100%;
-    margin-top: 60px;
-}
-
-/* Исправление карточки входа */
-#login {
-    background: rgba(30, 41, 59, 0.7);
+    background: rgba(12, 24, 16, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 30px 25px;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.2);
     text-align: center;
     max-width: 320px;
     width: 100%;
-    height: fit-content; /* Карточка сжимается строго по контенту */
+    height: fit-content;
     margin: 80px auto 0 auto;
 }
 
@@ -55,25 +41,38 @@ body {
     width: 100%;
     padding: 12px 15px;
     margin-bottom: 15px;
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: white;
+    background: #07120a;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 10px;
+    color: #4ade80;
     font-size: 15px;
     outline: none;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+#login input[type="password"]:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.3);
 }
 
 #login button {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: white;
+    background: linear-gradient(135deg, #22c55e, #15803d);
+    color: #022c22;
     border: none;
-    border-radius: 12px;
-    font-weight: 600;
+    border-radius: 10px;
+    font-weight: 700;
     font-size: 15px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.25);
+}
+
+#login button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
 }
 
 #message {
@@ -86,7 +85,7 @@ body {
    3. ОСНОВНОЙ КОНТЕЙНЕР
    ========================================== */
 #content {
-    max-width: 650px;
+    max-width: 1100px; /* Расширили контейнер, чтобы карточки влезали в ряд */
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -97,29 +96,30 @@ h1 {
     font-size: 32px;
     font-weight: 800;
     margin-bottom: 25px;
-    background: linear-gradient(135deg, #ffffff, #cbd5e1);
+    background: linear-gradient(135deg, #4ade80, #10b981);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
+    text-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
 }
 
 h2 {
     font-size: 20px;
     font-weight: 700;
     margin: 25px 0 12px 0;
-    color: #e2e8f0;
+    color: #86efac;
     width: 100%;
 }
 
-/* Инпуты и Текстовые поля */
+/* Текстовые поля ввода */
 input[type="text"], textarea {
     width: 100%;
     padding: 14px 18px;
-    background: rgba(30, 41, 59, 0.6);
+    background: rgba(12, 24, 16, 0.7);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    color: #f8fafc;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 12px;
+    color: #f0fdf4;
     font-size: 15px;
     outline: none;
     transition: all 0.3s ease;
@@ -127,9 +127,9 @@ input[type="text"], textarea {
 }
 
 input[type="text"]:focus, textarea:focus {
-    background: rgba(30, 41, 59, 0.85);
-    border-color: #6366f1;
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+    background: rgba(12, 24, 16, 0.95);
+    border-color: #22c55e;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
 }
 
 textarea {
@@ -160,10 +160,10 @@ textarea {
     justify-content: center;
     gap: 10px;
     padding: 14px 20px;
-    background: rgba(30, 41, 59, 0.5);
-    color: #94a3b8;
-    border: 1.5px dashed rgba(99, 102, 241, 0.4);
-    border-radius: 14px;
+    background: rgba(12, 24, 16, 0.6);
+    color: #86efac;
+    border: 1.5px dashed rgba(34, 197, 94, 0.4);
+    border-radius: 12px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
@@ -172,9 +172,9 @@ textarea {
 }
 
 .file-upload-button:hover {
-    background: rgba(99, 102, 241, 0.1);
-    border-color: #6366f1;
-    color: #e2e8f0;
+    background: rgba(34, 197, 94, 0.15);
+    border-color: #22c55e;
+    color: #bbf7d0;
 }
 
 .file-icon {
@@ -197,7 +197,7 @@ textarea {
     gap: 12px;
     cursor: pointer;
     user-select: none;
-    color: #cbd5e1;
+    color: #bbf7d0;
     font-size: 14px;
     font-weight: 500;
 }
@@ -209,7 +209,8 @@ textarea {
 .toggle-slider {
     width: 44px;
     height: 24px;
-    background-color: #334155;
+    background-color: #142e1b;
+    border: 1px solid rgba(34, 197, 94, 0.3);
     border-radius: 20px;
     position: relative;
     transition: background-color 0.3s;
@@ -221,19 +222,19 @@ textarea {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background-color: #94a3b8;
-    top: 3px;
-    left: 3px;
+    background-color: #4ade80;
+    top: 2px;
+    left: 2px;
     transition: transform 0.3s, background-color 0.3s;
 }
 
 .toggle-container input:checked + .toggle-slider {
-    background-color: #4f46e5;
+    background-color: #22c55e;
 }
 
 .toggle-container input:checked + .toggle-slider::before {
     transform: translateX(20px);
-    background-color: #ffffff;
+    background-color: #022c22;
 }
 
 /* ==========================================
@@ -244,35 +245,35 @@ textarea {
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
 }
 
 .btn-save {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #ffffff;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #022c22;
     font-size: 16px;
     font-weight: 700;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
 }
 
 .btn-save:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
 }
 
 .btn-cancel {
     width: 100%;
     padding: 12px;
-    background: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
     border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 14px;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
     transition: all 0.2s ease;
@@ -283,12 +284,12 @@ textarea {
 }
 
 /* ==========================================
-   7. КАРТОЧКИ ЗАПИСЕЙ
+   7. ГОРИЗОНТАЛЬНАЯ СЕТКА КАРТОЧЕК (GRID / FLEX)
    ========================================== */
 #notes {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap; /* Заставляет карточки выстраиваться ГОРИЗОНТАЛЬНО в ряд */
+    justify-content: center;
     gap: 20px;
     width: 100%;
 }
@@ -296,32 +297,33 @@ textarea {
 .note-card {
     display: flex;
     flex-direction: column;
-    background: rgba(30, 41, 59, 0.6);
+    background: rgba(12, 24, 16, 0.75);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
-    padding: 22px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     transition: all 0.3s ease;
     box-sizing: border-box;
 
-    /* Авто-ширина под контент и картинку */
-    width: fit-content;
-    min-width: 320px;
-    max-width: 100%;
+    /* Ширина адаптивная: карточки встают в ряд по нескольким штук */
+    flex: 1 1 300px;
+    max-width: 350px;
+    min-width: 280px;
 }
 
 .note-card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
-    transform: translateY(-3px);
+    border-color: rgba(34, 197, 94, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(34, 197, 94, 0.15);
 }
 
 /* Закреплённая карточка */
 .note-card.pinned {
-    background: rgba(30, 41, 59, 0.85);
-    border: 1px solid rgba(99, 102, 241, 0.5);
-    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.15);
+    background: rgba(14, 32, 20, 0.9);
+    border: 1px solid #22c55e;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
 }
 
 /* Плашка "Закреплено" СЛЕВА-СВЕРХУ */
@@ -330,28 +332,28 @@ textarea {
     display: inline-flex;
     align-items: center;
     align-self: flex-start;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    color: #ffffff;
+    background: linear-gradient(135deg, #22c55e, #15803d);
+    color: #022c22;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     padding: 5px 12px;
     border-radius: 20px;
-    margin-bottom: 14px;
-    box-shadow: 0 2px 10px rgba(79, 70, 229, 0.4);
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(34, 197, 94, 0.3);
     letter-spacing: 0.3px;
 }
 
 .note-title {
     margin: 0 0 8px 0;
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
-    color: #f8fafc;
+    color: #f0fdf4;
     word-break: break-word;
 }
 
 .note-content {
-    color: #cbd5e1;
-    font-size: 15px;
+    color: #bbf7d0;
+    font-size: 14px;
     line-height: 1.6;
     margin-bottom: 15px;
     white-space: pre-wrap;
@@ -361,21 +363,19 @@ textarea {
 /* Изображение внутри карточки */
 .note-image-container {
     margin: 8px 0 16px 0;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
     display: flex;
     justify-content: center;
-    background: rgba(15, 23, 42, 0.4);
+    background: #050b07;
 }
 
 .note-image {
     display: block;
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: 480px;
-    border-radius: 14px;
-    object-fit: contain;
+    width: 100%;
+    height: 200px; /* Одинаковая высота для карточек в ряду */
+    border-radius: 12px;
+    object-fit: cover;
 }
 
 /* Кнопки карточки */
@@ -385,47 +385,45 @@ textarea {
     gap: 8px;
     margin-top: auto;
     padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(34, 197, 94, 0.15);
 }
 
 .btn-action {
-    padding: 8px 14px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
     border: none;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
-/* Кнопка Закрепить/Открепить */
+/* Кнопки внутри карточек */
 .btn-pin {
-    background: rgba(255, 255, 255, 0.06);
-    color: #cbd5e1;
+    background: rgba(34, 197, 94, 0.1);
+    color: #86efac;
 }
 .btn-pin:hover {
-    background: rgba(99, 102, 241, 0.2);
-    color: #818cf8;
-}
-.btn-pin.active {
-    background: #4f46e5;
+    background: rgba(34, 197, 94, 0.25);
     color: #ffffff;
 }
+.btn-pin.active {
+    background: #22c55e;
+    color: #022c22;
+}
 
-/* Кнопка Изменить */
 .btn-edit {
-    background: rgba(255, 255, 255, 0.06);
-    color: #cbd5e1;
+    background: rgba(34, 197, 94, 0.1);
+    color: #86efac;
 }
 .btn-edit:hover {
-    background: rgba(14, 165, 233, 0.2);
+    background: rgba(56, 189, 248, 0.2);
     color: #38bdf8;
 }
 
-/* Кнопка Удалить */
 .btn-delete {
     background: rgba(239, 68, 68, 0.1);
     color: #fca5a5;
