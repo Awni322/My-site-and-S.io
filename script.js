@@ -1,288 +1,289 @@
-const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
-let currentImageBase64 = null;
-let currentNotesList = []; // Хранилище всех загруженных заметок
-let activeCategory = "all"; // Теккущий фильтр категории
+const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev"; // Ваша ссылка на Worker
 
-// =========================
-// Вход
-// =========================
+let allNotes = [];
+let editingNoteId = null;
+let currentBase64Image = null;
+let currentFilter = "all";
+
+// Авторизация
 async function login() {
-    let password = document.getElementById("password").value;
-    let message = document.getElementById("message");
-    message.innerHTML = "Проверка...";
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("message");
 
     try {
-        let response = await fetch(WORKER_URL, {
+        const response = await fetch(WORKER_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: password })
+            body: JSON.stringify({ password })
         });
 
         if (response.ok) {
-            message.innerHTML = "✅ Пароль верный";
-            message.style.color = "#4ade80";
             document.getElementById("login").style.display = "none";
             document.getElementById("content").style.display = "flex";
             loadNotes();
         } else {
-            message.innerHTML = "❌ Неверный пароль";
-            message.style.color = "#f87171";
+            message.style.color = "#ef4444";
+            message.innerText = "Неверный пароль!";
         }
-    } catch (e) {
-        message.innerHTML = "❌ Ошибка соединения";
-        message.style.color = "#f87171";
+    } catch (err) {
+        message.style.color = "#ef4444";
+        message.innerText = "Ошибка соединения с сервером.";
     }
 }
 
-// Конвертация файла в Base64
-function getBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+// Загрузка заметок
+async function loadNotes(searchQuery = "") {
+    try {
+        let url = WORKER_URL;
+        if (searchQuery) {
+            url += `?search=${encodeURIComponent(searchQuery)}`;
+        }
+
+        const response = await fetch(url);
+        allNotes = await response.json();
+        renderNotes();
+    } catch (err) {
+        console.error("Ошибка при загрузке заметок:", err);
+    }
+}
+
+// Фильтрация заметок на клиенте
+function filterCategory(category, event) {
+    currentFilter = category;
+    
+    // Обновляем активность кнопок фильтров
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    if (event) {
+        event.target.classList.add('active');
+    }
+
+    renderNotes();
+}
+
+// Поиск
+function handleSearch() {
+    const query = document.getElementById("search").value;
+    loadNotes(query);
+}
+
+// Рендеринг списка заметок
+function renderNotes() {
+    const container = document.getElementById("notes");
+    container.innerHTML = "";
+
+    // Фильтруем по категории
+    const filtered = allNotes.filter(note => {
+        if (currentFilter === "all") return true;
+        return (note.category || "Заметки") === currentFilter;
+    });
+
+    filtered.forEach(note => {
+        const card = document.createElement("div");
+        card.className = `note-card ${note.is_pinned ? "pinned" : ""}`;
+
+        // Клики по карточке для открытия модалки
+        card.onclick = (e) => {
+            if (!e.target.classList.contains("btn-action")) {
+                openModal(note);
+            }
+        };
+
+        const categoryText = note.category || "Заметки";
+        const categoryIcon = categoryText === "Скрипты" ? "📜" : "📝";
+
+        let html = `
+            ${note.is_pinned ? `<div class="pin-badge">📌 Закреплено</div>` : ""}
+            <div class="category-badge">${categoryIcon} ${categoryText}</div>
+            <h3 class="note-title">${escapeHtml(note.title)}</h3>
+            <div class="note-content">${escapeHtml(note.content)}</div>
+        `;
+
+        if (note.image) {
+            html += `
+                <div class="note-image-container">
+                    <img src="${note.image}" class="note-image" alt="Изображение">
+                </div>
+            `;
+        }
+
+        html += `
+            <div class="note-actions">
+                <button class="btn-action btn-pin ${note.is_pinned ? "active" : ""}" onclick="togglePin(${note.id}, ${note.is_pinned})">
+                    ${note.is_pinned ? "Открепить" : "Закрепить"}
+                </button>
+                <button class="btn-action btn-edit" onclick="startEdit(${note.id})">Редактировать</button>
+                <button class="btn-action btn-delete" onclick="deleteNote(${note.id})">Удалить</button>
+            </div>
+        `;
+
+        card.innerHTML = html;
+        container.appendChild(card);
     });
 }
 
-function updateFileName(input) {
-    const fileNameText = document.getElementById("fileNameText");
-    if (fileNameText && input.files && input.files[0]) {
-        fileNameText.innerText = "Файл: " + input.files[0].name;
-    } else if (fileNameText) {
-        fileNameText.innerText = "Прикрепить фото";
+// Обработка загрузки изображения
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    const fileNameSpan = document.getElementById("fileName");
+
+    if (file) {
+        fileNameSpan.innerText = file.name;
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            currentBase64Image = reader.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        fileNameSpan.innerText = "Выберите фото";
+        currentBase64Image = null;
     }
 }
 
-// =========================
-// Сохранение записи
-// =========================
+// Сохранение или обновление заметки
 async function saveNote() {
-    let title = document.getElementById("title").value;
-    let text = document.getElementById("text").value;
-    let category = document.getElementById("categorySelect") ? document.getElementById("categorySelect").value : "Заметки";
-    let isPinned = document.getElementById("isPinned").checked;
-    let imageInput = document.getElementById("imageInput");
+    const title = document.getElementById("title").value.trim();
+    const content = document.getElementById("contentInput").value.trim();
+    
+    // Новое считывание категории с radio-переключателей
+    const category = document.querySelector('input[name="category"]:checked')?.value || "Заметки";
+    const isPinned = document.getElementById("isPinned").checked;
 
-    if (!title || !text) {
-        alert("Заполни название и текст");
+    if (!title && !content) {
+        alert("Заполните заголовок или текст заметки!");
         return;
     }
 
-    let id = document.getElementById("title").dataset.id;
-    let action = id ? "edit" : "save";
-
-    let imageBase64 = currentImageBase64;
-    if (imageInput && imageInput.files[0]) {
-        imageBase64 = await getBase64(imageInput.files[0]);
-    }
-
-    let body = {
-        action: action,
-        title: title,
-        content: text,
-        category: category,
-        image: imageBase64,
+    const payload = {
+        action: editingNoteId ? "edit" : "save",
+        id: editingNoteId,
+        title,
+        content,
+        category,
+        image: currentBase64Image,
         is_pinned: isPinned
     };
 
-    if (id) {
-        body.id = id;
+    try {
+        const response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            resetForm();
+            loadNotes();
+        } else {
+            alert("Ошибка при сохранении!");
+        }
+    } catch (err) {
+        console.error("Ошибка сохранения:", err);
     }
-
-    let response = await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
-
-    if (response.ok) {
-        cancelEdit();
-        loadNotes();
-    }
 }
 
-// =========================
-// Загрузка и рендеринг
-// =========================
-async function loadNotes() {
-    let response = await fetch(WORKER_URL);
-    currentNotesList = await response.json();
-    applyFiltersAndRender();
-}
-
-// Фильтрация заметок по категории перед выводом
-function applyFiltersAndRender() {
-    let filtered = currentNotesList;
-
-    if (activeCategory !== "all") {
-        filtered = currentNotesList.filter(n => (n.category || "Заметки") === activeCategory);
-    }
-
-    renderNotes(filtered);
-}
-
-// Переключение фильтра категории
-function filterByCategory(category, btnElement) {
-    activeCategory = category;
-
-    // Подсвечиваем активную кнопку
-    document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-    if (btnElement) btnElement.classList.add("active");
-
-    applyFiltersAndRender();
-}
-
-function renderNotes(notes) {
-    let output = "";
-
-    notes.forEach(note => {
-        const isPinned = note.is_pinned === 1 || note.is_pinned === true;
-        const categoryName = note.category || "Заметки";
-
-        output += `
-        <div class="note-card ${isPinned ? 'pinned' : ''}" onclick="openNoteModal(${note.id})">
-            ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
-            
-            <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
-
-            <h3 class="note-title">${note.title}</h3>
-            <div class="note-content">${note.content}</div>
-
-            ${note.image ? `
-                <div class="note-image-container">
-                    <img src="${note.image}" class="note-image" alt="Фото">
-                </div>
-            ` : ""}
-
-            <div class="note-actions">
-                <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="event.stopPropagation(); togglePin(${note.id}, ${!isPinned})">
-                    ${isPinned ? '📌 Открепить' : '📌 Закрепить'}
-                </button>
-                <button class="btn-action btn-edit" onclick="event.stopPropagation(); editNote(${note.id})">
-                    ✏️ Изменить
-                </button>
-                <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNote(${note.id})">
-                    🗑 Удалить
-                </button>
-            </div>
-        </div>
-        `;
-    });
-
-    document.getElementById("notes").innerHTML = output;
-}
-
-// =========================
-// Вспомогательные функции
-// =========================
-async function togglePin(id, status) {
-    await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status })
-    });
-    loadNotes();
-}
-
-async function searchNotes() {
-    let text = document.getElementById("search").value;
-    let response = await fetch(WORKER_URL + "?search=" + encodeURIComponent(text));
-    currentNotesList = await response.json();
-    applyFiltersAndRender();
-}
-
-async function editNote(id) {
-    let note = currentNotesList.find(n => n.id == id);
+// Редактирование
+function startEdit(id) {
+    const note = allNotes.find(n => n.id === id);
     if (!note) return;
 
-    document.getElementById("title").value = note.title;
-    document.getElementById("text").value = note.content;
-    
-    if (document.getElementById("categorySelect")) {
-        document.getElementById("categorySelect").value = note.category || "Заметки";
-    }
-
-    document.getElementById("isPinned").checked = note.is_pinned === 1 || note.is_pinned === true;
-    document.getElementById("title").dataset.id = note.id;
+    editingNoteId = note.id;
     document.getElementById("formTitle").innerText = "Редактировать запись";
-    document.getElementById("cancelEdit").style.display = "block";
+    document.getElementById("title").value = note.title || "";
+    document.getElementById("contentInput").value = note.content || "";
+    
+    // Выбор нужной категории в переключателе
+    const categoryRadio = document.querySelector(`input[name="category"][value="${note.category || "Заметки"}"]`);
+    if (categoryRadio) categoryRadio.checked = true;
 
-    currentImageBase64 = note.image;
+    document.getElementById("isPinned").checked = !!note.is_pinned;
+    document.getElementById("btnCancel").style.display = "block";
+
+    currentBase64Image = note.image || null;
+    document.getElementById("fileName").innerText = note.image ? "Изображение прикреплено" : "Выберите фото";
 }
 
-function cancelEdit() {
-    document.getElementById("title").value = "";
-    document.getElementById("text").value = "";
-    if (document.getElementById("categorySelect")) document.getElementById("categorySelect").value = "Заметки";
-    if (document.getElementById("imageInput")) document.getElementById("imageInput").value = "";
-    if (document.getElementById("fileNameText")) document.getElementById("fileNameText").innerText = "Прикрепить фото";
-    document.getElementById("isPinned").checked = false;
-    delete document.getElementById("title").dataset.id;
-    currentImageBase64 = null;
-
+// Сброс формы
+function resetForm() {
+    editingNoteId = null;
     document.getElementById("formTitle").innerText = "Новая запись";
-    document.getElementById("cancelEdit").style.display = "none";
+    document.getElementById("title").value = "";
+    document.getElementById("contentInput").value = "";
+    
+    // Возврат переключателя на "Заметки" по умолчанию
+    const defaultRadio = document.querySelector('input[name="category"][value="Заметки"]');
+    if (defaultRadio) defaultRadio.checked = true;
+
+    document.getElementById("isPinned").checked = false;
+    document.getElementById("imageInput").value = "";
+    document.getElementById("fileName").innerText = "Выберите фото";
+    document.getElementById("btnCancel").style.display = "none";
+    currentBase64Image = null;
 }
 
-async function deleteNote(id) {
-    let response = await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete", id: id })
-    });
-
-    if (response.ok) {
+// Закрепление / Открепление
+async function togglePin(id, currentPinnedState) {
+    try {
+        await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "toggle_pin",
+                id,
+                is_pinned: !currentPinnedState
+            })
+        });
         loadNotes();
+    } catch (err) {
+        console.error("Ошибка переключения закрепа:", err);
     }
 }
 
-// =========================
-// Модальное окно (Просмотр)
-// =========================
-function openNoteModal(id) {
-    let note = currentNotesList.find(n => n.id == id);
-    if (!note) return;
+// Удаление
+async function deleteNote(id) {
+    if (!confirm("Вы уверены, что хотите удалить эту запись?")) return;
 
-    document.getElementById("modalTitle").innerText = note.title;
-    document.getElementById("modalText").innerText = note.content;
+    try {
+        await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "delete", id })
+        });
+        loadNotes();
+    } catch (err) {
+        console.error("Ошибка удаления:", err);
+    }
+}
 
-    let imgContainer = document.getElementById("modalImageContainer");
+// Модальное окно просмотра
+function openModal(note) {
+    const overlay = document.getElementById("modalOverlay");
+    const modalImage = document.getElementById("modalImage");
+    const modalLeft = document.getElementById("modalLeft");
+
+    document.getElementById("modalTitle").innerText = note.title || "Без названия";
+    document.getElementById("modalText").innerText = note.content || "";
+
     if (note.image) {
-        imgContainer.innerHTML = `<img src="${note.image}" alt="Фото">`;
-        imgContainer.style.display = "flex";
+        modalImage.src = note.image;
+        modalLeft.style.display = "flex";
     } else {
-        imgContainer.innerHTML = "";
-        imgContainer.style.display = "none";
+        modalLeft.style.display = "none";
     }
 
-    let pinBadge = document.getElementById("modalPinBadge");
-    const isPinned = note.is_pinned === 1 || note.is_pinned === true;
-    const categoryName = note.category || "Заметки";
-
-    if (pinBadge) {
-        pinBadge.innerHTML = `
-            <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
-            ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
-        `;
-    }
-
-    document.getElementById("noteModal").classList.add("active");
+    overlay.classList.add("active");
 }
 
-function closeNoteModal(e) {
-    if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close')) return;
-    document.getElementById("noteModal").classList.remove("active");
+function closeModal() {
+    document.getElementById("modalOverlay").classList.remove("active");
 }
 
-// Глобальный доступ к функциям
-window.login = login;
-window.saveNote = saveNote;
-window.deleteNote = deleteNote;
-window.editNote = editNote;
-window.searchNotes = searchNotes;
-window.togglePin = togglePin;
-window.cancelEdit = cancelEdit;
-window.updateFileName = updateFileName;
-window.openNoteModal = openNoteModal;
-window.closeNoteModal = closeNoteModal;
-window.filterByCategory = filterByCategory;
+// Вспомогательная функция для безопасности вывода HTML
+function escapeHtml(text) {
+    if (!text) return "";
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
