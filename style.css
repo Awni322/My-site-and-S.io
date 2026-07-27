@@ -484,3 +484,130 @@ textarea {
     max-width: 520px;
     margin-bottom: 25px;
 }
+/* Клик по карточке */
+.note-card {
+    cursor: pointer;
+}
+
+/* Затемняющий фон */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Главное окно просмотра */
+.modal-card {
+    background: rgba(18, 30, 22, 0.95);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    width: 100%;
+    max-width: 850px;
+    max-height: 85vh;
+    position: relative;
+    overflow: hidden;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1) translateY(0);
+}
+
+/* Кнопка закрытия (крестик) */
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.2s;
+}
+
+.modal-close:hover {
+    background: rgba(239, 68, 68, 0.4);
+}
+
+/* Внутренняя сетка: фото слева, текст справа */
+.modal-body {
+    display: flex;
+    gap: 25px;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.modal-left {
+    flex: 1;
+    max-width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-left img {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.modal-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#modalTitle {
+    font-size: 24px;
+    color: #f8fafc;
+    margin-bottom: 15px;
+    word-break: break-word;
+}
+
+#modalText {
+    color: #cbd5e1;
+    font-size: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Адаптив для мобилок */
+@media (max-width: 700px) {
+    .modal-body {
+        flex-direction: column;
+    }
+    .modal-left {
+        max-width: 100%;
+    }
+}
