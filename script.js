@@ -47,4 +47,17 @@ function openNoteModal(id) {
     document.getElementById("modalOverlay").classList.add("active");
 }
 
+window.login = login;
+window.saveNote = saveNote;
+window.deleteNote = deleteNote;
+window.editNote = editNote;
+window.handleSearch = handleSearch;
+window.togglePin = togglePin;
+window.resetForm = resetForm;
+window.handleImageUpload = handleImageUpload;
+window.openNoteModal = openNoteModal;
+window.closeModal = closeModal;
+window.filterCategory = filterCategory;
+window.closeConfirmModal = closeConfirmModal;
+window.copyToClipboard = copyToClipboard;
 window.copyModalContent = copyModalContent;
