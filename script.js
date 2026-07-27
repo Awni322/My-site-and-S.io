@@ -1,13 +1,18 @@
 const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
 
-let editingId = null;
 
 
+// =========================
+// Вход
+// =========================
 
 async function login(){
 
-    let password = document.getElementById("password").value;
-    let message = document.getElementById("message");
+    let password =
+        document.getElementById("password").value;
+
+    let message =
+        document.getElementById("message");
 
 
     message.innerHTML = "Проверка...";
@@ -27,16 +32,22 @@ async function login(){
     );
 
 
-
     if(response.ok){
 
-        message.innerHTML = "✅ Пароль верный";
-        message.style.color = "green";
+
+        message.innerHTML =
+            "✅ Пароль верный";
+
+        message.style.color =
+            "green";
 
 
-        document.getElementById("login").style.display="none";
+        document.getElementById("login").style.display =
+            "none";
 
-        document.getElementById("content").style.display="block";
+
+        document.getElementById("content").style.display =
+            "block";
 
 
         loadNotes();
@@ -45,9 +56,11 @@ async function login(){
     } else {
 
 
-        message.innerHTML="❌ Неверный пароль";
+        message.innerHTML =
+            "❌ Неверный пароль";
 
-        message.style.color="red";
+        message.style.color =
+            "red";
 
     }
 
@@ -56,29 +69,28 @@ async function login(){
 
 
 
+
+
+
+// =========================
+// Сохранение записи
+// =========================
+
 async function saveNote(){
 
 
     let title =
-    document.getElementById("title").value;
+        document.getElementById("title").value;
 
 
     let text =
-    document.getElementById("text").value;
-
-
-
-    let message =
-    document.getElementById("message");
+        document.getElementById("text").value;
 
 
 
     if(!title || !text){
 
-        message.innerHTML =
-        "Заполни название и текст";
-
-        message.style.color="red";
+        alert("Заполни название и текст");
 
         return;
 
@@ -86,75 +98,68 @@ async function saveNote(){
 
 
 
-    let data = {
+    let id =
+        document.getElementById("title").dataset.id;
 
 
-        action:
-        editingId ? "edit" : "save",
 
+    let action =
+        id ? "edit" : "save";
+
+
+
+    let body = {
+
+
+        action: action,
 
         title:title,
 
-
         content:text
-
 
     };
 
 
 
-    if(editingId){
+    if(id){
 
-        data.id = editingId;
+        body.id = id;
 
     }
 
 
 
-    let response = await fetch(
-        WORKER_URL,
-        {
-            method:"POST",
+    let response =
+        await fetch(
 
-            headers:{
-                "Content-Type":"application/json"
-            },
+            WORKER_URL,
 
-            body:JSON.stringify(data)
+            {
 
-        }
-    );
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:
+                    JSON.stringify(body)
+
+            }
+
+        );
 
 
 
     if(response.ok){
 
 
-        document.getElementById("title").value="";
+        document.getElementById("title").value = "";
 
-        document.getElementById("text").value="";
-
-
-        editingId=null;
+        document.getElementById("text").value = "";
 
 
-
-        document.getElementById("formTitle").innerHTML =
-        "Новая запись";
-
-
-
-        document.getElementById("cancelEdit").style.display =
-        "none";
-
-
-
-        message.innerHTML =
-        "✅ Сохранено";
-
-
-        message.style.color="green";
-
+        delete document.getElementById("title").dataset.id;
 
 
         loadNotes();
@@ -162,81 +167,89 @@ async function saveNote(){
 
     }
 
+
 }
 
 
 
 
 
+
+
+
+// =========================
+// Загрузка записей
+// =========================
+
 async function loadNotes(){
 
 
-    let response = await fetch(
-        WORKER_URL
-    );
+    let response =
+        await fetch(WORKER_URL);
 
 
     let notes =
-    await response.json();
+        await response.json();
+
+
+    renderNotes(notes);
+
+
+}
 
 
 
-    let output="";
 
 
 
-    notes.forEach(note=>{
+
+// =========================
+// Отображение записей
+// =========================
+
+function renderNotes(notes){
 
 
-        let safeTitle =
-        note.title.replace(/'/g,"\\'");
+    let output = "";
 
 
-        let safeContent =
-        note.content.replace(/'/g,"\\'");
 
+    notes.forEach(note => {
 
 
         output += `
 
 
-<div>
+        <div>
 
 
-<h3>
-📌 ${note.title}
-</h3>
+            <h3>
+                📌 ${note.title}
+            </h3>
 
 
-<p>
-${note.content}
-</p>
-
-
-
-<button onclick="editNote(${note.id}, '${safeTitle}', '${safeContent}')">
-
-✏️ Изменить
-
-</button>
+            <p>
+                ${note.content}
+            </p>
 
 
 
-<button onclick="deleteNote(${note.id})">
-
-🗑 Удалить
-
-</button>
+            <button onclick="editNote(${note.id})">
+                ✏️ Изменить
+            </button>
 
 
-<hr>
+
+            <button onclick="deleteNote(${note.id})">
+                🗑 Удалить
+            </button>
 
 
-</div>
+
+        </div>
 
 
-`;
-
+        `;
 
 
     });
@@ -244,7 +257,7 @@ ${note.content}
 
 
     document.getElementById("notes").innerHTML =
-    output;
+        output;
 
 
 }
@@ -254,30 +267,83 @@ ${note.content}
 
 
 
+
+
+
+// =========================
+// Поиск
+// =========================
+
+async function searchNotes(){
+
+
+    let text =
+        document.getElementById("search").value;
+
+
+
+    let response =
+        await fetch(
+            WORKER_URL +
+            "?search=" +
+            encodeURIComponent(text)
+        );
+
+
+
+    let notes =
+        await response.json();
+
+
+
+    renderNotes(notes);
+
+
+}
+
+
+
+
+
+
+
+
+
+// =========================
+// Редактирование
+// =========================
+
 async function editNote(id){
 
 
-    let response = await fetch(
-        WORKER_URL
-    );
+    let response =
+        await fetch(WORKER_URL);
 
 
-    let notes = await response.json();
+
+    let notes =
+        await response.json();
 
 
-    let note = notes.find(
-        n => n.id === id
-    );
+
+    let note =
+        notes.find(
+            n => n.id == id
+        );
+
 
 
     if(!note){
+
         return;
+
     }
 
 
 
     document.getElementById("title").value =
         note.title;
+
 
 
     document.getElementById("text").value =
@@ -296,58 +362,43 @@ async function editNote(id){
 
 
 
-function cancelEdit(){
-
-
-    editingId=null;
 
 
 
-    document.getElementById("title").value="";
-
-    document.getElementById("text").value="";
-
-
-
-    document.getElementById("formTitle").innerHTML =
-    "Новая запись";
-
-
-
-    document.getElementById("cancelEdit").style.display =
-    "none";
-
-
-}
-
-
-
-
+// =========================
+// Удаление
+// =========================
 
 async function deleteNote(id){
 
 
-    let response = await fetch(
-        WORKER_URL,
-        {
+    let response =
+        await fetch(
 
-            method:"POST",
+            WORKER_URL,
 
-            headers:{
-                "Content-Type":"application/json"
-            },
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
 
 
-            body:JSON.stringify({
+                body:
+                JSON.stringify({
 
-                action:"delete",
+                    action:"delete",
 
-                id:id
+                    id:id
 
-            })
+                })
 
-        }
-    );
+
+            }
+
+        );
 
 
 
@@ -361,63 +412,16 @@ async function deleteNote(id){
 }
 
 
-async function searchNotes(){
-
-    let text =
-    document.getElementById("search").value;
 
 
-    let response =
-    await fetch(
-        WORKER_URL + "?search=" + encodeURIComponent(text)
-    );
 
 
-    let notes =
-    await response.json();
+window.login = login;
 
-
-   function renderNotes(notes){
-    let output = "";
-
-    notes.forEach(note => {
-
-        output += `
-        <div>
-
-            <h3>📌 ${note.title}</h3>
-
-            <p>${note.content}</p>
-
-            <button onclick="editNote(${note.id})">
-            ✏️ Изменить
-            </button>
-
-            <button onclick="deleteNote(${note.id})">
-            🗑 Удалить
-            </button>
-
-        </div>
-        `;
-
-    });
-
-    document.getElementById("notes").innerHTML = output;
-}
-
-    });
-
-
-    document.getElementById("notes").innerHTML =
-    output;
-
-}
-
+window.saveNote = saveNote;
 
 window.deleteNote = deleteNote;
 
 window.editNote = editNote;
-
-window.cancelEdit = cancelEdit;
 
 window.searchNotes = searchNotes;
