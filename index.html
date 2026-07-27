@@ -8,74 +8,81 @@
 </head>
 <body>
 
-<div id="login">
-    <input id="password" type="password" placeholder="Введите пароль">
-    <button onclick="login()">Войти</button>
-    <p id="message"></p>
-</div>
+    <!-- Блок входа (по умолчанию виден) -->
+    <div id="login" class="login-card">
+        <input type="password" id="password" placeholder="Введите пароль">
+        <button onclick="login()">Войти</button>
+        <div id="message"></div>
+    </div>
 
-<div id="content" style="display:none;">
-    <h1>Архив</h1>
+    <!-- Блок контента (скрыт до логина) -->
+    <div id="content" style="display: none;">
+        <h1>Архив</h1>
 
-    <!-- Обертка формы создания/редактирования -->
-    <div class="form-container">
-        <h2 id="formTitle">Новая запись</h2>
-        <input id="title" type="text" placeholder="Название">
-        <textarea id="text" placeholder="Текст записи"></textarea>
+        <!-- Форма добавления/редактирования -->
+        <div class="form-container">
+            <h2 id="formTitle">Новая запись</h2>
+            
+            <input id="title" type="text" placeholder="Название">
+            <textarea id="text" placeholder="Текст записи"></textarea>
 
-        <div class="file-upload-wrapper">
-            <label class="file-upload-button">
-                <span class="file-icon">🖼️</span>
-                <span id="fileNameText">Прикрепить фото</span>
-                <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
-            </label>
+            <!-- Выбор категории -->
+            <select id="categorySelect">
+                <option value="Заметки">📝 Заметки</option>
+                <option value="Скрипты">📜 Скрипты</option>
+            </select>
+
+            <div class="file-upload-wrapper">
+                <label class="file-upload-button">
+                    <span class="file-icon">🖼️</span>
+                    <span id="fileNameText">Прикрепить фото</span>
+                    <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
+                </label>
+            </div>
+
+            <div class="pin-wrapper">
+                <label class="toggle-container">
+                    <input type="checkbox" id="isPinned">
+                    <span class="toggle-slider"></span>
+                    <span>📌 Закрепить запись</span>
+                </label>
+            </div>
+
+            <div class="actions-wrapper">
+                <button class="btn-save" onclick="saveNote()">Сохранить</button>
+                <button id="cancelEdit" class="btn-cancel" onclick="cancelEdit()" style="display:none;">Отмена</button>
+            </div>
         </div>
 
-        <div class="pin-wrapper">
-            <label class="toggle-container">
-                <input type="checkbox" id="isPinned">
-                <span class="toggle-slider"></span>
-                <span>📌 Закрепить запись</span>
-            </label>
+        <!-- Поиск -->
+        <input id="search" type="text" placeholder="Поиск записей..." oninput="searchNotes()">
+
+        <!-- Фильтры категорий -->
+        <div class="category-filters">
+            <button class="filter-btn active" onclick="filterByCategory('all', this)">Все</button>
+            <button class="filter-btn" onclick="filterByCategory('Заметки', this)">📝 Заметки</button>
+            <button class="filter-btn" onclick="filterByCategory('Скрипты', this)">📜 Скрипты</button>
         </div>
 
-        <div class="actions-wrapper">
-            <button class="btn-save" onclick="saveNote()">Сохранить</button>
-            <button id="cancelEdit" class="btn-cancel" onclick="cancelEdit()" style="display:none;">Отмена</button>
+        <!-- Сетка заметок -->
+        <div id="notes"></div>
+    </div>
+
+    <!-- Модальное окно просмотра -->
+    <div id="noteModal" class="modal-overlay" onclick="closeNoteModal(event)">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeNoteModal()">✕</button>
+            <div class="modal-body">
+                <div class="modal-left" id="modalImageContainer"></div>
+                <div class="modal-right">
+                    <div id="modalPinBadge"></div>
+                    <h2 id="modalTitle"></h2>
+                    <div id="modalText"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <h2>Записи:</h2>
-    <input id="search" type="text" placeholder="Поиск записей..." oninput="searchNotes()">
-<!-- Фильтры категорий -->
-<div class="category-filters">
-    <button class="filter-btn active" onclick="filterByCategory('all', this)">Все</button>
-    <button class="filter-btn" onclick="filterByCategory('Заметки', this)">📝 Заметки</button>
-    <button class="filter-btn" onclick="filterByCategory('Скрипты', this)">📜 Скрипты</button>
-</div>
-    <div id="notes"></div>
-</div>
-
-<script src="script.js"></script>
-    <!-- Модальное окно просмотра записи -->
-<div id="noteModal" class="modal-overlay" onclick="closeNoteModal(event)">
-    <div class="modal-card" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeNoteModal()">✕</button>
-        <div class="modal-body">
-            <div class="modal-left" id="modalImageContainer">
-                <!-- Сюда вставляется картинка -->
-            </div>
-            <div class="modal-right">
-                <div id="modalPinBadge"></div>
-                <h2 id="modalTitle"></h2>
-                <div id="modalText"></div>
-            </div>
-        </div>
-    </div>
-</div>
-<select id="categorySelect">
-    <option value="Заметки">📝 Заметки</option>
-    <option value="Скрипты">📜 Скрипты</option>
-</select>
+    <script src="script.js"></script>
 </body>
 </html>
