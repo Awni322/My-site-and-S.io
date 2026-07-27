@@ -220,7 +220,6 @@ function renderNotes(notes) {
     document.getElementById("notes").innerHTML = output;
 }
 
-// Открытие модалки просмотра
 function openNoteModal(id) {
     let note = currentNotesList.find(n => n.id == id);
     if (!note) return;
@@ -228,21 +227,29 @@ function openNoteModal(id) {
     document.getElementById("modalTitle").innerText = note.title;
     document.getElementById("modalText").innerText = note.content;
 
-    // Ссылка на плейс Roblox
+    // Работа со ссылкой на Roblox
     let robloxContainer = document.getElementById("modalRobloxContainer");
-    if (robloxContainer) {
-        if (note.roblox_url && note.roblox_url.trim() !== "") {
-            let url = note.roblox_url.startsWith("http") ? note.roblox_url : "https://" + note.roblox_url;
-            robloxContainer.innerHTML = `
-                <a href="${url}" target="_blank" class="roblox-link-btn">
-                    🎮 Открыть плейс в Roblox
-                </a>
-            `;
-        } else {
-            robloxContainer.innerHTML = "";
-        }
+    
+    // Если по какой-то причине контейнера нет в разметке, создаем его на лету
+    if (!robloxContainer) {
+        robloxContainer = document.createElement("div");
+        robloxContainer.id = "modalRobloxContainer";
+        let modalTextEl = document.getElementById("modalText");
+        modalTextEl.parentNode.insertBefore(robloxContainer, modalTextEl);
     }
 
+    if (note.roblox_url && note.roblox_url.trim() !== "") {
+        let url = note.roblox_url.startsWith("http") ? note.roblox_url : "https://" + note.roblox_url;
+        robloxContainer.innerHTML = `
+            <a href="${url}" target="_blank" class="roblox-link-btn">
+                🎮 Открыть плейс в Roblox
+            </a>
+        `;
+    } else {
+        robloxContainer.innerHTML = "";
+    }
+
+    // Картинка
     let modalImg = document.getElementById("modalImage");
     let modalLeft = document.getElementById("modalLeft");
 
@@ -255,7 +262,6 @@ function openNoteModal(id) {
 
     document.getElementById("modalOverlay").classList.add("active");
 }
-
 // Заполнение формы для редактирования
 function editNote(id) {
     let note = currentNotesList.find(n => n.id == id);
