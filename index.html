@@ -27,14 +27,29 @@
 
     <!-- Чекбокс закрепления -->
    
- <label class="toggle-container">
-    <input type="checkbox" id="isPinned">
-    <span class="toggle-slider"></span>
-    <span class="label-text">📌 Закрепить запись</span>
-</label>
-    
-    <button onclick="saveNote()">Сохранить</button>
-    <button id="cancelEdit" onclick="cancelEdit()" style="display:none;">Отмена</button>
+<!-- Красивый выбор файла -->
+<div class="file-upload-wrapper">
+    <label for="imageInput" class="file-upload-button">
+        <span class="file-icon">📷</span>
+        <span id="fileNameText">Прикрепить фото</span>
+    </label>
+    <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
+</div>
+
+<!-- Тумблер закрепления -->
+<div class="pin-wrapper">
+    <label class="toggle-container">
+        <input type="checkbox" id="isPinned">
+        <span class="toggle-slider"></span>
+        <span class="label-text">📌 Закрепить запись</span>
+    </label>
+</div>
+
+<!-- Кнопка сохранить снизу на отдельной строке -->
+<div class="actions-wrapper">
+    <button class="btn-save" onclick="saveNote()">Сохранить</button>
+    <button id="cancelEdit" class="btn-cancel" onclick="cancelEdit()" style="display:none;">Отмена</button>
+</div>
 
     <h2>Записи:</h2>
     <input id="search" type="text" placeholder="Поиск записей..." oninput="searchNotes()">
