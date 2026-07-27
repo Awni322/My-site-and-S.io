@@ -751,3 +751,128 @@ button:focus-visible {
     cursor: pointer;
     font-weight: 500;
 }
+/* Общий вид карточки */
+.note-card {
+    position: relative;
+    background-color: #1a2332;
+    border: 1px solid #2d3748;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Выделение для закреплённых карточек */
+.note-card.pinned {
+    background-color: #1e293b;
+    border: 1px solid #3b82f6;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+}
+
+/* Плашка "Закреплено" сверху справа */
+.pin-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* Заголовок карточки */
+.note-title {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #f8fafc;
+    word-break: break-word;
+    padding-right: 100px; /* Чтобы не перекрывал плашку "Закреплено" */
+}
+
+/* Текст записи (чёткий и хорошо видимый) */
+.note-content {
+    color: #cbd5e1;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Блок с изображением */
+.note-image-container {
+    margin: 15px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.note-image {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+}
+
+/* Кнопки действий */
+.note-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #2d3748;
+}
+
+.btn-action {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Кнопка Закрепить/Открепить */
+.btn-pin {
+    background-color: #2d3748;
+    color: #e2e8f0;
+}
+.btn-pin:hover {
+    background-color: #3b82f6;
+    color: white;
+}
+.btn-pin.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* Кнопка Изменить */
+.btn-edit {
+    background-color: #334155;
+    color: #e2e8f0;
+}
+.btn-edit:hover {
+    background-color: #0284c7;
+    color: white;
+}
+
+/* Кнопка Удалить */
+.btn-delete {
+    background-color: #334155;
+    color: #f87171;
+}
+.btn-delete:hover {
+    background-color: #dc2626;
+    color: white;
+}
