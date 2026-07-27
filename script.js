@@ -238,16 +238,37 @@ async function togglePin(id, currentPinnedState) {
     }
 }
 
-// Удаление
-async function deleteNote(id) {
-    if (!confirm("Вы уверены, что хотите удалить эту запись?")) return;
+let noteIdToDelete = null;
+
+// Вызов модального окна подтверждения
+function deleteNote(id) {
+    noteIdToDelete = id;
+    const overlay = document.getElementById("confirmOverlay");
+    const confirmBtn = document.getElementById("btnConfirmDelete");
+
+    // При клике на "Удалить" в модалке вызываем подтвержденное удаление
+    confirmBtn.onclick = () => confirmDelete();
+
+    overlay.classList.add("active");
+}
+
+// Закрытие модалки
+function closeConfirmModal() {
+    document.getElementById("confirmOverlay").classList.remove("active");
+    noteIdToDelete = null;
+}
+
+// Подтвержденное удаление
+async function confirmDelete() {
+    if (!noteIdToDelete) return;
 
     try {
         await fetch(WORKER_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "delete", id })
+            body: JSON.stringify({ action: "delete", id: noteIdToDelete })
         });
+        closeConfirmModal();
         loadNotes();
     } catch (err) {
         console.error("Ошибка удаления:", err);
