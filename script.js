@@ -91,18 +91,30 @@ function renderNotes(notes) {
     let output = "";
 
     notes.forEach(note => {
-        const pinText = note.is_pinned ? "📌 Открепить" : "📌 Закрепить";
-        const pinBadge = note.is_pinned ? " [ЗАКРЕПЛЕНО]" : "";
+        // Проверяем, закреплена ли карточка
+        const isPinned = note.is_pinned === 1 || note.is_pinned === true;
 
         output += `
-        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; ${note.is_pinned ? 'background:#f0f8ff;' : ''}">
-            <h3>${note.title}${pinBadge}</h3>
-            <p>${note.content}</p>
-            ${note.image ? `<img src="${note.image}" style="max-width:300px; display:block; margin-bottom:10px;">` : ""}
+        <div class="note-card ${isPinned ? 'pinned' : ''}">
+            ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
             
-            <button onclick="togglePin(${note.id}, ${!note.is_pinned})">${pinText}</button>
-            <button onclick="editNote(${note.id})">✏️ Изменить</button>
-            <button onclick="deleteNote(${note.id})">🗑 Удалить</button>
+            <h3 class="note-title">${note.title}</h3>
+            
+            <div class="note-content">${note.content}</div>
+
+            ${note.image ? `<div class="note-image-container"><img src="${note.image}" class="note-image" alt="Фото"></div>` : ""}
+
+            <div class="note-actions">
+                <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="togglePin(${note.id}, ${!isPinned})">
+                    ${isPinned ? '📌 Открепить' : '📌 Закрепить'}
+                </button>
+                <button class="btn-action btn-edit" onclick="editNote(${note.id})">
+                    ✏️ Изменить
+                </button>
+                <button class="btn-action btn-delete" onclick="deleteNote(${note.id})">
+                    🗑 Удалить
+                </button>
+            </div>
         </div>
         `;
     });
