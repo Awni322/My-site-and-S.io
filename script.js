@@ -209,29 +209,22 @@ async function loadNotes(){
 
 function renderNotes(notes){
 
-
     let output = "";
-
 
 
     notes.forEach(note => {
 
-
         output += `
 
-
         <div>
-
 
             <h3>
                 📌 ${note.title}
             </h3>
 
-
             <p>
                 ${note.content}
             </p>
-
 
 
             <button onclick="editNote(${note.id})">
@@ -239,29 +232,21 @@ function renderNotes(notes){
             </button>
 
 
-
             <button onclick="deleteNote(${note.id})">
                 🗑 Удалить
             </button>
 
 
-
         </div>
 
-
         `;
-
 
     });
 
 
-
-    document.getElementById("notes").innerHTML =
-        output;
-
+    document.getElementById("notes").innerHTML = output;
 
 }
-
 
 
 
