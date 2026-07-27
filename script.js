@@ -86,12 +86,10 @@ async function loadNotes() {
     renderNotes(notes);
 }
 
-// Рендеринг записей
 function renderNotes(notes) {
     let output = "";
 
     notes.forEach(note => {
-        // Проверяем, закреплена ли карточка
         const isPinned = note.is_pinned === 1 || note.is_pinned === true;
 
         output += `
@@ -99,10 +97,13 @@ function renderNotes(notes) {
             ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
             
             <h3 class="note-title">${note.title}</h3>
-            
             <div class="note-content">${note.content}</div>
 
-            ${note.image ? `<div class="note-image-container"><img src="${note.image}" class="note-image" alt="Фото"></div>` : ""}
+            ${note.image ? `
+                <div class="note-image-container">
+                    <img src="${note.image}" class="note-image" alt="Фото">
+                </div>
+            ` : ""}
 
             <div class="note-actions">
                 <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="togglePin(${note.id}, ${!isPinned})">
@@ -121,7 +122,6 @@ function renderNotes(notes) {
 
     document.getElementById("notes").innerHTML = output;
 }
-
 // Переключение закрепления
 async function togglePin(id, status) {
     await fetch(WORKER_URL, {
