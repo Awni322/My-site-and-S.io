@@ -17,34 +17,33 @@
 <div id="content" style="display:none;">
     <h1>Архив</h1>
 
-    <h2 id="formTitle">Новая запись</h2>
-    <input id="title" type="text" placeholder="Название"><br><br>
-    <textarea id="text" placeholder="Текст записи"></textarea><br><br>
+    <!-- Обертка формы создания/редактирования -->
+    <div class="form-container">
+        <h2 id="formTitle">Новая запись</h2>
+        <input id="title" type="text" placeholder="Название">
+        <textarea id="text" placeholder="Текст записи"></textarea>
 
+        <div class="file-upload-wrapper">
+            <label class="file-upload-button">
+                <span class="file-icon">🖼️</span>
+                <span id="fileNameText">Прикрепить фото</span>
+                <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
+            </label>
+        </div>
 
-<!-- Красивый выбор файла -->
-<div class="file-upload-wrapper">
-    <label for="imageInput" class="file-upload-button">
-        <span class="file-icon">📷</span>
-        <span id="fileNameText">Прикрепить фото</span>
-    </label>
-    <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
-</div>
+        <div class="pin-wrapper">
+            <label class="toggle-container">
+                <input type="checkbox" id="isPinned">
+                <span class="toggle-slider"></span>
+                <span>📌 Закрепить запись</span>
+            </label>
+        </div>
 
-<!-- Тумблер закрепления -->
-<div class="pin-wrapper">
-    <label class="toggle-container">
-        <input type="checkbox" id="isPinned">
-        <span class="toggle-slider"></span>
-        <span class="label-text">📌 Закрепить запись</span>
-    </label>
-</div>
-
-<!-- Кнопка сохранить снизу на отдельной строке -->
-<div class="actions-wrapper">
-    <button class="btn-save" onclick="saveNote()">Сохранить</button>
-    <button id="cancelEdit" class="btn-cancel" onclick="cancelEdit()" style="display:none;">Отмена</button>
-</div>
+        <div class="actions-wrapper">
+            <button class="btn-save" onclick="saveNote()">Сохранить</button>
+            <button id="cancelEdit" class="btn-cancel" onclick="cancelEdit()" style="display:none;">Отмена</button>
+        </div>
+    </div>
 
     <h2>Записи:</h2>
     <input id="search" type="text" placeholder="Поиск записей..." oninput="searchNotes()">
