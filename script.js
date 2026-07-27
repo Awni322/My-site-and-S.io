@@ -376,41 +376,33 @@ async function searchNotes(){
     await response.json();
 
 
+   function renderNotes(notes){
     let output = "";
-
 
     notes.forEach(note => {
 
+        output += `
+        <div>
 
-output += `
+            <h3>📌 ${note.title}</h3>
 
-<div>
+            <p>${note.content}</p>
 
-    <h3>
-        📌 ${note.title}
-    </h3>
+            <button onclick="editNote(${note.id})">
+            ✏️ Изменить
+            </button>
 
-    <p>
-        ${note.content}
-    </p>
+            <button onclick="deleteNote(${note.id})">
+            🗑 Удалить
+            </button>
 
+        </div>
+        `;
 
-    <button onclick="editNote(${note.id})">
-        ✏️ Изменить
-    </button>
+    });
 
-
-    <button onclick="deleteNote(${note.id})">
-        🗑 Удалить
-    </button>
-
-
-    <hr>
-
-</div>
-
-`;
-
+    document.getElementById("notes").innerHTML = output;
+}
 
     });
 
