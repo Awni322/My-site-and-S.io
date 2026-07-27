@@ -92,33 +92,32 @@ function renderNotes(notes) {
     notes.forEach(note => {
         const isPinned = note.is_pinned === 1 || note.is_pinned === true;
 
-        output += `
-        <div class="note-card ${isPinned ? 'pinned' : ''}">
-            ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
-            
-            <h3 class="note-title">${note.title}</h3>
-            <div class="note-content">${note.content}</div>
+output += `
+<div class="note-card ${isPinned ? 'pinned' : ''}">
+    ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
+    
+    <h3 class="note-title">${note.title}</h3>
+    <div class="note-content">${note.content}</div>
 
-            ${note.image ? `
-                <div class="note-image-container">
-                    <img src="${note.image}" class="note-image" alt="Фото">
-                </div>
-            ` : ""}
-
-            <div class="note-actions">
-                <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="togglePin(${note.id}, ${!isPinned})">
-                    ${isPinned ? '📌 Открепить' : '📌 Закрепить'}
-                </button>
-                <button class="btn-action btn-edit" onclick="editNote(${note.id})">
-                    ✏️ Изменить
-                </button>
-                <button class="btn-action btn-delete" onclick="deleteNote(${note.id})">
-                    🗑 Удалить
-                </button>
-            </div>
+    ${note.image ? `
+        <div class="note-image-container">
+            <img src="${note.image}" class="note-image" alt="Фото">
         </div>
-        `;
-    });
+    ` : ""}
+
+    <div class="note-actions">
+        <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="togglePin(${note.id}, ${!isPinned})">
+            ${isPinned ? '📌 Открепить' : '📌 Закрепить'}
+        </button>
+        <button class="btn-action btn-edit" onclick="editNote(${note.id})">
+            ✏️ Изменить
+        </button>
+        <button class="btn-action btn-delete" onclick="deleteNote(${note.id})">
+            🗑 Удалить
+        </button>
+    </div>
+</div>
+`;
 
     document.getElementById("notes").innerHTML = output;
 }
