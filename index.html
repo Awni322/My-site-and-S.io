@@ -3,87 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив</title>
+    <title>Заметки и Скрипты</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Блок входа (по умолчанию виден) -->
-    <div id="login" class="login-card">
+    <!-- ОКНО АВТОРИЗАЦИИ -->
+    <div id="login">
+        <h2>Вход</h2>
         <input type="password" id="password" placeholder="Введите пароль">
         <button onclick="login()">Войти</button>
         <div id="message"></div>
     </div>
 
-    <!-- Блок контента (скрыт до логина) -->
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
     <div id="content" style="display: none;">
-        <h1>Архив</h1>
+        <h1>Мои Заметки</h1>
 
-        <!-- Форма добавления/редактирования -->
+        <!-- ФОРМА СОЗДАНИЯ / РЕДАКТИРОВАНИЯ -->
         <div class="form-container">
             <h2 id="formTitle">Новая запись</h2>
             
-            <input id="title" type="text" placeholder="Название">
-            <textarea id="text" placeholder="Текст записи"></textarea>
+            <input type="text" id="title" placeholder="Заголовок">
+            <textarea id="contentInput" placeholder="Введите текст..."></textarea>
 
-            <!-- Выбор категории -->
-<div class="category-toggle-group">
-    <label class="category-radio">
-        <input type="radio" name="category" value="Заметки" checked>
-        <span class="radio-tile">📝 Заметки</span>
-    </label>
-    <label class="category-radio">
-        <input type="radio" name="category" value="Скрипты">
-        <span class="radio-tile">📜 Скрипты</span>
-    </label>
-</div>
-
-            <div class="file-upload-wrapper">
-                <label class="file-upload-button">
-                    <span class="file-icon">🖼️</span>
-                    <span id="fileNameText">Прикрепить фото</span>
-                    <input type="file" id="imageInput" accept="image/*" onchange="updateFileName(this)">
+            <!-- Переключатель категорий -->
+            <div class="category-toggle-group">
+                <label class="category-radio">
+                    <input type="radio" name="category" value="Заметки" checked>
+                    <span class="radio-tile">📝 Заметки</span>
+                </label>
+                <label class="category-radio">
+                    <input type="radio" name="category" value="Скрипты">
+                    <span class="radio-tile">📜 Скрипты</span>
                 </label>
             </div>
 
+            <!-- Загрузка фото -->
+            <div class="file-upload-wrapper">
+                <label class="file-upload-button">
+                    <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+                    📎 <span id="fileName">Выберите фото</span>
+                </label>
+            </div>
+
+            <!-- Тумблер закрепа -->
             <div class="pin-wrapper">
                 <label class="toggle-container">
                     <input type="checkbox" id="isPinned">
                     <span class="toggle-slider"></span>
-                    <span>📌 Закрепить запись</span>
+                    📌 Закрепить запись
                 </label>
             </div>
 
+            <!-- Кнопки формы -->
             <div class="actions-wrapper">
                 <button class="btn-save" onclick="saveNote()">Сохранить</button>
-                <button id="cancelEdit" class="btn-cancel" onclick="cancelEdit()" style="display:none;">Отмена</button>
+                <button class="btn-cancel" id="btnCancel" onclick="resetForm()" style="display: none;">Отмена</button>
             </div>
         </div>
 
-        <!-- Поиск -->
-        <input id="search" type="text" placeholder="Поиск записей..." oninput="searchNotes()">
+        <!-- ПОИСК И ФИЛЬТРЫ -->
+        <input type="text" id="search" placeholder="Поиск..." oninput="handleSearch()">
 
-        <!-- Фильтры категорий -->
         <div class="category-filters">
-            <button class="filter-btn active" onclick="filterByCategory('all', this)">Все</button>
-            <button class="filter-btn" onclick="filterByCategory('Заметки', this)">📝 Заметки</button>
-            <button class="filter-btn" onclick="filterByCategory('Скрипты', this)">📜 Скрипты</button>
+            <button class="filter-btn active" onclick="filterCategory('all', event)">Все</button>
+            <button class="filter-btn" onclick="filterCategory('Заметки', event)">📝 Заметки</button>
+            <button class="filter-btn" onclick="filterCategory('Скрипты', event)">📜 Скрипты</button>
         </div>
 
-        <!-- Сетка заметок -->
+        <!-- СПИСОК ЗАМЕТОК -->
         <div id="notes"></div>
     </div>
 
-    <!-- Модальное окно просмотра -->
-    <div id="noteModal" class="modal-overlay" onclick="closeNoteModal(event)">
+    <!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА -->
+    <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeNoteModal()">✕</button>
+            <button class="modal-close" onclick="closeModal()">✕</button>
             <div class="modal-body">
-                <div class="modal-left" id="modalImageContainer"></div>
+                <div class="modal-left" id="modalLeft">
+                    <img id="modalImage" src="" alt="Изображение">
+                </div>
                 <div class="modal-right">
-                    <div id="modalPinBadge"></div>
                     <h2 id="modalTitle"></h2>
-                    <div id="modalText"></div>
+                    <p id="modalText"></p>
                 </div>
             </div>
         </div>
