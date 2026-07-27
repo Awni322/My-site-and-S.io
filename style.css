@@ -304,3 +304,34 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     flex: 1; padding: 11px; background: linear-gradient(135deg, #ef4444, #dc2626);
     color: #ffffff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
 }
+/* Кнопка скопировать на карточке */
+.btn-copy {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+.btn-copy:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+/* Ссылка на Roblox Place в модальном окне */
+.roblox-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #00a2ff, #0066ff);
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
+}
+
+.roblox-link-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
+}
