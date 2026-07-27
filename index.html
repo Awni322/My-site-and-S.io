@@ -27,10 +27,16 @@
             <textarea id="text" placeholder="Текст записи"></textarea>
 
             <!-- Выбор категории -->
-            <select id="categorySelect">
-                <option value="Заметки">📝 Заметки</option>
-                <option value="Скрипты">📜 Скрипты</option>
-            </select>
+<div class="category-toggle-group">
+    <label class="category-radio">
+        <input type="radio" name="category" value="Заметки" checked>
+        <span class="radio-tile">📝 Заметки</span>
+    </label>
+    <label class="category-radio">
+        <input type="radio" name="category" value="Скрипты">
+        <span class="radio-tile">📜 Скрипты</span>
+    </label>
+</div>
 
             <div class="file-upload-wrapper">
                 <label class="file-upload-button">
