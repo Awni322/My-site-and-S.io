@@ -55,10 +55,12 @@ function handleImageUpload(e) {
 async function saveNote() {
     let title = document.getElementById("title").value;
     let content = document.getElementById("contentInput").value;
-    let categorySelect = document.getElementById("categorySelect");
-    let category = categorySelect ? categorySelect.value : "Заметки";
     let isPinned = document.getElementById("isPinned") ? document.getElementById("isPinned").checked : false;
     let imageInput = document.getElementById("imageInput");
+
+    // Читаем значение из выбранной радиокнопки
+    let categoryRadio = document.querySelector('input[name="category"]:checked');
+    let category = categoryRadio ? categoryRadio.value : "Заметки";
 
     if (!title || !content) {
         alert("Заполните заголовок и текст!");
@@ -201,9 +203,9 @@ function editNote(id) {
     document.getElementById("title").value = note.title;
     document.getElementById("contentInput").value = note.content;
     
-    if (document.getElementById("categorySelect")) {
-        document.getElementById("categorySelect").value = note.category || "Заметки";
-    }
+    // Выделяем нужную радиокнопку при редактировании
+    let catRadio = document.querySelector(`input[name="category"][value="${note.category || 'Заметки'}"]`);
+    if (catRadio) catRadio.checked = true;
 
     if (document.getElementById("isPinned")) {
         document.getElementById("isPinned").checked = note.is_pinned === 1 || note.is_pinned === true;
@@ -216,13 +218,19 @@ function editNote(id) {
     currentImageBase64 = note.image;
 }
 
+// Сброс формы
 function resetForm() {
     document.getElementById("title").value = "";
     document.getElementById("contentInput").value = "";
-    if (document.getElementById("categorySelect")) document.getElementById("categorySelect").value = "Заметки";
+    
+    // Возвращаем радиокнопку на "Заметки" по умолчанию
+    let defRadio = document.querySelector('input[name="category"][value="Заметки"]');
+    if (defRadio) defRadio.checked = true;
+
     if (document.getElementById("imageInput")) document.getElementById("imageInput").value = "";
     if (document.getElementById("fileName")) document.getElementById("fileName").innerText = "Выберите фото";
     if (document.getElementById("isPinned")) document.getElementById("isPinned").checked = false;
+    
     delete document.getElementById("title").dataset.id;
     currentImageBase64 = null;
 
