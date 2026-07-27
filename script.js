@@ -242,7 +242,7 @@ function openNoteModal(id) {
         let url = note.roblox_url.startsWith("http") ? note.roblox_url : "https://" + note.roblox_url;
         robloxContainer.innerHTML = `
             <a href="${url}" target="_blank" class="roblox-link-btn">
-                🎮 Открыть плейс в Roblox
+              :paperclip: Открыть ссылку  
             </a>
         `;
     } else {
