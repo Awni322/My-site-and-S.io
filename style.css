@@ -1,641 +1,137 @@
-/* =========================================================
-   Modern SaaS UI Design
-   Clean CSS architecture
-   Responsive • Accessible • Minimal
-   ========================================================= */
-
-
-/* =========================
-   Global variables
-   ========================= */
-
-:root {
-    --bg-primary: #0b1220;
-    --bg-secondary: #111827;
-    --surface: rgba(255, 255, 255, 0.08);
-    --surface-hover: rgba(255, 255, 255, 0.12);
-
-    --border: rgba(255, 255, 255, 0.12);
-
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-
-    --accent: #22c55e;
-    --accent-hover: #16a34a;
-
-    --danger: #ef4444;
-    --danger-hover: #dc2626;
-
-    --radius-lg: 22px;
-    --radius-md: 14px;
-    --radius-sm: 10px;
-
-    --shadow:
-        0 20px 50px rgba(0, 0, 0, 0.35);
-
-    --transition:
-        0.25s ease;
-}
-
-
-/* =========================
-   Reset
-   ========================= */
-
+/* ==========================================
+   1. ОБЩИЕ СТИЛИ И СБРОС
+   ========================================== */
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
-
 
 body {
-
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #0f172a;
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
     min-height: 100vh;
+}
 
-    margin: 0;
-
-    padding: 60px 20px;
-
-    background:
-        radial-gradient(
-            circle at top,
-            rgba(34,197,94,0.18),
-            transparent 35%
-        ),
-        linear-gradient(
-            135deg,
-            var(--bg-primary),
-            var(--bg-secondary)
-        );
-
-    color: var(--text-primary);
-
-    font-family:
-        Inter,
-        "Segoe UI",
-        Arial,
-        sans-serif;
-
+/* ==========================================
+   2. ФОРМА ВХОДА (LOGIN)
+   ========================================== */
+#login {
+    background-color: #1e293b;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    border: 1px solid #334155;
     text-align: center;
-
-    line-height: 1.5;
-}
-
-
-/* =========================
-   Main application cards
-   ========================= */
-
-#login,
-#content {
-
+    max-width: 350px;
     width: 100%;
-
-    max-width: 760px;
-
-    margin: 0 auto;
-
-    padding: 40px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,0.10),
-            rgba(255,255,255,0.04)
-        );
-
-    border: 1px solid var(--border);
-
-    border-radius: var(--radius-lg);
-
-    backdrop-filter: blur(18px);
-
-    box-shadow: var(--shadow);
-
-    animation: fadeIn 0.5s ease;
+    margin-top: 50px;
 }
 
-
-/* =========================
-   Typography
-   ========================= */
-
-h1 {
-
-    margin: 0 0 20px;
-
-    font-size: clamp(32px, 5vw, 46px);
-
-    font-weight: 800;
-
-    letter-spacing: -1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            #4ade80,
-            #22c55e
-        );
-
-    -webkit-background-clip: text;
-
-    -webkit-text-fill-color: transparent;
-}
-
-
-h2 {
-
-    margin-top: 30px;
-
-    margin-bottom: 20px;
-
-    color: var(--text-secondary);
-
-    font-size: 24px;
-
-    font-weight: 700;
-}
-
-
-/* =========================
-   Inputs
-   ========================= */
-
-input,
-textarea {
-
-    width: min(100%, 560px);
-
-    padding: 15px 18px;
-
-    margin: 8px 0;
-
-    background:
-        rgba(15,23,42,0.65);
-
-    color: var(--text-primary);
-
-    border:
-
-        1px solid var(--border);
-
-    border-radius: var(--radius-md);
-
-    outline: none;
-
-    font-size: 16px;
-
-    transition:
-        border-color var(--transition),
-        box-shadow var(--transition),
-        transform var(--transition);
-
-}
-
-
-input::placeholder,
-textarea::placeholder {
-
-    color: var(--text-muted);
-
-}
-
-
-input:hover,
-textarea:hover {
-
-    border-color:
-        rgba(255,255,255,0.25);
-
-}
-
-
-input:focus,
-textarea:focus {
-
-    border-color: var(--accent);
-
-    box-shadow:
-        0 0 0 4px rgba(34,197,94,0.18);
-
-    transform: translateY(-1px);
-
-}
-
-
-textarea {
-
-    min-height: 170px;
-
-    resize: vertical;
-
-}
-
-
-/* =========================
-   Buttons
-   ========================= */
-
-button {
-
-    margin-top: 18px;
-
-    padding: 14px 28px;
-
-    border: none;
-
-    border-radius: 999px;
-
-    background:
-
-        linear-gradient(
-            135deg,
-            var(--accent),
-            #16a34a
-        );
-
+#login input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background-color: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
     color: white;
-
-    font-size: 16px;
-
-    font-weight: 700;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 10px 25px rgba(34,197,94,0.25);
-
-    transition:
-        transform var(--transition),
-        box-shadow var(--transition),
-        background var(--transition);
-
-}
-
-
-button:hover {
-
-    background:
-
-        linear-gradient(
-            135deg,
-            #4ade80,
-            var(--accent-hover)
-        );
-
-    transform:
-        translateY(-3px);
-
-    box-shadow:
-        0 15px 35px rgba(34,197,94,0.35);
-
-}
-
-
-button:active {
-
-    transform:
-        translateY(0);
-
-}
-
-
-button:focus-visible {
-
-    outline:
-
-        3px solid
-        rgba(34,197,94,0.45);
-
-    outline-offset: 3px;
-
-}
-
-
-/* =========================
-   Messages
-   ========================= */
-
-#message {
-
-    margin-top: 18px;
-
-    min-height: 24px;
-
-    color:
-
-        var(--accent);
-
-    font-size: 17px;
-
-    font-weight: 700;
-
-}
-
-
-/* =========================
-   Notes section
-   ========================= */
-
-#notes {
-
-    margin-top: 35px;
-
-}
-
-
-#notes div {
-
-    max-width: 650px;
-
-    margin: 18px auto;
-
-    padding: 25px;
-
-    text-align: left;
-
-    background:
-
-        rgba(255,255,255,0.06);
-
-    border:
-
-        1px solid var(--border);
-
-    border-radius: var(--radius-md);
-
-    backdrop-filter: blur(12px);
-
-    box-shadow:
-
-        0 10px 30px rgba(0,0,0,0.25);
-
-    transition:
-
-        transform var(--transition),
-        background var(--transition),
-        border-color var(--transition);
-
-}
-
-
-#notes div:hover {
-
-    transform:
-        translateY(-5px);
-
-    background:
-
-        var(--surface-hover);
-
-    border-color:
-
-        rgba(255,255,255,0.22);
-
-}
-
-
-#notes h3 {
-
-    margin-top: 0;
-
-    margin-bottom: 12px;
-
-    color:
-
-        #4ade80;
-
-    font-size: 21px;
-
-}
-
-
-#notes p {
-
-    margin: 0;
-
-    color:
-
-        var(--text-secondary);
-
-    white-space: pre-wrap;
-
-    line-height: 1.7;
-
-}
-
-
-/* =========================
-   Delete button
-   ========================= */
-
-#notes button {
-
-    margin-top: 18px;
-
-    padding:
-
-        10px 18px;
-
-    background:
-
-        linear-gradient(
-            135deg,
-            var(--danger),
-            #b91c1c
-        );
-
-    box-shadow:
-
-        0 8px 20px rgba(239,68,68,0.25);
-
-}
-
-
-#notes button:hover {
-
-    background:
-
-        linear-gradient(
-            135deg,
-            #f87171,
-            var(--danger-hover)
-        );
-
-}
-
-
-/* =========================
-   Animation
-   ========================= */
-
-@keyframes fadeIn {
-
-    from {
-
-        opacity: 0;
-
-        transform:
-            translateY(15px);
-
-    }
-
-
-    to {
-
-        opacity: 1;
-
-        transform:
-            translateY(0);
-
-    }
-
-}
-
-
-/* =========================
-   Mobile optimization
-   ========================= */
-
-@media (max-width: 600px) {
-
-
-    body {
-
-        padding:
-
-            25px 14px;
-
-    }
-
-
-    #login,
-    #content {
-
-        padding:
-
-            25px 18px;
-
-        border-radius:
-
-            18px;
-
-    }
-
-
-    h1 {
-
-        font-size:
-
-            32px;
-
-    }
-
-
-    h2 {
-
-        font-size:
-
-            21px;
-
-    }
-
-
-    input,
-    textarea {
-
-        font-size:
-
-            16px;
-
-        padding:
-
-            14px;
-
-    }
-
-
-    button {
-
-        width:
-
-            100%;
-
-        padding:
-
-            15px;
-
-    }
-
-
-    #notes div {
-
-        padding:
-
-            20px;
-
-    }
-
-}
-.toggle-container {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    user-select: none;
-    color: #e2e8f0;
     font-size: 15px;
-    white-space: nowrap;
-    margin: 12px 0;
+    outline: none;
 }
 
-.toggle-container input {
-    display: none;
+#login button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.toggle-slider {
-    width: 42px;
-    height: 22px;
-    background-color: #2a374a;
-    border-radius: 20px;
-    position: relative;
-    transition: background-color 0.3s;
-    border: 1px solid #3b82f633;
-}
-
-.toggle-slider::before {
-    content: "";
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: #94a3b8;
-    top: 2px;
-    left: 3px;
-    transition: transform 0.3s, background-color 0.3s;
-}
-
-.toggle-container input:checked + .toggle-slider {
+#login button:hover {
     background-color: #2563eb;
 }
 
-.toggle-container input:checked + .toggle-slider::before {
-    transform: translateX(20px);
-    background-color: #ffffff;
-}
-/* Область загрузки файла */
-.file-upload-wrapper {
-    margin: 15px 0;
+#message {
+    margin-top: 15px;
+    font-size: 14px;
 }
 
-/* Скрываем стандартную некрасивую кнопку */
+/* ==========================================
+   3. ОСНОВНОЙ КОНТЕЙНЕР И ФОРМА ЗАПИСИ
+   ========================================== */
+#content {
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #f8fafc;
+    text-align: center;
+}
+
+h2 {
+    font-size: 20px;
+    margin: 20px 0 10px 0;
+    color: #cbd5e1;
+    width: 100%;
+}
+
+/* Поля ввода (Заголовок, Текст, Поиск) */
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    color: #f8fafc;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus, textarea:focus {
+    border-color: #3b82f6;
+}
+
+textarea {
+    height: 120px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+#search {
+    margin-bottom: 20px;
+}
+
+/* ==========================================
+   4. КАСТОМНАЯ КНОПКА ЗАГРУЗКИ ФОТО
+   ========================================== */
+.file-upload-wrapper {
+    margin: 15px 0;
+    width: 100%;
+}
+
 .file-upload-wrapper input[type="file"] {
     display: none;
 }
 
-/* Кастомная кнопка загрузки */
 .file-upload-button {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
@@ -655,24 +151,26 @@ button:focus-visible {
 .file-upload-button:hover {
     background-color: #26334d;
     border-color: #60a5fa;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
 }
 
 .file-icon {
     font-size: 18px;
 }
 
-/* Блок закпрепления */
+/* ==========================================
+   5. ТУМБЛЕР ЗАКРЕПЛЕНИЯ (SWITCH)
+   ========================================== */
 .pin-wrapper {
-    margin: 15px 0 25px 0;
+    margin: 10px 0 20px 0;
+    width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .toggle-container {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     user-select: none;
     color: #e2e8f0;
@@ -713,17 +211,20 @@ button:focus-visible {
     background-color: #ffffff;
 }
 
-/* Кнопки управления снизу */
+/* ==========================================
+   6. КНОПКИ ДЕЙСТВИЙ ФОРМЫ (СОХРАНИТЬ/ОТМЕНА)
+   ========================================== */
 .actions-wrapper {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 10px;
+    width: 100%;
+    margin-bottom: 25px;
 }
 
 .btn-save {
     width: 100%;
-    padding: 12px 24px;
+    padding: 12px;
     background-color: #10b981;
     color: #ffffff;
     font-size: 16px;
@@ -738,7 +239,6 @@ button:focus-visible {
 .btn-save:hover {
     background-color: #059669;
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
 .btn-cancel {
@@ -751,50 +251,63 @@ button:focus-visible {
     cursor: pointer;
     font-weight: 500;
 }
-/* Общий вид карточки */
+
+/* ==========================================
+   7. СПИСОК ЗАПИСЕЙ И КАРТОЧКИ
+   ========================================== */
+#notes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
 .note-card {
-    position: relative;
+    display: flex;
+    flex-direction: column;
     background-color: #1a2332;
     border: 1px solid #2d3748;
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
+    box-sizing: border-box;
+
+    /* Динамическая ширина от размера изображения */
+    width: fit-content;
+    min-width: 300px;
+    max-width: 100%;
 }
 
-/* Выделение для закреплённых карточек */
+/* Выделение закреплённой карточки */
 .note-card.pinned {
     background-color: #1e293b;
     border: 1px solid #3b82f6;
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
-/* Плашка "Закреплено" сверху справа */
+/* Бейдж "📌 Закреплено" слева-сверху */
 .pin-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
+    align-self: flex-start;
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #ffffff;
     font-size: 12px;
     font-weight: 600;
-    padding: 4px 10px;
+    padding: 4px 12px;
     border-radius: 20px;
+    margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
-/* Заголовок карточки */
 .note-title {
     margin: 0 0 10px 0;
     font-size: 20px;
     font-weight: 700;
     color: #f8fafc;
     word-break: break-word;
-    padding-right: 100px; /* Чтобы не перекрывал плашку "Закреплено" */
 }
 
-/* Текст записи (чёткий и хорошо видимый) */
 .note-content {
     color: #cbd5e1;
     font-size: 15px;
@@ -804,28 +317,31 @@ button:focus-visible {
     word-break: break-word;
 }
 
-/* Блок с изображением */
+/* Контейнер картинки */
 .note-image-container {
-    margin: 15px 0;
+    margin: 10px 0 15px 0;
     border-radius: 12px;
     overflow: hidden;
-    max-width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
 .note-image {
-    max-width: 100%;
-    max-height: 400px;
-    object-fit: cover;
-    border-radius: 12px;
     display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 500px;
+    border-radius: 12px;
+    object-fit: contain;
 }
 
-/* Кнопки действий */
+/* Кнопки в карточке */
 .note-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 15px;
+    margin-top: auto;
     padding-top: 15px;
     border-top: 1px solid #2d3748;
 }
@@ -843,36 +359,15 @@ button:focus-visible {
     gap: 6px;
 }
 
-/* Кнопка Закрепить/Открепить */
 .btn-pin {
     background-color: #2d3748;
     color: #e2e8f0;
 }
-.btn-pin:hover {
-    background-color: #3b82f6;
-    color: white;
-}
-.btn-pin.active {
-    background-color: #2563eb;
-    color: white;
-}
+.btn-pin:hover { background-color: #3b82f6; color: white; }
+.btn-pin.active { background-color: #2563eb; color: white; }
 
-/* Кнопка Изменить */
-.btn-edit {
-    background-color: #334155;
-    color: #e2e8f0;
-}
-.btn-edit:hover {
-    background-color: #0284c7;
-    color: white;
-}
+.btn-edit { background-color: #334155; color: #e2e8f0; }
+.btn-edit:hover { background-color: #0284c7; color: white; }
 
-/* Кнопка Удалить */
-.btn-delete {
-    background-color: #334155;
-    color: #f87171;
-}
-.btn-delete:hover {
-    background-color: #dc2626;
-    color: white;
-}
+.btn-delete { background-color: #334155; color: #f87171; }
+.btn-delete:hover { background-color: #dc2626; color: white; }
