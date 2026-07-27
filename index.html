@@ -2,13 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Заметки и Скрипты</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- ОКНО АВТОРИЗАЦИИ -->
+    <!-- ЭКРАН ВХОДА (Все элементы формы должны быть СТРОГО вне этого блока) -->
     <div id="login">
         <h2>Вход</h2>
         <input type="password" id="password" placeholder="Введите пароль">
@@ -16,39 +15,35 @@
         <div id="message"></div>
     </div>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <!-- ОСНОВНОЙ КОНТЕНТ (Изначально hidden/display:none в JS до входа) -->
     <div id="content" style="display: none;">
-        <h1>Мои Заметки</h1>
+        <h1>Заметки & Скрипты</h1>
 
-        <!-- ФОРМА СОЗДАНИЯ / РЕДАКТИРОВАНИЯ -->
         <div class="form-container">
             <h2 id="formTitle">Новая запись</h2>
             
             <input type="text" id="title" placeholder="Заголовок">
             <textarea id="contentInput" placeholder="Введите текст..."></textarea>
 
-            <!-- Переключатель категорий -->
             <div class="radio-group">
-    <label class="radio-label">
-        <input type="radio" name="category" value="Заметки" checked>
-        📝 Заметки
-    </label>
-    <label class="radio-label">
-        <input type="radio" name="category" value="Скрипты">
-        📜 Скрипты
-    </label>
-</div>
-<!-- НОВОЕ ПОЛЕ: Ссылка на Roblox Place -->
-<input type="text" id="robloxUrl" placeholder="Ссылка на плейс Roblox (необязательно)...">
-            <!-- Загрузка фото -->
-            <div class="file-upload-wrapper">
-                <label class="file-upload-button">
-                    <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
-                    📎 <span id="fileName">Выберите фото</span>
+                <label class="radio-label">
+                    <input type="radio" name="category" value="Заметки" checked> 📝 Заметки
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="category" value="Скрипты"> 📜 Скрипты
                 </label>
             </div>
 
-            <!-- Тумблер закрепа -->
+            <!-- Поле Roblox СТРОГО внутри .form-container -->
+            <input type="text" id="robloxUrl" placeholder="Ссылка на плейс Roblox (необязательно)...">
+
+            <div class="file-upload-wrapper">
+                <label class="file-upload-button" for="imageInput">
+                    📎 <span id="fileName">Выберите фото</span>
+                </label>
+                <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+            </div>
+
             <div class="pin-wrapper">
                 <label class="toggle-container">
                     <input type="checkbox" id="isPinned">
@@ -57,14 +52,13 @@
                 </label>
             </div>
 
-            <!-- Кнопки формы -->
             <div class="actions-wrapper">
                 <button class="btn-save" onclick="saveNote()">Сохранить</button>
                 <button class="btn-cancel" id="btnCancel" onclick="resetForm()" style="display: none;">Отмена</button>
             </div>
         </div>
 
-        <!-- ПОИСК И ФИЛЬТРЫ -->
+        <!-- ПОИСК СТРОГО ПОД ФОРМОЙ -->
         <input type="text" id="search" placeholder="Поиск..." oninput="handleSearch()">
 
         <div class="category-filters">
@@ -73,50 +67,46 @@
             <button class="filter-btn" onclick="filterCategory('Скрипты', event)">📜 Скрипты</button>
         </div>
 
-        <!-- СПИСОК ЗАМЕТОК -->
         <div id="notes"></div>
     </div>
 
     <!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА -->
-    <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeModal()">✕</button>
             <div class="modal-body">
                 <div class="modal-left" id="modalLeft">
-                    <img id="modalImage" src="" alt="Изображение">
+                    <img id="modalImage" src="" alt="Превью">
                 </div>
                 <div class="modal-right">
                     <h2 id="modalTitle"></h2>
-                    <p id="modalText"></p>
+                    
+                    <!-- Контейнер для Roblox кнопки -->
+                    <div id="modalRobloxContainer"></div>
+
+                    <div id="modalText"></div>
+
+                    <!-- Кнопка копирования прямо в модальном окне -->
+                    <button class="btn-modal-copy" id="btnModalCopy" onclick="copyModalContent()">
+                        📋 Скопировать текст/скрипт
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
-    <!-- МОДАЛЬНОЕ ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
-<div id="confirmOverlay" class="modal-overlay">
-    <div class="confirm-card">
-        <h3>Удаление записи</h3>
-        <p>Вы уверены, что хотите удалить эту запись? Действие нельзя будет отменить.</p>
-        <div class="confirm-actions">
-            <button class="btn-cancel" onclick="closeConfirmModal()">Отмена</button>
-            <button class="btn-delete-confirm" id="btnConfirmDelete">Удалить</button>
+    <!-- ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
+    <div class="modal-overlay" id="confirmOverlay">
+        <div class="confirm-card">
+            <h3>Удалить запись?</h3>
+            <p>Это действие нельзя будет отменить.</p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Отмена</button>
+                <button class="btn-delete-confirm" id="btnConfirmDelete">Удалить</button>
+            </div>
         </div>
     </div>
-</div>
 
-    <!-- Поле выбора категории -->
-<div class="radio-group">
-    <label class="radio-label">
-        <input type="radio" name="category" value="Заметки" checked> 📝 Заметки
-    </label>
-    <label class="radio-label">
-        <input type="radio" name="category" value="Скрипты"> 📜 Скрипты
-    </label>
-</div>
-
-<!-- НОВОЕ ПОЛЕ: Ссылка на Roblox Place -->
-<input type="text" id="robloxUrl" placeholder="Ссылка на плейс Roblox (необязательно)...">
+    <script src="script.js"></script>
 </body>
 </html>
