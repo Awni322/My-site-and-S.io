@@ -382,28 +382,34 @@ async function searchNotes(){
     notes.forEach(note => {
 
 
-        output += `
+output += `
 
-        <div>
+<div>
 
-            <h3>
-            📌 ${note.title}
-            </h3>
+    <h3>
+        📌 ${note.title}
+    </h3>
 
-            <p>
-            ${note.content}
-            </p>
+    <p>
+        ${note.content}
+    </p>
 
 
-            <button onclick="deleteNote(${note.id})">
-            🗑 Удалить
-            </button>
+    <button onclick="editNote(${note.id})">
+        ✏️ Изменить
+    </button>
 
-            <hr>
 
-        </div>
+    <button onclick="deleteNote(${note.id})">
+        🗑 Удалить
+    </button>
 
-        `;
+
+    <hr>
+
+</div>
+
+`;
 
 
     });
