@@ -1,5 +1,6 @@
 const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
 let currentImageBase64 = null;
+let currentNotesList = []; // Хранилище загруженных записей для работы модального окна
 
 // =========================
 // Вход
@@ -102,8 +103,8 @@ async function saveNote() {
 // =========================
 async function loadNotes() {
     let response = await fetch(WORKER_URL);
-    let notes = await response.json();
-    renderNotes(notes);
+    currentNotesList = await response.json();
+    renderNotes(currentNotesList);
 }
 
 function renderNotes(notes) {
@@ -113,7 +114,7 @@ function renderNotes(notes) {
         const isPinned = note.is_pinned === 1 || note.is_pinned === true;
 
         output += `
-        <div class="note-card ${isPinned ? 'pinned' : ''}">
+        <div class="note-card ${isPinned ? 'pinned' : ''}" onclick="openNoteModal(${note.id})">
             ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
             
             <h3 class="note-title">${note.title}</h3>
@@ -126,13 +127,13 @@ function renderNotes(notes) {
             ` : ""}
 
             <div class="note-actions">
-                <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="togglePin(${note.id}, ${!isPinned})">
+                <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="event.stopPropagation(); togglePin(${note.id}, ${!isPinned})">
                     ${isPinned ? '📌 Открепить' : '📌 Закрепить'}
                 </button>
-                <button class="btn-action btn-edit" onclick="editNote(${note.id})">
+                <button class="btn-action btn-edit" onclick="event.stopPropagation(); editNote(${note.id})">
                     ✏️ Изменить
                 </button>
-                <button class="btn-action btn-delete" onclick="deleteNote(${note.id})">
+                <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNote(${note.id})">
                     🗑 Удалить
                 </button>
             </div>
@@ -158,20 +159,23 @@ async function togglePin(id, status) {
 async function searchNotes() {
     let text = document.getElementById("search").value;
     let response = await fetch(WORKER_URL + "?search=" + encodeURIComponent(text));
-    let notes = await response.json();
-    renderNotes(notes);
+    currentNotesList = await response.json();
+    renderNotes(currentNotesList);
 }
 
 async function editNote(id) {
-    let response = await fetch(WORKER_URL);
-    let notes = await response.json();
-    let note = notes.find(n => n.id == id);
+    let note = currentNotesList.find(n => n.id == id);
+    if (!note) {
+        let response = await fetch(WORKER_URL);
+        let notes = await response.json();
+        note = notes.find(n => n.id == id);
+    }
 
     if (!note) return;
 
     document.getElementById("title").value = note.title;
     document.getElementById("text").value = note.content;
-    document.getElementById("isPinned").checked = note.is_pinned === 1;
+    document.getElementById("isPinned").checked = note.is_pinned === 1 || note.is_pinned === true;
     document.getElementById("title").dataset.id = note.id;
     document.getElementById("formTitle").innerText = "Редактировать запись";
     document.getElementById("cancelEdit").style.display = "block";
@@ -204,6 +208,39 @@ async function deleteNote(id) {
     }
 }
 
+// =========================
+// Модальное окно (Просмотр)
+// =========================
+function openNoteModal(id) {
+    let note = currentNotesList.find(n => n.id == id);
+    if (!note) return;
+
+    document.getElementById("modalTitle").innerText = note.title;
+    document.getElementById("modalText").innerText = note.content;
+
+    let imgContainer = document.getElementById("modalImageContainer");
+    if (note.image) {
+        imgContainer.innerHTML = `<img src="${note.image}" alt="Фото">`;
+        imgContainer.style.display = "flex";
+    } else {
+        imgContainer.innerHTML = "";
+        imgContainer.style.display = "none";
+    }
+
+    let pinBadge = document.getElementById("modalPinBadge");
+    const isPinned = note.is_pinned === 1 || note.is_pinned === true;
+    if (pinBadge) {
+        pinBadge.innerHTML = isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : '';
+    }
+
+    document.getElementById("noteModal").classList.add("active");
+}
+
+function closeNoteModal(e) {
+    if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close')) return;
+    document.getElementById("noteModal").classList.remove("active");
+}
+
 // Глобальный доступ к функциям
 window.login = login;
 window.saveNote = saveNote;
@@ -213,3 +250,5 @@ window.searchNotes = searchNotes;
 window.togglePin = togglePin;
 window.cancelEdit = cancelEdit;
 window.updateFileName = updateFileName;
+window.openNoteModal = openNoteModal;
+window.closeNoteModal = closeNoteModal;
