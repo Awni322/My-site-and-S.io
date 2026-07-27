@@ -287,17 +287,21 @@ textarea {
     box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
-/* Бейдж "📌 Закреплено" слева-сверху */
+/* Бейдж "📌 Закреплено" — находится внутри карточки слева-сверху */
 .pin-badge {
-    align-self: flex-start;
+    position: static; /* Отключаем абсолютное позиционирование */
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start; /* Выравниваем по левому краю */
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: #ffffff;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    width: fit-content;
 }
 
 .note-title {
