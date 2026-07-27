@@ -47,7 +47,12 @@
 
     <h2>Записи:</h2>
     <input id="search" type="text" placeholder="Поиск записей..." oninput="searchNotes()">
-
+<!-- Фильтры категорий -->
+<div class="category-filters">
+    <button class="filter-btn active" onclick="filterByCategory('all', this)">Все</button>
+    <button class="filter-btn" onclick="filterByCategory('Заметки', this)">📝 Заметки</button>
+    <button class="filter-btn" onclick="filterByCategory('Скрипты', this)">📜 Скрипты</button>
+</div>
     <div id="notes"></div>
 </div>
 
@@ -68,5 +73,9 @@
         </div>
     </div>
 </div>
+<select id="categorySelect">
+    <option value="Заметки">📝 Заметки</option>
+    <option value="Скрипты">📜 Скрипты</option>
+</select>
 </body>
 </html>
