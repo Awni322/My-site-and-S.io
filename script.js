@@ -4,9 +4,7 @@ let currentNotesList = [];
 let activeCategory = "all"; 
 let noteIdToDelete = null;
 
-// =========================
-// Вход
-// =========================
+// Авторизация
 async function login() {
     let password = document.getElementById("password").value;
     let message = document.getElementById("message");
@@ -35,7 +33,7 @@ async function login() {
     }
 }
 
-// Конвертация файла в Base64
+// Конвертер картинки
 function getBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -45,27 +43,25 @@ function getBase64(file) {
     });
 }
 
-function updateFileName(input) {
-    const fileNameText = document.getElementById("fileNameText");
-    if (fileNameText && input.files && input.files[0]) {
-        fileNameText.innerText = "Файл: " + input.files[0].name;
-    } else if (fileNameText) {
-        fileNameText.innerText = "Прикрепить фото";
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    const fileNameSpan = document.getElementById("fileName");
+    if (file && fileNameSpan) {
+        fileNameSpan.innerText = "Файл: " + file.name;
     }
 }
 
-// =========================
 // Сохранение записи
-// =========================
 async function saveNote() {
     let title = document.getElementById("title").value;
-    let text = document.getElementById("text").value;
-    let category = document.getElementById("categorySelect") ? document.getElementById("categorySelect").value : "Заметки";
+    let content = document.getElementById("contentInput").value;
+    let categorySelect = document.getElementById("categorySelect");
+    let category = categorySelect ? categorySelect.value : "Заметки";
     let isPinned = document.getElementById("isPinned") ? document.getElementById("isPinned").checked : false;
     let imageInput = document.getElementById("imageInput");
 
-    if (!title || !text) {
-        alert("Заполни название и текст");
+    if (!title || !content) {
+        alert("Заполните заголовок и текст!");
         return;
     }
 
@@ -80,7 +76,7 @@ async function saveNote() {
     let body = {
         action: action,
         title: title,
-        content: text,
+        content: content,
         category: category,
         image: imageBase64,
         is_pinned: isPinned
@@ -90,25 +86,33 @@ async function saveNote() {
         body.id = id;
     }
 
-    let response = await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
+    try {
+        let response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
 
-    if (response.ok) {
-        cancelEdit();
-        loadNotes();
+        if (response.ok) {
+            resetForm();
+            loadNotes();
+        } else {
+            alert("Ошибка сохранения на сервере.");
+        }
+    } catch (err) {
+        console.error("Ошибка при сохранении:", err);
     }
 }
 
-// =========================
-// Загрузка и фильтрация
-// =========================
+// Загрузка
 async function loadNotes() {
-    let response = await fetch(WORKER_URL);
-    currentNotesList = await response.json();
-    applyFiltersAndRender();
+    try {
+        let response = await fetch(WORKER_URL);
+        currentNotesList = await response.json();
+        applyFiltersAndRender();
+    } catch (err) {
+        console.error("Ошибка загрузки:", err);
+    }
 }
 
 function applyFiltersAndRender() {
@@ -121,11 +125,22 @@ function applyFiltersAndRender() {
     renderNotes(filtered);
 }
 
-function filterByCategory(category, btnElement) {
+function filterCategory(category, event) {
     activeCategory = category;
     document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-    if (btnElement) btnElement.classList.add("active");
+    if (event && event.target) {
+        event.target.classList.add("active");
+    }
     applyFiltersAndRender();
+}
+
+function handleSearch() {
+    let query = document.getElementById("search").value.toLowerCase();
+    let filtered = currentNotesList.filter(n => 
+        n.title.toLowerCase().includes(query) || 
+        n.content.toLowerCase().includes(query)
+    );
+    renderNotes(filtered);
 }
 
 function renderNotes(notes) {
@@ -155,7 +170,7 @@ function renderNotes(notes) {
                     ${isPinned ? '📌 Открепить' : '📌 Закрепить'}
                 </button>
                 <button class="btn-action btn-edit" onclick="event.stopPropagation(); editNote(${note.id})">
-                    ✏️ Изменить
+                    ✏️ Редактировать
                 </button>
                 <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNote(${note.id})">
                     🗑 Удалить
@@ -168,9 +183,7 @@ function renderNotes(notes) {
     document.getElementById("notes").innerHTML = output;
 }
 
-// =========================
-// Вспомогательные функции
-// =========================
+// Закреп
 async function togglePin(id, status) {
     await fetch(WORKER_URL, {
         method: "POST",
@@ -180,19 +193,13 @@ async function togglePin(id, status) {
     loadNotes();
 }
 
-async function searchNotes() {
-    let text = document.getElementById("search").value;
-    let response = await fetch(WORKER_URL + "?search=" + encodeURIComponent(text));
-    currentNotesList = await response.json();
-    applyFiltersAndRender();
-}
-
-async function editNote(id) {
+// Редактирование
+function editNote(id) {
     let note = currentNotesList.find(n => n.id == id);
     if (!note) return;
 
     document.getElementById("title").value = note.title;
-    document.getElementById("text").value = note.content;
+    document.getElementById("contentInput").value = note.content;
     
     if (document.getElementById("categorySelect")) {
         document.getElementById("categorySelect").value = note.category || "Заметки";
@@ -204,32 +211,26 @@ async function editNote(id) {
 
     document.getElementById("title").dataset.id = note.id;
     document.getElementById("formTitle").innerText = "Редактировать запись";
-    if (document.getElementById("cancelEdit")) {
-        document.getElementById("cancelEdit").style.display = "block";
-    }
+    document.getElementById("btnCancel").style.display = "block";
 
     currentImageBase64 = note.image;
 }
 
-function cancelEdit() {
+function resetForm() {
     document.getElementById("title").value = "";
-    document.getElementById("text").value = "";
+    document.getElementById("contentInput").value = "";
     if (document.getElementById("categorySelect")) document.getElementById("categorySelect").value = "Заметки";
     if (document.getElementById("imageInput")) document.getElementById("imageInput").value = "";
-    if (document.getElementById("fileNameText")) document.getElementById("fileNameText").innerText = "Прикрепить фото";
+    if (document.getElementById("fileName")) document.getElementById("fileName").innerText = "Выберите фото";
     if (document.getElementById("isPinned")) document.getElementById("isPinned").checked = false;
     delete document.getElementById("title").dataset.id;
     currentImageBase64 = null;
 
     document.getElementById("formTitle").innerText = "Новая запись";
-    if (document.getElementById("cancelEdit")) {
-        document.getElementById("cancelEdit").style.display = "none";
-    }
+    document.getElementById("btnCancel").style.display = "none";
 }
 
-// =========================
-// Удаление с модальным окном
-// =========================
+// Удаление
 function deleteNote(id) {
     noteIdToDelete = id;
     const overlay = document.getElementById("confirmOverlay");
@@ -263,9 +264,7 @@ async function confirmDelete() {
     }
 }
 
-// =========================
 // Модальное окно просмотра
-// =========================
 function openNoteModal(id) {
     let note = currentNotesList.find(n => n.id == id);
     if (!note) return;
@@ -273,49 +272,34 @@ function openNoteModal(id) {
     document.getElementById("modalTitle").innerText = note.title;
     document.getElementById("modalText").innerText = note.content;
 
-    let imgContainer = document.getElementById("modalImageContainer");
-    
-    // Если картинка загружена пользователем — показываем её, 
-    // если нет — подтягиваем из папки img/ или скрываем блок
+    let modalImg = document.getElementById("modalImage");
+    let modalLeft = document.getElementById("modalLeft");
+
     if (note.image) {
-        imgContainer.innerHTML = `<img src="${note.image}" alt="Фото">`;
-        imgContainer.style.display = "flex";
+        modalImg.src = note.image;
+        modalLeft.style.display = "flex";
     } else {
-        // Замени на свою картинку-заглушку из папки img, например 'img/default.png'
-        // Или опусти до imgContainer.style.display = "none";
-        imgContainer.innerHTML = `<img src="img/default.png" alt="Заглушка" onerror="this.parentElement.style.display='none'">`;
-        imgContainer.style.display = "flex";
+        modalImg.src = "img/default.png";
+        modalImg.onerror = () => { modalLeft.style.display = "none"; };
     }
 
-    let pinBadge = document.getElementById("modalPinBadge");
-    const isPinned = note.is_pinned === 1 || note.is_pinned === true;
-    const categoryName = note.category || "Заметки";
-
-    if (pinBadge) {
-        pinBadge.innerHTML = `
-            <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
-            ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
-        `;
-    }
-
-    document.getElementById("noteModal").classList.add("active");
+    document.getElementById("modalOverlay").classList.add("active");
 }
 
-function closeNoteModal(e) {
-    if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close')) return;
-    document.getElementById("noteModal").classList.remove("active");
+function closeModal() {
+    document.getElementById("modalOverlay").classList.remove("active");
 }
 
-// Глобальный доступ к функциям
+// Экспорт
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
 window.editNote = editNote;
-window.searchNotes = searchNotes;
+window.handleSearch = handleSearch;
 window.togglePin = togglePin;
-window.cancelEdit = cancelEdit;
-window.updateFileName = updateFileName;
+window.resetForm = resetForm;
+window.handleImageUpload = handleImageUpload;
 window.openNoteModal = openNoteModal;
-window.closeNoteModal = closeNoteModal;
-window.filterByCategory = filterByCategory;
+window.closeModal = closeModal;
+window.filterCategory = filterCategory;
 window.closeConfirmModal = closeConfirmModal;
