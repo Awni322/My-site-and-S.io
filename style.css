@@ -1,5 +1,5 @@
 /* ==========================================
-   1. ОБЩИЕ СТИЛИ И СБРОС
+   1. СБРОС И ГЛОБАЛЬНЫЕ СТИЛИ
    ========================================== */
 * {
     box-sizing: border-box;
@@ -8,68 +8,81 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #0f172a;
-    color: #f8fafc;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    background-attachment: fixed;
+    color: #f1f5f9;
     display: flex;
     justify-content: center;
-    padding: 20px;
+    padding: 30px 15px;
     min-height: 100vh;
 }
 
 /* ==========================================
-   2. ФОРМА ВХОДА (LOGIN)
+   2. АВТОРИЗАЦИЯ (LOGIN)
    ========================================== */
 #login {
-    background-color: #1e293b;
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    border: 1px solid #334155;
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 35px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     text-align: center;
-    max-width: 350px;
+    max-width: 360px;
     width: 100%;
-    margin-top: 50px;
+    margin-top: 60px;
 }
 
 #login input[type="password"] {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 18px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
     color: white;
     font-size: 15px;
     outline: none;
+    transition: all 0.3s ease;
+}
+
+#login input[type="password"]:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
 }
 
 #login button {
     width: 100%;
-    padding: 12px;
-    background-color: #3b82f6;
+    padding: 14px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: 600;
+    font-size: 15px;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
 }
 
 #login button:hover {
-    background-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
 }
 
 #message {
     margin-top: 15px;
     font-size: 14px;
+    font-weight: 500;
 }
 
 /* ==========================================
-   3. ОСНОВНОЙ КОНТЕЙНЕР И ФОРМА ЗАПИСИ
+   3. ОСНОВНОЙ КОНТЕЙНЕР
    ========================================== */
 #content {
-    max-width: 600px;
+    max-width: 650px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -77,52 +90,59 @@ body {
 }
 
 h1 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #f8fafc;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, #ffffff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     text-align: center;
 }
 
 h2 {
     font-size: 20px;
-    margin: 20px 0 10px 0;
-    color: #cbd5e1;
+    font-weight: 700;
+    margin: 25px 0 12px 0;
+    color: #e2e8f0;
     width: 100%;
 }
 
-/* Поля ввода (Заголовок, Текст, Поиск) */
+/* Инпуты и Текстовые поля */
 input[type="text"], textarea {
     width: 100%;
-    padding: 12px 15px;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
+    padding: 14px 18px;
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
     color: #f8fafc;
     font-size: 15px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: all 0.3s ease;
     box-sizing: border-box;
 }
 
 input[type="text"]:focus, textarea:focus {
-    border-color: #3b82f6;
+    background: rgba(30, 41, 59, 0.85);
+    border-color: #6366f1;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
 }
 
 textarea {
-    height: 120px;
+    height: 110px;
     resize: vertical;
     font-family: inherit;
 }
 
 #search {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 /* ==========================================
-   4. КАСТОМНАЯ КНОПКА ЗАГРУЗКИ ФОТО
+   4. ЗАГРУЗКА ФОТО
    ========================================== */
 .file-upload-wrapper {
-    margin: 15px 0;
+    margin: 12px 0;
     width: 100%;
 }
 
@@ -135,22 +155,22 @@ textarea {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 12px 20px;
-    background-color: #1e293b;
-    color: #e2e8f0;
-    border: 1px dashed #3b82f6;
-    border-radius: 12px;
+    padding: 14px 20px;
+    background: rgba(30, 41, 59, 0.5);
+    color: #94a3b8;
+    border: 1.5px dashed rgba(99, 102, 241, 0.4);
+    border-radius: 14px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.25s ease;
+    transition: all 0.3s ease;
     width: 100%;
-    box-sizing: border-box;
 }
 
 .file-upload-button:hover {
-    background-color: #26334d;
-    border-color: #60a5fa;
+    background: rgba(99, 102, 241, 0.1);
+    border-color: #6366f1;
+    color: #e2e8f0;
 }
 
 .file-icon {
@@ -158,7 +178,7 @@ textarea {
 }
 
 /* ==========================================
-   5. ТУМБЛЕР ЗАКРЕПЛЕНИЯ (SWITCH)
+   5. ТУМБЛЕР (SWITCH)
    ========================================== */
 .pin-wrapper {
     margin: 10px 0 20px 0;
@@ -173,8 +193,9 @@ textarea {
     gap: 12px;
     cursor: pointer;
     user-select: none;
-    color: #e2e8f0;
-    font-size: 15px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .toggle-container input {
@@ -182,8 +203,8 @@ textarea {
 }
 
 .toggle-slider {
-    width: 40px;
-    height: 22px;
+    width: 44px;
+    height: 24px;
     background-color: #334155;
     border-radius: 20px;
     position: relative;
@@ -193,8 +214,8 @@ textarea {
 .toggle-slider::before {
     content: "";
     position: absolute;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background-color: #94a3b8;
     top: 3px;
@@ -203,57 +224,62 @@ textarea {
 }
 
 .toggle-container input:checked + .toggle-slider {
-    background-color: #2563eb;
+    background-color: #4f46e5;
 }
 
 .toggle-container input:checked + .toggle-slider::before {
-    transform: translateX(18px);
+    transform: translateX(20px);
     background-color: #ffffff;
 }
 
 /* ==========================================
-   6. КНОПКИ ДЕЙСТВИЙ ФОРМЫ (СОХРАНИТЬ/ОТМЕНА)
+   6. КНОПКИ ФОРМЫ
    ========================================== */
 .actions-wrapper {
     display: flex;
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
 }
 
 .btn-save {
     width: 100%;
-    padding: 12px;
-    background-color: #10b981;
+    padding: 14px;
+    background: linear-gradient(135deg, #10b981, #059669);
     color: #ffffff;
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 700;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
 }
 
 .btn-save:hover {
-    background-color: #059669;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
 }
 
 .btn-cancel {
     width: 100%;
-    padding: 10px;
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    border-radius: 12px;
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 14px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: rgba(239, 68, 68, 0.3);
 }
 
 /* ==========================================
-   7. СПИСОК ЗАПИСЕЙ И КАРТОЧКИ
+   7. КАРТОЧКИ ЗАПИСЕЙ
    ========================================== */
 #notes {
     display: flex;
@@ -266,46 +292,53 @@ textarea {
 .note-card {
     display: flex;
     flex-direction: column;
-    background-color: #1a2332;
-    border: 1px solid #2d3748;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     transition: all 0.3s ease;
     box-sizing: border-box;
 
-    /* Динамическая ширина от размера изображения */
+    /* Авто-ширина под контент и картинку */
     width: fit-content;
-    min-width: 300px;
+    min-width: 320px;
     max-width: 100%;
 }
 
-/* Выделение закреплённой карточки */
-.note-card.pinned {
-    background-color: #1e293b;
-    border: 1px solid #3b82f6;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+.note-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px);
 }
 
-/* Бейдж "📌 Закреплено" — находится внутри карточки слева-сверху */
+/* Закреплённая карточка */
+.note-card.pinned {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.5);
+    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.15);
+}
+
+/* Плашка "Закреплено" СЛЕВА-СВЕРХУ */
 .pin-badge {
-    position: static; /* Отключаем абсолютное позиционирование */
+    position: static;
     display: inline-flex;
     align-items: center;
-    align-self: flex-start; /* Выравниваем по левому краю */
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    align-self: flex-start;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
     color: #ffffff;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 12px;
     border-radius: 20px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-    width: fit-content;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(79, 70, 229, 0.4);
+    letter-spacing: 0.3px;
 }
 
 .note-title {
-    margin: 0 0 10px 0;
+    margin: 0 0 8px 0;
     font-size: 20px;
     font-weight: 700;
     color: #f8fafc;
@@ -321,13 +354,14 @@ textarea {
     word-break: break-word;
 }
 
-/* Контейнер картинки */
+/* Изображение внутри карточки */
 .note-image-container {
-    margin: 10px 0 15px 0;
-    border-radius: 12px;
+    margin: 8px 0 16px 0;
+    border-radius: 14px;
     overflow: hidden;
     display: flex;
     justify-content: center;
+    background: rgba(15, 23, 42, 0.4);
 }
 
 .note-image {
@@ -335,24 +369,24 @@ textarea {
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 500px;
-    border-radius: 12px;
+    max-height: 480px;
+    border-radius: 14px;
     object-fit: contain;
 }
 
-/* Кнопки в карточке */
+/* Кнопки карточки */
 .note-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     margin-top: auto;
-    padding-top: 15px;
-    border-top: 1px solid #2d3748;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .btn-action {
     padding: 8px 14px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -363,15 +397,36 @@ textarea {
     gap: 6px;
 }
 
+/* Кнопка Закрепить/Открепить */
 .btn-pin {
-    background-color: #2d3748;
-    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
 }
-.btn-pin:hover { background-color: #3b82f6; color: white; }
-.btn-pin.active { background-color: #2563eb; color: white; }
+.btn-pin:hover {
+    background: rgba(99, 102, 241, 0.2);
+    color: #818cf8;
+}
+.btn-pin.active {
+    background: #4f46e5;
+    color: #ffffff;
+}
 
-.btn-edit { background-color: #334155; color: #e2e8f0; }
-.btn-edit:hover { background-color: #0284c7; color: white; }
+/* Кнопка Изменить */
+.btn-edit {
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+}
+.btn-edit:hover {
+    background: rgba(14, 165, 233, 0.2);
+    color: #38bdf8;
+}
 
-.btn-delete { background-color: #334155; color: #f87171; }
-.btn-delete:hover { background-color: #dc2626; color: white; }
+/* Кнопка Удалить */
+.btn-delete {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+}
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+}
