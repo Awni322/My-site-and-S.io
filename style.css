@@ -508,3 +508,117 @@ body {
     transform: scale(1.1);
     border-color: var(--accent-color);
 }
+/* Дефолтная тема (Хакерская / Тёмно-зелёная) */
+:root {
+    --bg-color: #0b130f;
+    --card-bg: #132219;
+    --text-color: #ffffff;
+    --text-muted: #8a9a90;
+    --accent-color: #4ade80;
+    --border-color: #1f382a;
+}
+
+/* Светлая тема */
+[data-theme="light"] {
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-color: #1f2937;
+    --text-muted: #6b7280;
+    --accent-color: #16a34a;
+    --border-color: #e5e7eb;
+}
+
+/* Строгая тёмно-синяя тема */
+[data-theme="dark-blue"] {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-color: #38bdf8;
+    --border-color: #334155;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Контейнер кнопки справа сверху */
+.theme-menu-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+}
+
+/* Сама кнопка */
+.theme-toggle-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--accent-color);
+}
+
+/* Выпадающее мини-меню */
+.theme-dropdown {
+    position: absolute;
+    top: 55px;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 10px;
+    width: 180px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    display: none; /* Скрыто по умолчанию */
+    flex-direction: column;
+    gap: 8px;
+}
+
+.theme-dropdown.active {
+    display: flex;
+}
+
+/* Кнопки выбора темы с превью внутри меню */
+.theme-option {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    text-align: left;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-option:hover {
+    background: var(--border-color);
+    border-color: var(--accent-color);
+}
+
+/* Кружочки-превью цветов */
+.theme-preview-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
