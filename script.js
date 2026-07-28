@@ -460,6 +460,48 @@ function setTheme(themeName) {
         dropdown.classList.remove("active");
     }
 }
+document.addEventListener("DOMContentLoaded", () => {
+    const menuBtn = document.getElementById("themeMenuBtn");
+    const dropdown = document.getElementById("themeDropdown");
+
+    // Восстанавливаем тему при заходах с разных устройств/браузеров (через localStorage)
+    const savedTheme = localStorage.getItem("site_theme");
+    if (savedTheme) {
+        if (savedTheme === "default") {
+            document.documentElement.removeAttribute("data-theme");
+        } else {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        }
+    }
+
+    if (menuBtn && dropdown) {
+        menuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle("active");
+        });
+
+        document.addEventListener("click", () => {
+            dropdown.classList.remove("active");
+        });
+    }
+});
+
+function setTheme(themeName) {
+    const html = document.documentElement;
+    const dropdown = document.getElementById("themeDropdown");
+
+    if (themeName === "default") {
+        html.removeAttribute("data-theme");
+        localStorage.setItem("site_theme", "default");
+    } else {
+        html.setAttribute("data-theme", themeName);
+        localStorage.setItem("site_theme", themeName);
+    }
+
+    if (dropdown) {
+        dropdown.classList.remove("active");
+    }
+}
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
