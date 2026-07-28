@@ -414,6 +414,52 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+// Логика выпадающего меню и смены тем
+document.addEventListener("DOMContentLoaded", () => {
+    const menuBtn = document.getElementById("themeMenuBtn");
+    const dropdown = document.getElementById("themeDropdown");
+
+    // Восстанавливаем сохраненную тему при загрузке
+    const savedTheme = localStorage.getItem("site_theme");
+    if (savedTheme) {
+        if (savedTheme === "default") {
+            document.documentElement.removeAttribute("data-theme");
+        } else {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        }
+    }
+
+    // Открытие/закрытие меню по клику на иконку кисти
+    if (menuBtn && dropdown) {
+        menuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle("active");
+        });
+
+        // Закрытие меню при клике в любое другое место экрана
+        document.addEventListener("click", () => {
+            dropdown.classList.remove("active");
+        });
+    }
+});
+
+// Функция применения выбранной темы
+function setTheme(themeName) {
+    const html = document.documentElement;
+    const dropdown = document.getElementById("themeDropdown");
+
+    if (themeName === "default") {
+        html.removeAttribute("data-theme");
+        localStorage.setItem("site_theme", "default");
+    } else {
+        html.setAttribute("data-theme", themeName);
+        localStorage.setItem("site_theme", themeName);
+    }
+
+    if (dropdown) {
+        dropdown.classList.remove("active");
+    }
+}
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
