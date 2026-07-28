@@ -356,6 +356,42 @@ async function confirmDelete() {
 function closeModal() {
     document.getElementById("modalOverlay").classList.remove("active");
 }
+// Функция переключения тем
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute("data-theme");
+    
+    let newTheme = "";
+    if (currentTheme === "light") {
+        newTheme = "dark-blue";
+    } else if (currentTheme === "dark-blue") {
+        newTheme = ""; // Возвращаем дефолтную (зелёную)
+    } else {
+        newTheme = "light";
+    }
+
+    if (newTheme) {
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("site_theme", newTheme);
+    } else {
+        html.removeAttribute("data-theme");
+        localStorage.removeItem("site_theme");
+    }
+}
+
+// Автоматическая загрузка сохранённой темы при открытии сайта
+document.addEventListener("DOMContentLoaded", () => {
+    const savedTheme = localStorage.getItem("site_theme");
+    if (savedTheme) {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+    }
+    
+    // Здесь же уже была привязка кнопки входа, она остаётся на месте
+    const loginBtn = document.getElementById("loginBtn");
+    if (loginBtn) {
+        loginBtn.addEventListener("click", login);
+    }
+});
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
