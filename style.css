@@ -1,5 +1,38 @@
 /* ==========================================
-   1. БАЗОВЫЕ НАСТРОЙКИ И СБРОС
+   1. ПЕРЕМЕННЫЕ ТЕМ ОФОРМЛЕНИЯ
+   ========================================== */
+:root {
+    --bg-color: #0b130f;
+    --card-bg: #132219;
+    --text-color: #ffffff;
+    --text-muted: #8a9a90;
+    --accent-color: #4ade80;
+    --border-color: #1f382a;
+    --input-bg: rgba(12, 24, 16, 0.95);
+}
+
+[data-theme="light"] {
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-color: #1f2937;
+    --text-muted: #6b7280;
+    --accent-color: #16a34a;
+    --border-color: #e5e7eb;
+    --input-bg: #f9fafb;
+}
+
+[data-theme="dark-blue"] {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
+    --text-muted: #94a3b8;
+    --accent-color: #38bdf8;
+    --border-color: #334155;
+    --input-bg: #0f172a;
+}
+
+/* ==========================================
+   2. БАЗОВЫЕ НАСТРОЙКИ
    ========================================== */
 * {
     box-sizing: border-box;
@@ -9,542 +42,19 @@
 
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #050b07;
-    background-image: radial-gradient(circle at 50% 0%, #0a2012 0%, #050b07 70%);
-    background-attachment: fixed;
-    color: #e2e8f0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 30px 20px;
     min-height: 100vh;
-}
-
-/* ==========================================
-   2. АВТОРИЗАЦИЯ (LOGIN)
-   ========================================== */
-#login {
-    background: rgba(12, 24, 16, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 35px 25px 25px 25px;
-    border-radius: 18px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 0 0 15px rgba(34, 197, 94, 0.15);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    text-align: center;
-    max-width: 320px;
-    width: 100%;
-    margin-top: 80px;
-}
-
-#login h2 { color: #4ade80; font-size: 24px; font-weight: 700; margin-bottom: 22px; }
-#login input[type="password"] {
-    width: 100%; padding: 12px 15px; margin-bottom: 15px; background: #07120a;
-    border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 10px; color: #4ade80; outline: none;
-}
-#login input[type="password"]:focus { border-color: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.3); }
-#login button {
-    width: 100%; padding: 12px; background: linear-gradient(135deg, #22c55e, #15803d);
-    color: #022c22; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
-}
-#message { margin-top: 12px; font-size: 14px; }
-
-/* ==========================================
-   3. ОСНОВНОЙ КОНТЕНТ И ФОРМА
-   ========================================== */
-#content {
-    max-width: 95vw; width: 100%; display: flex; flex-direction: column; align-items: center;
-}
-
-h1 {
-    font-size: 32px; font-weight: 800; margin-bottom: 25px;
-    background: linear-gradient(135deg, #4ade80, #10b981);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    text-align: center;
-}
-
-.form-container {
-    width: 100%; max-width: 520px; background: rgba(12, 24, 16, 0.75);
-    backdrop-filter: blur(12px); border: 1px solid rgba(34, 197, 94, 0.2);
-    border-radius: 18px; padding: 24px; margin-bottom: 20px; display: flex; flex-direction: column;
-}
-
-.form-container h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: #86efac; text-align: center; }
-
-input[type="text"], textarea {
-    width: 100%; padding: 14px 18px; background: rgba(12, 24, 16, 0.7);
-    border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; color: #f0fdf4;
-    outline: none; margin-bottom: 12px; transition: all 0.3s ease;
-}
-input[type="text"]:focus, textarea:focus {
-    background: rgba(12, 24, 16, 0.95); border-color: #22c55e;
-}
-textarea { height: 110px; resize: vertical; font-family: inherit; }
-
-/* ПОИСК: уменьшенный размер и центрирование */
-#search {
-    width: 100%;
-    max-width: 520px;
-    padding: 12px 18px;
-    background: rgba(12, 24, 16, 0.7);
-    border: 1px solid rgba(34, 197, 94, 0.2);
-    border-radius: 12px;
-    color: #f0fdf4;
-    outline: none;
-    margin: 0 auto 20px auto;
-    transition: all 0.3s ease;
-}
-
-#search:focus {
-    background: rgba(12, 24, 16, 0.95);
-    border-color: #22c55e;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.2);
-}
-
-/* СТИЛИЗОВАННЫЕ РАДИОКНОПКИ КАТЕГОРИЙ */
-.radio-group {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
-    align-items: center;
-}
-
-.radio-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #bbf7d0;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    user-select: none;
-}
-
-.radio-label input[type="radio"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid rgba(34, 197, 94, 0.5);
-    border-radius: 50%;
-    outline: none;
-    background: #07120a;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.2s ease;
-}
-
-.radio-label input[type="radio"]:checked {
-    border-color: #22c55e;
-    background: #22c55e;
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
-}
-
-.radio-label input[type="radio"]:checked::after {
-    content: "";
-    position: absolute;
-    top: 5px;
-    left: 5px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #022c22;
-}
-
-/* ==========================================
-   4. ЗАГРУЗКА И ТУМБЛЕР
-   ========================================== */
-.file-upload-wrapper { margin: 4px 0 12px 0; width: 100%; }
-.file-upload-wrapper input[type="file"] { display: none; }
-.file-upload-button {
-    display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 20px;
-    background: rgba(12, 24, 16, 0.6); color: #86efac; border: 1.5px dashed rgba(34, 197, 94, 0.4);
-    border-radius: 12px; cursor: pointer; transition: all 0.3s ease; width: 100%;
-}
-.file-upload-button:hover { background: rgba(34, 197, 94, 0.15); border-color: #22c55e; }
-
-.pin-wrapper { margin: 4px 0 20px 0; display: flex; }
-.toggle-container {
-    display: inline-flex; align-items: center; gap: 12px; cursor: pointer; color: #bbf7d0; font-size: 14px;
-}
-.toggle-container input { display: none; }
-.toggle-slider {
-    width: 44px; height: 24px; background-color: #142e1b; border: 1px solid rgba(34, 197, 94, 0.3);
-    border-radius: 20px; position: relative; transition: background-color 0.3s;
-}
-.toggle-slider::before {
-    content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%;
-    background-color: #4ade80; top: 2px; left: 2px; transition: transform 0.3s, background-color 0.3s;
-}
-.toggle-container input:checked + .toggle-slider { background-color: #22c55e; }
-.toggle-container input:checked + .toggle-slider::before { transform: translateX(20px); background-color: #022c22; }
-
-/* Кнопки формы */
-.actions-wrapper { display: flex; gap: 10px; width: 100%; }
-.btn-save {
-    flex: 1; padding: 14px; background: linear-gradient(135deg, #22c55e, #16a34a);
-    color: #022c22; font-weight: 700; border: none; border-radius: 12px; cursor: pointer;
-}
-.btn-cancel {
-    padding: 14px 20px; background: rgba(239, 68, 68, 0.15); color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; cursor: pointer;
-}
-
-/* ==========================================
-   5. ФИЛЬТРЫ И СЕТКА КАРТОЧЕК
-   ========================================== */
-.category-filters { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; flex-wrap: wrap; }
-.filter-btn {
-    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(34, 197, 94, 0.3);
-    color: #94a3b8; padding: 8px 18px; border-radius: 20px; cursor: pointer; transition: all 0.2s ease;
-}
-.filter-btn:hover, .filter-btn.active { background: #22c55e; color: #052e16; border-color: #22c55e; }
-
-#notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 100%; }
-.note-card {
-    display: flex; flex-direction: column; background: rgba(12, 24, 16, 0.75);
-    border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 16px; padding: 18px; cursor: pointer;
-    transition: transform 0.3s ease, border-color 0.3s ease;
-}
-.note-card:hover { border-color: rgba(34, 197, 94, 0.5); transform: translateY(-4px); }
-.note-card.pinned { border: 1px solid #22c55e; background: rgba(14, 32, 20, 0.9); }
-
-.category-badge {
-    align-self: flex-start; font-size: 11px; background: rgba(34, 197, 94, 0.15);
-    color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); padding: 3px 8px; border-radius: 6px; margin-bottom: 8px;
-}
-.pin-badge {
-    align-self: flex-start; background: linear-gradient(135deg, #22c55e, #15803d); color: #022c22;
-    font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; margin-bottom: 8px;
-}
-.note-title { margin: 0 0 8px 0; font-size: 18px; color: #f0fdf4; word-break: break-word; }
-.note-content { color: #bbf7d0; font-size: 14px; margin-bottom: 15px; white-space: pre-wrap; word-break: break-word; }
-.note-image-container { margin: 8px 0 16px 0; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; }
-.note-image { width: 100%; height: 180px; object-fit: cover; }
-
-.note-actions { display: flex; gap: 6px; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(34, 197, 94, 0.15); }
-.btn-action { padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; }
-.btn-pin { background: rgba(34, 197, 94, 0.1); color: #86efac; }
-.btn-pin.active { background: #22c55e; color: #022c22; }
-.btn-edit { background: rgba(34, 197, 94, 0.1); color: #86efac; }
-.btn-delete { background: rgba(239, 68, 68, 0.1); color: #fca5a5; }
-
-/* ==========================================
-   6. ПЛАВНЫЕ МОДАЛЬНЫЕ ОКНА И «БОЛЬШОЙ РЕЖИМ»
-   ========================================== */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center; z-index: 1000;
-    opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.modal-overlay.active { opacity: 1; visibility: visible; }
-
-.modal-card, .confirm-card {
-    transform: scale(0.9); transition: transform 0.3s ease;
-}
-
-.modal-overlay.active .modal-card,
-.modal-overlay.active .confirm-card { transform: scale(1); }
-
-.modal-card {
-    background: rgba(18, 30, 22, 0.95); border: 1px solid rgba(34, 197, 94, 0.3);
-    border-radius: 20px; width: 90%; max-width: 850px; max-height: 85vh; position: relative; overflow: hidden;
-}
-
-.modal-close {
-    position: absolute; top: 15px; right: 15px; background: rgba(255, 255, 255, 0.1);
-    border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 10;
-}
-.modal-close:hover { background: rgba(239, 68, 68, 0.4); }
-
-.modal-body { display: flex; gap: 25px; padding: 30px; overflow-y: auto; max-height: 85vh; }
-.modal-left { flex: 1; max-width: 45%; display: flex; align-items: center; justify-content: center; }
-.modal-left img { width: 100%; height: auto; max-height: 450px; object-fit: contain; border-radius: 12px; }
-
-/* Текст и заголовок в модальном окне */
-.modal-right {
-    flex: 1.2;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
-
-#modalTitle {
-    font-size: 26px;
-    font-weight: 800;
-    color: #4ade80;
-    margin-bottom: 16px;
-    line-height: 1.3;
-    word-break: break-word;
-}
-
-#modalText {
-    font-size: 15px;
-    line-height: 1.6;
-    color: #e2e8f0;
-    background: rgba(7, 18, 10, 0.6);
-    border: 1px solid rgba(34, 197, 94, 0.15);
-    border-radius: 12px;
-    padding: 16px;
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-y: auto;
-}
-
-.confirm-card {
-    background: rgba(18, 30, 22, 0.95); border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 18px; padding: 24px; max-width: 420px; width: 100%; text-align: center;
-}
-.confirm-card h3 { color: #f8fafc; font-size: 20px; margin-bottom: 10px; }
-.confirm-card p { color: #94a3b8; font-size: 14px; margin-bottom: 20px; }
-.confirm-actions { display: flex; gap: 12px; }
-.btn-delete-confirm {
-    flex: 1; padding: 11px; background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: #ffffff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
-}
-/* Кнопка скопировать на карточке */
-.btn-copy {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-}
-.btn-copy:hover {
-    background: rgba(59, 130, 246, 0.3);
-}
-
-/* Ссылка на Roblox Place в модальном окне */
-.roblox-link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 14px;
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #00a2ff, #0066ff);
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
-}
-
-.roblox-link-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
-}
-/* Кнопка скопировать на карточке */
-.btn-copy {
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-}
-.btn-copy:hover {
-    background: rgba(59, 130, 246, 0.3);
-}
-
-/* Ссылка на Roblox Place в модальном окне */
-.roblox-link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 14px;
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #00a2ff, #0066ff);
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
-}
-
-.roblox-link-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
-}
-/* Кнопка скопировать в модальном окне просмотрщика */
-.btn-modal-copy {
-    margin-top: 15px;
-    padding: 12px 18px;
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.3);
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-modal-copy:hover {
-    background: rgba(34, 197, 94, 0.3);
-    border-color: #22c55e;
-    transform: translateY(-1px);
-}
-
-/* Кнопка ссылки на Roblox */
-.roblox-link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 14px;
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #00a2ff, #0066ff);
-    color: #ffffff;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-    border-radius: 10px;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
-}
-
-.roblox-link-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
-}
-/* Основные переменные по умолчанию (тёмно-зелёная / хакерская) */
-:root {
-    --bg-color: #0b130f;
-    --card-bg: #132219;
-    --text-color: #ffffff;
-    --text-muted: #8a9a90;
-    --accent-color: #4ade80;
-    --border-color: #1f382a;
-}
-
-/* Светлая тема */
-[data-theme="light"] {
-    --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
-    --text-color: #1f2937;
-    --text-muted: #6b7280;
-    --accent-color: #16a34a;
-    --border-color: #e5e7eb;
-}
-
-/* Строгая тёмная (серо-синяя) тема */
-[data-theme="dark-blue"] {
-    --bg-color: #0f172a;
-    --card-bg: #1e293b;
-    --text-color: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-color: #38bdf8;
-    --border-color: #334155;
-}
-
-/* Применяем переменные к телу страницы */
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.3s, color 0.3s;
-}
-/* Основные цвета (Хакерская / Тёмно-зелёная по умолчанию) */
-:root {
-    --bg-color: #0b130f;
-    --card-bg: #132219;
-    --text-color: #ffffff;
-    --text-muted: #8a9a90;
-    --accent-color: #4ade80;
-    --border-color: #1f382a;
-}
-
-/* Светлая тема */
-[data-theme="light"] {
-    --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
-    --text-color: #1f2937;
-    --text-muted: #6b7280;
-    --accent-color: #16a34a;
-    --border-color: #e5e7eb;
-}
-
-/* Строгая тёмно-синяя тема */
-[data-theme="dark-blue"] {
-    --bg-color: #0f172a;
-    --card-bg: #1e293b;
-    --text-color: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-color: #38bdf8;
-    --border-color: #334155;
-}
-
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Кнопка смены темы — стильная, круглая, справа сверху */
-.theme-toggle-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.theme-toggle-btn:hover {
-    transform: scale(1.1);
-    border-color: var(--accent-color);
-}
-/* Дефолтная тема (Хакерская / Тёмно-зелёная) */
-:root {
-    --bg-color: #0b130f;
-    --card-bg: #132219;
-    --text-color: #ffffff;
-    --text-muted: #8a9a90;
-    --accent-color: #4ade80;
-    --border-color: #1f382a;
-}
-
-/* Светлая тема */
-[data-theme="light"] {
-    --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
-    --text-color: #1f2937;
-    --text-muted: #6b7280;
-    --accent-color: #16a34a;
-    --border-color: #e5e7eb;
-}
-
-/* Строгая тёмно-синяя тема */
-[data-theme="dark-blue"] {
-    --bg-color: #0f172a;
-    --card-bg: #1e293b;
-    --text-color: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent-color: #38bdf8;
-    --border-color: #334155;
-}
-
-body {
-    background-color: var(--bg-color) !important;
-    color: var(--text-color) !important;
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-/* Контейнер кнопки справа сверху */
+/* ==========================================
+   3. КНОПКА И МЕНЮ СМЕНЫ ТЕМЫ
+   ========================================== */
 .theme-menu-container {
     position: fixed;
     top: 20px;
@@ -552,7 +62,6 @@ body {
     z-index: 2000;
 }
 
-/* Сама кнопка */
 .theme-toggle-btn {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
@@ -574,7 +83,6 @@ body {
     border-color: var(--accent-color);
 }
 
-/* Выпадающее мини-меню */
 .theme-dropdown {
     position: absolute;
     top: 55px;
@@ -585,7 +93,7 @@ body {
     padding: 10px;
     width: 180px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    display: none; /* Скрыто по умолчанию */
+    display: none;
     flex-direction: column;
     gap: 8px;
 }
@@ -594,7 +102,6 @@ body {
     display: flex;
 }
 
-/* Кнопки выбора темы с превью внутри меню */
 .theme-option {
     background: transparent;
     border: 1px solid transparent;
@@ -615,137 +122,224 @@ body {
     border-color: var(--accent-color);
 }
 
-/* Кружочки-превью цветов */
 .theme-preview-dot {
     width: 16px;
     height: 16px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
-/* --- ТЕМЫ ОФОРМЛЕНИЯ --- */
 
-/* 1. Хакерская (Тёмно-зелёная по умолчанию) */
-:root {
-    --bg: #0d1117;
-    --card-bg: #161b22;
-    --text: #e6edf3;
-    --text-muted: #8b949e;
-    --accent: #238636;
-    --border: #30363d;
-}
-
-/* 2. Светлая (Минималистичная) */
-[data-theme="light"] {
-    --bg: #ffffff;
-    --card-bg: #f6f8fa;
-    --text: #24292f;
-    --text-muted: #57606a;
-    --accent: #0969da;
-    --border: #d0d7de;
-}
-
-/* 3. Тёмно-синяя (Строгая) */
-[data-theme="dark-blue"] {
-    --bg: #0f172a;
-    --card-bg: #1e293b;
-    --text: #f8fafc;
-    --text-muted: #94a3b8;
-    --accent: #38bdf8;
-    --border: #334155;
-}
-
-/* --- ГЛОБАЛЬНЫЕ СТИЛИ САЙТА --- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background-color: var(--bg) !important;
-    color: var(--text) !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    min-height: 100vh;
-}
-
-/* Все карточки, блоки и контейнеры привязываем к переменным */
-.card, .note-card, .modal-content, input, textarea, select {
-    background-color: var(--card-bg) !important;
-    color: var(--text) !important;
-    border-color: var(--border) !important;
-}
-
-/* --- КНОПКА И МЕНЮ ТЕМЫ СХОДЯТ ВПРАВО ВВЕРХ --- */
-.theme-menu-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-}
-
-.theme-toggle-btn {
+/* ==========================================
+   4. АВТОРИЗАЦИЯ (LOGIN)
+   ========================================== */
+#login {
     background: var(--card-bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: border-color 0.2s;
+    padding: 35px 25px 25px 25px;
+    border-radius: 18px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    text-align: center;
+    max-width: 320px;
+    width: 100%;
+    margin-top: 80px;
 }
 
-.theme-toggle-btn:hover {
-    border-color: var(--accent);
+#login h2 { color: var(--accent-color); font-size: 24px; font-weight: 700; margin-bottom: 22px; }
+#login input[type="password"] {
+    width: 100%; padding: 12px 15px; margin-bottom: 15px; background: var(--input-bg);
+    border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-color); outline: none;
+}
+#login input[type="password"]:focus { border-color: var(--accent-color); }
+#login button {
+    width: 100%; padding: 12px; background: var(--accent-color);
+    color: var(--bg-color); border: none; border-radius: 10px; font-weight: 700; cursor: pointer;
+}
+#message { margin-top: 12px; font-size: 14px; }
+
+/* ==========================================
+   5. ОСНОВНОЙ КОНТЕНТ И ФОРМА
+   ========================================== */
+#content {
+    max-width: 95vw; width: 100%; display: flex; flex-direction: column; align-items: center;
 }
 
-/* Минималистичное выпадающее меню предпросмотра */
-.theme-dropdown {
-    position: absolute;
-    top: 48px;
-    right: 0;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px;
-    width: 160px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    display: none;
-    flex-direction: column;
-    gap: 4px;
+h1 {
+    font-size: 32px; font-weight: 800; margin-bottom: 25px;
+    color: var(--accent-color);
+    text-align: center;
 }
 
-.theme-dropdown.active {
-    display: flex;
+.form-container {
+    width: 100%; max-width: 520px; background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 18px; padding: 24px; margin-bottom: 20px; display: flex; flex-direction: column;
 }
 
-.theme-option {
-    background: transparent;
-    border: none;
-    color: var(--text);
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    text-align: left;
-    transition: background 0.15s;
+.form-container h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; color: var(--accent-color); text-align: center; }
+
+input[type="text"], textarea {
+    width: 100%; padding: 14px 18px; background: var(--input-bg);
+    border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color);
+    outline: none; margin-bottom: 12px; transition: all 0.3s ease;
+}
+input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent-color);
+}
+textarea { height: 110px; resize: vertical; font-family: inherit; }
+
+#search {
+    width: 100%;
+    max-width: 520px;
+    padding: 12px 18px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-color);
+    outline: none;
+    margin: 0 auto 20px auto;
+}
+#search:focus { border-color: var(--accent-color); }
+
+.radio-group { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; }
+.radio-label { display: flex; align-items: center; gap: 8px; color: var(--text-color); cursor: pointer; font-size: 14px; font-weight: 500; }
+.radio-label input[type="radio"] {
+    appearance: none; width: 18px; height: 18px; border: 1.5px solid var(--border-color);
+    border-radius: 50%; outline: none; background: var(--input-bg); cursor: pointer; position: relative;
+}
+.radio-label input[type="radio"]:checked { border-color: var(--accent-color); background: var(--accent-color); }
+
+/* ==========================================
+   6. ЗАГРУЗКА И ТУМБЛЕР
+   ========================================== */
+.file-upload-wrapper { margin: 4px 0 12px 0; width: 100%; }
+.file-upload-wrapper input[type="file"] { display: none; }
+.file-upload-button {
+    display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 20px;
+    background: var(--input-bg); color: var(--text-color); border: 1.5px dashed var(--border-color);
+    border-radius: 12px; cursor: pointer; transition: all 0.3s ease; width: 100%;
+}
+.file-upload-button:hover { border-color: var(--accent-color); }
+
+.pin-wrapper { margin: 4px 0 20px 0; display: flex; }
+.toggle-container { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; color: var(--text-color); font-size: 14px; }
+.toggle-container input { display: none; }
+.toggle-slider {
+    width: 44px; height: 24px; background-color: var(--border-color);
+    border-radius: 20px; position: relative; transition: background-color 0.3s;
+}
+.toggle-slider::before {
+    content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+    background-color: var(--accent-color); top: 3px; left: 3px; transition: transform 0.3s;
+}
+.toggle-container input:checked + .toggle-slider { background-color: var(--accent-color); }
+.toggle-container input:checked + .toggle-slider::before { transform: translateX(20px); background-color: var(--bg-color); }
+
+.actions-wrapper { display: flex; gap: 10px; width: 100%; }
+.btn-save {
+    flex: 1; padding: 14px; background: var(--accent-color);
+    color: var(--bg-color); font-weight: 700; border: none; border-radius: 12px; cursor: pointer;
+}
+.btn-cancel {
+    padding: 14px 20px; background: rgba(239, 68, 68, 0.15); color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; cursor: pointer;
 }
 
-.theme-option:hover {
-    background: var(--border);
+/* ==========================================
+   7. КАРТОЧКИ И ФИЛЬТРЫ
+   ========================================== */
+.category-filters { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; flex-wrap: wrap; }
+.filter-btn {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    color: var(--text-muted); padding: 8px 18px; border-radius: 20px; cursor: pointer; transition: all 0.2s ease;
+}
+.filter-btn:hover, .filter-btn.active { background: var(--accent-color); color: var(--bg-color); border-color: var(--accent-color); }
+
+#notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 100%; }
+.note-card {
+    display: flex; flex-direction: column; background: var(--card-bg);
+    border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; cursor: pointer;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.note-card:hover { border-color: var(--accent-color); transform: translateY(-4px); }
+.note-card.pinned { border: 1px solid var(--accent-color); }
+
+.category-badge {
+    align-self: flex-start; font-size: 11px; background: var(--input-bg);
+    color: var(--accent-color); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 6px; margin-bottom: 8px;
+}
+.pin-badge {
+    align-self: flex-start; background: var(--accent-color); color: var(--bg-color);
+    font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; margin-bottom: 8px;
+}
+.note-title { margin: 0 0 8px 0; font-size: 18px; color: var(--text-color); word-break: break-word; }
+.note-content { color: var(--text-muted); font-size: 14px; margin-bottom: 15px; white-space: pre-wrap; word-break: break-word; }
+.note-image-container { margin: 8px 0 16px 0; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; }
+.note-image { width: 100%; height: 180px; object-fit: cover; }
+
+.note-actions { display: flex; gap: 6px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); }
+.btn-action { padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; }
+.btn-pin { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+.btn-pin.active { background: var(--accent-color); color: var(--bg-color); }
+.btn-edit { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+.btn-delete { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+.btn-copy { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+/* ==========================================
+   8. МОДАЛЬНЫЕ ОКНА
+   ========================================== */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center; z-index: 3000;
+    opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal-card, .confirm-card { transform: scale(0.9); transition: transform 0.3s ease; }
+.modal-overlay.active .modal-card, .modal-overlay.active .confirm-card { transform: scale(1); }
+
+.modal-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: 20px; width: 90%; max-width: 850px; max-height: 85vh; position: relative; overflow: hidden;
 }
 
-.theme-preview-box {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    border: 1px solid rgba(128,128,128,0.4);
+.modal-close {
+    position: absolute; top: 15px; right: 15px; background: var(--input-bg);
+    border: 1px solid var(--border-color); color: var(--text-color); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 10;
 }
+.modal-close:hover { background: rgba(239, 68, 68, 0.4); }
+
+.modal-body { display: flex; gap: 25px; padding: 30px; overflow-y: auto; max-height: 85vh; }
+.modal-left { flex: 1; max-width: 45%; display: flex; align-items: center; justify-content: center; }
+.modal-left img { width: 100%; height: auto; max-height: 450px; object-fit: contain; border-radius: 12px; }
+
+.modal-right { flex: 1.2; display: flex; flex-direction: column; justify-content: flex-start; }
+#modalTitle { font-size: 26px; font-weight: 800; color: var(--accent-color); margin-bottom: 16px; word-break: break-word; }
+#modalText {
+    font-size: 15px; line-height: 1.6; color: var(--text-color); background: var(--input-bg);
+    border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; white-space: pre-wrap; word-break: break-word; overflow-y: auto;
+}
+
+.confirm-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: 18px; padding: 24px; max-width: 420px; width: 100%; text-align: center;
+}
+.confirm-card h3 { color: var(--text-color); font-size: 20px; margin-bottom: 10px; }
+.confirm-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
+.confirm-actions { display: flex; gap: 12px; }
+.btn-delete-confirm {
+    flex: 1; padding: 11px; background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
+}
+
+.roblox-link-btn {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 10px 16px;
+    background: linear-gradient(135deg, #00a2ff, #0066ff); color: #ffffff; text-decoration: none;
+    font-size: 13px; font-weight: 700; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 102, 255, 0.25);
+}
+.btn-modal-copy {
+    margin-top: 15px; padding: 12px 18px; background: var(--input-bg);
+    color: var(--accent-color); border: 1px solid var(--border-color); border-radius: 12px;
+    font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-modal-copy:hover { border-color: var(--accent-color); }
