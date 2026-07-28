@@ -6,7 +6,24 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
+<div class="theme-menu-container">
+    <button class="theme-toggle-btn" id="themeMenuBtn" title="Выбрать тему">🎨</button>
+    
+    <div class="theme-dropdown" id="themeDropdown">
+        <button class="theme-option" onclick="setTheme('default')">
+            <span class="theme-preview-dot" style="background: #0b130f;"></span>
+            Хакерская
+        </button>
+        <button class="theme-option" onclick="setTheme('light')">
+            <span class="theme-preview-dot" style="background: #f0f2f5;"></span>
+            Светлая
+        </button>
+        <button class="theme-option" onclick="setTheme('dark-blue')">
+            <span class="theme-preview-dot" style="background: #0f172a;"></span>
+            Тёмно-синяя
+        </button>
+    </div>
+</div>
     <!-- ЭКРАН ВХОДА (Все элементы формы должны быть СТРОГО вне этого блока) -->
     <div id="login">
         <h2>Вход</h2>
