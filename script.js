@@ -379,49 +379,41 @@ function toggleTheme() {
     }
 }
 
-// Автоматическая загрузка сохранённой темы при открытии сайта
+// Надежная логика темы с автоприменением
 document.addEventListener("DOMContentLoaded", () => {
-    const savedTheme = localStorage.getItem("site_theme");
-    if (savedTheme) {
-        document.documentElement.setAttribute("data-theme", savedTheme);
-    }
+    const themeBtn = document.getElementById("themeToggleBtn");
     
-    // Здесь же уже была привязка кнопки входа, она остаётся на месте
-    const loginBtn = document.getElementById("loginBtn");
-    if (loginBtn) {
-        loginBtn.addEventListener("click", login);
-    }
-});
-// Функция переключения темы
-function toggleTheme() {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute("data-theme");
-    
-    let newTheme = "";
-    if (!currentTheme || currentTheme === "default") {
-        newTheme = "light";
-    } else if (currentTheme === "light") {
-        newTheme = "dark-blue";
-    } else {
-        newTheme = "default";
-    }
-
-    if (newTheme === "default") {
-        html.removeAttribute("data-theme");
-        localStorage.setItem("site_theme", "default");
-    } else {
-        html.setAttribute("data-theme", newTheme);
-        localStorage.setItem("site_theme", newTheme);
-    }
-}
-
-// Автоприменение сохраненной темы при загрузке страницы (для каждого устройства/браузера индивидуально)
-(function() {
+    // Восстанавливаем тему при загрузке
     const savedTheme = localStorage.getItem("site_theme");
     if (savedTheme && savedTheme !== "default") {
         document.documentElement.setAttribute("data-theme", savedTheme);
     }
-})();
+
+    // Вешаем обработчик клика прямо через скрипт
+    if (themeBtn) {
+        themeBtn.addEventListener("click", () => {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute("data-theme");
+            
+            let newTheme = "";
+            if (!currentTheme || currentTheme === "default") {
+                newTheme = "light";
+            } else if (currentTheme === "light") {
+                newTheme = "dark-blue";
+            } else {
+                newTheme = "default";
+            }
+
+            if (newTheme === "default") {
+                html.removeAttribute("data-theme");
+                localStorage.setItem("site_theme", "default");
+            } else {
+                html.setAttribute("data-theme", newTheme);
+                localStorage.setItem("site_theme", newTheme);
+            }
+        });
+    }
+});
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
