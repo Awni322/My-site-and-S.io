@@ -48,8 +48,8 @@ body, input, textarea, button {
     --glass-blur: blur(14px);
 }
 
-/* ==========================================
-   2. БАЗОВЫЕ НАСТРОЙКИ И ФОН НА ВСЕХ ЭКРАН
+//* ==========================================
+   2. БАЗОВЫЕ НАСТРОЙКИ И ЖИВОЙ ФОН
    ========================================== */
 * {
     box-sizing: border-box;
@@ -57,10 +57,23 @@ body, input, textarea, button {
     padding: 0;
 }
 
+/* Фиксированный фоновый слой на весь экран с плавной анимацией */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -999;
+    background: linear-gradient(-45deg, var(--bg-color), var(--accent-color), #0f172a, var(--bg-color));
+    background-size: 400% 400%;
+    animation: fullBackgroundShift 15s ease infinite;
+    pointer-events: none;
+}
+
 body {
-    background: linear-gradient(-45deg, var(--bg-color), var(--accent-color), #0f172a, var(--bg-color)) !important;
-    background-size: 400% 400% !important;
-    animation: fullBackgroundShift 18s ease infinite !important;
+    background-color: var(--bg-color) !important; /* Базовый цвет на случай загрузки */
     color: var(--text-color);
     display: flex;
     flex-direction: column;
@@ -72,13 +85,12 @@ body {
     overflow-x: hidden;
 }
 
-/* Полностью убираем старые круги по краям */
-body::before,
+/* Убираем старый дубль body::after */
 body::after {
     display: none !important;
 }
 
-/* Плавное переливание градиента на весь экран */
+/* Плавное переливание градиента */
 @keyframes fullBackgroundShift {
     0% {
         background-position: 0% 50%;
@@ -90,7 +102,6 @@ body::after {
         background-position: 0% 50%;
     }
 }
-
 /* ==========================================
    3. КНОПКА И МЕНЮ СМЕНЫ ТЕМЫ
    ========================================== */
