@@ -1,5 +1,4 @@
 const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
-const WORKER_TOKEN = "7c40c0a27808af0b8228be8dc2c7bdbe992f042b0f8cffde0b0629db76244185";
 
 let currentImageBase64 = null;
 let currentNotesList = []; 
@@ -17,13 +16,13 @@ async function login() {
     message.style.color = "#ffffff";
 
     try {
-        let response = await fetch(WORKER_URL, {
+        let response = await fetch(WORKER_URL + "login", {
             method: "POST",
             headers: { 
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${WORKER_TOKEN}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ password: password })
+            body: JSON.stringify({ password: password }),
+            credentials: "include"
         });
 
         if (response.ok) {
@@ -132,10 +131,10 @@ async function saveNote() {
         let response = await fetch(WORKER_URL, {
             method: "POST",
             headers: { 
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${WORKER_TOKEN}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            credentials: "include"
         });
 
         if (response.ok) {
@@ -154,9 +153,7 @@ async function loadNotes() {
     try {
         let response = await fetch(WORKER_URL, {
             method: "GET",
-            headers: {
-                "Authorization": `Bearer ${WORKER_TOKEN}`
-            }
+            credentials: "include"
         });
         currentNotesList = await response.json();
         applyFiltersAndRender();
@@ -350,10 +347,10 @@ async function togglePin(id, status) {
     await fetch(WORKER_URL, {
         method: "POST",
         headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${WORKER_TOKEN}`
+            "Content-Type": "application/json"
         },
-        body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status })
+        body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status }),
+        credentials: "include"
     });
     loadNotes();
 }
@@ -382,10 +379,10 @@ async function confirmDelete() {
         await fetch(WORKER_URL, {
             method: "POST",
             headers: { 
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${WORKER_TOKEN}`
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ action: "delete", id: noteIdToDelete })
+            body: JSON.stringify({ action: "delete", id: noteIdToDelete }),
+            credentials: "include"
         });
         closeConfirmModal();
         loadNotes();
