@@ -78,27 +78,21 @@ body::before {
     width: 200vw;
     height: 200vh;
     z-index: -999;
-    /* Крупный мягкий двухцветный градиент из темы */
-    background: radial-gradient(circle, var(--accent-color) 0%, var(--bg-color) 70%);
-    opacity: 0.35; /* Делаем эффект заметным */
-    filter: blur(80px); /* Полностью убивает любые полосы и ступени */
-    animation: vibrantShift 10s ease-in-out infinite alternate;
+    background: radial-gradient(circle, var(--accent-color) 0%, var(--bg-color) 80%);
+    opacity: 0.15; /* Снизили яркость до 15% — теперь фон вообще не слепит */
+    filter: blur(120px); /* Максимальное размытие, убирающее любые намеки на артефакты */
+    animation: vibrantShift 20s ease-in-out infinite alternate;
     pointer-events: none;
 }
 
-/* Динамичное изменение масштаба и вращение оттенков для заметного перелива */
 @keyframes vibrantShift {
     0% {
         transform: translate(0, 0) scale(1);
-        filter: blur(80px) hue-rotate(0deg);
-    }
-    50% {
-        transform: translate(50px, 30px) scale(1.15);
-        filter: blur(90px) hue-rotate(45deg);
+        filter: blur(120px) hue-rotate(0deg);
     }
     100% {
-        transform: translate(-30px, 50px) scale(1);
-        filter: blur(80px) hue-rotate(-45deg);
+        transform: translate(30px, 30px) scale(1.08);
+        filter: blur(130px) hue-rotate(20deg); /* Минимальный поворот цвета для еле заметной динамики */
     }
 }
 body::after {
@@ -487,10 +481,10 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
     transform: translateY(-2px);
 }
-/* Пример класса для главного заголовка */
-.gradient-text {
-    background: linear-gradient(135deg, #10b981, #3b82f6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+/* Идеальный градиентный заголовок, привязанный к вашим темам */
+.gradient-text, h1 {
+    background: linear-gradient(135deg, var(--accent-color), var(--text-color)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
     display: inline-block;
 }
