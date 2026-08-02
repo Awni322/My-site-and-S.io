@@ -481,4 +481,44 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
     transform: translateY(-2px);
 }
+/* Контейнер для всплывающих уведомлений */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: -350px; /* Изначально спрятан за правым экраном */
+    background: var(--card-bg, #1e293b);
+    color: var(--text-color, #ffffff);
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 320px;
+}
 
+/* Класс для плавного появления */
+.toast-notification.show {
+    right: 20px;
+}
+
+/* Кнопка закрытия крестиком */
+.toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-color, #ffffff);
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 0;
+}
+
+.toast-close:hover {
+    opacity: 1;
+}
