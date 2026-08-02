@@ -443,6 +443,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (loginContainer) loginContainer.style.display = "none";
             if (contentContainer) contentContainer.style.display = "flex";
             applyFiltersAndRender();
+            
+            // 👉 ВОТ ЗДЕСЬ ТЕПЕРЬ ВЫЗЫВАЕТСЯ УВЕДОМЛЕНИЕ ПРИ АВТОМАТИЧЕСКОМ ВХОДЕ
+            showAutoLoginToast();
         } else {
             if (loginContainer) loginContainer.style.display = "block";
             if (contentContainer) contentContainer.style.display = "none";
@@ -453,8 +456,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (contentContainer) contentContainer.style.display = "none";
     }
 });
+
+// Функции для всплывающего уведомления
 function showAutoLoginToast() {
-    // Создаем элемент уведомления, если его еще нет
     let toast = document.getElementById("autoLoginToast");
     if (!toast) {
         toast = document.createElement("div");
@@ -467,12 +471,10 @@ function showAutoLoginToast() {
         document.body.appendChild(toast);
     }
 
-    // Плавно показываем
     setTimeout(() => {
         toast.classList.add("show");
     }, 100);
 
-    // Автоматическое закрытие через 6 секунд
     window.toastTimer = setTimeout(() => {
         closeToast();
     }, 6000);
@@ -485,6 +487,7 @@ function closeToast() {
         clearTimeout(window.toastTimer);
     }
 }
+
 // Экспорт функций в глобальную область видимости
 window.login = login;
 window.saveNote = saveNote;
@@ -501,3 +504,4 @@ window.closeConfirmModal = closeConfirmModal;
 window.copyToClipboard = copyToClipboard;
 window.copyModalContent = copyModalContent;
 window.setTheme = setTheme;
+window.closeToast = closeToast;
