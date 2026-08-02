@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Применяем новый шрифт ко всему интерфейсу */
+body, input, textarea, button {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+
 /* ==========================================
    1. ПЕРЕМЕННЫЕ ТЕМ ОФОРМЛЕНИЯ
    ========================================== */
@@ -369,10 +377,4 @@ body::after {
     bottom: -100px;
     right: -100px;
     background: #10b981;
-}
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-/* Применяем новый шрифт ко всему интерфейсу */
-body, input, textarea, button {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
