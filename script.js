@@ -219,6 +219,9 @@ function renderNotes(notes) {
         const isPinned = note.is_pinned === 1 || note.is_pinned === true;
         const categoryName = note.category || "Заметки";
 
+        // Безопасно экранируем содержимое для HTML и JS-атрибутов
+        const safeContentForClick = JSON.stringify(note.content);
+
         output += `
         <div class="note-card ${isPinned ? 'pinned' : ''}" onclick="openNoteModal(${note.id})">
             ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
@@ -235,7 +238,7 @@ function renderNotes(notes) {
             ` : ""}
 
             <div class="note-actions">
-                <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyToClipboard(\`${note.content.replace(/`/g, '\\`').replace(/\\/g, '\\\\')}\`, this)">
+                <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyToClipboard(${safeContentForClick.replace(/"/g, '&quot;')}, this)">
                     📋 Копировать
                 </button>
                 <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="event.stopPropagation(); togglePin(${note.id}, ${!isPinned})">
