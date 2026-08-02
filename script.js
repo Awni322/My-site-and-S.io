@@ -48,6 +48,16 @@ document.addEventListener("DOMContentLoaded", () => {
         loginBtn.addEventListener("click", login);
     }
 
+    // Поддержка нажатия Enter в поле ввода пароля
+    const passwordInput = document.getElementById("password");
+    if (passwordInput) {
+        passwordInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                login();
+            }
+        });
+    }
+
     // Восстановление темы
     const savedTheme = localStorage.getItem("site_theme");
     if (savedTheme) {
@@ -155,8 +165,10 @@ async function loadNotes() {
             method: "GET",
             credentials: "include"
         });
-        currentNotesList = await response.json();
-        applyFiltersAndRender();
+        if (response.ok) {
+            currentNotesList = await response.json();
+            applyFiltersAndRender();
+        }
     } catch (err) {
         console.error("Ошибка загрузки:", err);
     }
@@ -219,7 +231,6 @@ function renderNotes(notes) {
         const isPinned = note.is_pinned === 1 || note.is_pinned === true;
         const categoryName = note.category || "Заметки";
 
-        // Безопасно экранируем содержимое для HTML и JS-атрибутов
         const safeContentForClick = JSON.stringify(note.content);
 
         output += `
@@ -277,7 +288,7 @@ function openNoteModal(id) {
         let url = note.roblox_url.startsWith("http") ? note.roblox_url : "https://" + note.roblox_url;
         robloxContainer.innerHTML = `
             <a href="${url}" target="_blank" class="roblox-link-btn">
-               📎 Открыть ссылку  
+                📎 Открыть ссылку  
             </a>
         `;
     } else {
@@ -415,30 +426,34 @@ function setTheme(themeName) {
         dropdown.classList.remove("active");
     }
 }
-document.addEventListener('DOMContentLoaded', async () => {
-    const loginContainer = document.getElementById('login');
-    const contentContainer = document.getElementById('content');
+
+// Автоматическая проверка сессии (входа без пароля) при загрузке страницы
+document.addEventListener("DOMContentLoaded", async () => {
+    const loginContainer = document.getElementById("login");
+    const contentContainer = document.getElementById("content");
 
     try {
-        // Делаем запрос к воркеру на проверку сессии
-        const response = await fetch('/api/check-session', {
-            method: 'GET',
-            credentials: 'include' // Важно для отправки кук, если сессия в HttpOnly куке
+        let response = await fetch(WORKER_URL, {
+            method: "GET",
+            credentials: "include"
         });
 
         if (response.ok) {
-            // Если воркер подтвердил сессию — сразу пускаем на сайт
-            if (loginContainer) loginContainer.style.display = 'none';
-            if (contentContainer) contentContainer.style.display = 'flex';
+            currentNotesList = await response.json();
+            if (loginContainer) loginContainer.style.display = "none";
+            if (contentContainer) contentContainer.style.display = "flex";
+            applyFiltersAndRender();
         } else {
-            // Если сессии нет — показываем форму входа
-            if (loginContainer) loginContainer.style.display = 'block';
-            if (contentContainer) contentContainer.style.display = 'none';
+            if (loginContainer) loginContainer.style.display = "block";
+            if (contentContainer) contentContainer.style.display = "none";
         }
     } catch (error) {
-        console.error('Ошибка проверки сессии:', error);
+        console.error("Ошибка при проверке сессии:", error);
+        if (loginContainer) loginContainer.style.display = "block";
+        if (contentContainer) contentContainer.style.display = "none";
     }
 });
+
 // Экспорт функций в глобальную область видимости
 window.login = login;
 window.saveNote = saveNote;
