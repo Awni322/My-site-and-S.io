@@ -415,7 +415,46 @@ function setTheme(themeName) {
         dropdown.classList.remove("active");
     }
 }
+document.addEventListener('DOMContentLoaded', () => {
+    const loginContainer = document.getElementById('login');
+    const contentContainer = document.getElementById('content'); // Контейнер с основным сайтом
+    const passwordInput = document.getElementById('passwordInput'); // Укажите ваш ID инпута пароля
+    const loginBtn = document.getElementById('loginBtn'); // Укажите ваш ID кнопки входа
+    const message = document.getElementById('message');
 
+    // Функция проверки авторизации при старте
+    function checkAuth() {
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            if (loginContainer) loginContainer.style.display = 'none';
+            if (contentContainer) contentContainer.style.display = 'flex'; // или 'block' в зависимости от вашего верстки
+        } else {
+            if (loginContainer) loginContainer.style.display = 'block';
+            if (contentContainer) contentContainer.style.display = 'none';
+        }
+    }
+
+    // Запускаем проверку сразу при загрузке
+    checkAuth();
+
+    // Обработка клика по кнопке входа (или отправки формы)
+    if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const enteredPassword = passwordInput.value;
+
+            // Здесь ваш правильный пароль (или сверка, которая у вас уже используется)
+            const correctPassword = 'ваш_пароль'; 
+
+            if (enteredPassword === correctPassword) {
+                // Сохраняем флаг, что пользователь залогинен
+                localStorage.setItem('isLoggedIn', 'true');
+                checkAuth();
+            } else {
+                if (message) message.textContent = 'Неверный пароль!';
+            }
+        });
+    }
+});
 // Экспорт функций в глобальную область видимости
 window.login = login;
 window.saveNote = saveNote;
