@@ -522,3 +522,32 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .toast-close:hover {
     opacity: 1;
 }
+/* Исправление обводки и внешнего вида кнопки закрытия */
+.toast-close {
+    background: transparent;
+    border: none;
+    outline: none; /* Убирает стандартную рамку фокуса браузера */
+    box-shadow: none; /* Убирает тени, если они наследовались */
+    color: var(--text-color, #ffffff);
+    font-size: 16px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-close:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.05); /* Легкий аккуратный фон при наведении вместо кривой обводки */
+    border-radius: 6px;
+}
+
+.toast-close:focus, 
+.toast-close:active {
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
