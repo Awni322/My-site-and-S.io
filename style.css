@@ -343,3 +343,30 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .btn-modal-copy:hover { border-color: var(--accent-color); }
+/* Фоновые неоновые переливы */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(120px);
+    opacity: 0.15; /* Мягкое свечение, не мешает читаемости */
+    pointer-events: none;
+}
+
+/* Левый верхний угол */
+body::before {
+    top: -100px;
+    left: -100px;
+    background: #22c55e;
+}
+
+/* Правый нижний угол */
+body::after {
+    bottom: -100px;
+    right: -100px;
+    background: #10b981;
+}
