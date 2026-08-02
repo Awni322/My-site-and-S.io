@@ -453,7 +453,38 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (contentContainer) contentContainer.style.display = "none";
     }
 });
+function showAutoLoginToast() {
+    // Создаем элемент уведомления, если его еще нет
+    let toast = document.getElementById("autoLoginToast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "autoLoginToast";
+        toast.className = "toast-notification";
+        toast.innerHTML = `
+            <span>💡 Так как вы уже вводили пароль, ещё раз вводить его не нужно</span>
+            <button class="toast-close" onclick="closeToast()">✕</button>
+        `;
+        document.body.appendChild(toast);
+    }
 
+    // Плавно показываем
+    setTimeout(() => {
+        toast.classList.add("show");
+    }, 100);
+
+    // Автоматическое закрытие через 6 секунд
+    window.toastTimer = setTimeout(() => {
+        closeToast();
+    }, 6000);
+}
+
+function closeToast() {
+    const toast = document.getElementById("autoLoginToast");
+    if (toast) {
+        toast.classList.remove("show");
+        clearTimeout(window.toastTimer);
+    }
+}
 // Экспорт функций в глобальную область видимости
 window.login = login;
 window.saveNote = saveNote;
