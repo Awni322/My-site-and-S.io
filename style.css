@@ -495,3 +495,66 @@ body::after {
         transform: translate(-50px, 90px) scale(0.95);
     }
 }
+/* ==========================================
+   ДИНАМИЧЕСКИЙ ГРАДИЕНТНЫЙ ПЕРЕЛИВАЮЩИЙСЯ ФОН
+   ========================================== */
+
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(120px);
+    opacity: 0.25;
+    pointer-events: none;
+}
+
+/* Первая сфера с переливающимся цветом */
+body::before {
+    width: 500px;
+    height: 500px;
+    top: -100px;
+    left: -100px;
+    background: linear-gradient(135deg, var(--accent-color), #3b82f6, #10b981);
+    background-size: 300% 300%;
+    animation: floatBlob 18s ease-in-out infinite alternate, gradientShift 12s ease infinite;
+}
+
+/* Вторая сфера с независимым переливом */
+body::after {
+    width: 600px;
+    height: 600px;
+    bottom: -150px;
+    right: -150px;
+    background: linear-gradient(135deg, #10b981, var(--accent-color), #8b5cf6);
+    background-size: 300% 300%;
+    animation: floatBlob 24s ease-in-out infinite alternate, gradientShift 15s ease infinite reverse;
+    animation-delay: -5s;
+}
+
+/* Плавное перемещение */
+@keyframes floatBlob {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(90px, 70px) scale(1.15);
+    }
+    100% {
+        transform: translate(-60px, 100px) scale(0.95);
+    }
+}
+
+/* Плавное переливание оттенков градиента */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
