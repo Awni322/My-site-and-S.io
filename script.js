@@ -415,44 +415,28 @@ function setTheme(themeName) {
         dropdown.classList.remove("active");
     }
 }
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const loginContainer = document.getElementById('login');
-    const contentContainer = document.getElementById('content'); // Контейнер с основным сайтом
-    const passwordInput = document.getElementById('passwordInput'); // Укажите ваш ID инпута пароля
-    const loginBtn = document.getElementById('loginBtn'); // Укажите ваш ID кнопки входа
-    const message = document.getElementById('message');
+    const contentContainer = document.getElementById('content');
 
-    // Функция проверки авторизации при старте
-    function checkAuth() {
-        if (localStorage.getItem('isLoggedIn') === 'true') {
+    try {
+        // Делаем запрос к воркеру на проверку сессии
+        const response = await fetch('/api/check-session', {
+            method: 'GET',
+            credentials: 'include' // Важно для отправки кук, если сессия в HttpOnly куке
+        });
+
+        if (response.ok) {
+            // Если воркер подтвердил сессию — сразу пускаем на сайт
             if (loginContainer) loginContainer.style.display = 'none';
-            if (contentContainer) contentContainer.style.display = 'flex'; // или 'block' в зависимости от вашего верстки
+            if (contentContainer) contentContainer.style.display = 'flex';
         } else {
+            // Если сессии нет — показываем форму входа
             if (loginContainer) loginContainer.style.display = 'block';
             if (contentContainer) contentContainer.style.display = 'none';
         }
-    }
-
-    // Запускаем проверку сразу при загрузке
-    checkAuth();
-
-    // Обработка клика по кнопке входа (или отправки формы)
-    if (loginBtn) {
-        loginBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const enteredPassword = passwordInput.value;
-
-            // Здесь ваш правильный пароль (или сверка, которая у вас уже используется)
-            const correctPassword = 'ваш_пароль'; 
-
-            if (enteredPassword === correctPassword) {
-                // Сохраняем флаг, что пользователь залогинен
-                localStorage.setItem('isLoggedIn', 'true');
-                checkAuth();
-            } else {
-                if (message) message.textContent = 'Неверный пароль!';
-            }
-        });
+    } catch (error) {
+        console.error('Ошибка проверки сессии:', error);
     }
 });
 // Экспорт функций в глобальную область видимости
