@@ -11,36 +11,45 @@ body, input, textarea, button {
    ========================================== */
 :root {
     --bg-color: #0b130f;
-    --card-bg: #132219;
+    --card-bg: rgba(19, 34, 25, 0.75);
+    --card-bg-solid: #132219;
     --text-color: #ffffff;
     --text-muted: #8a9a90;
     --accent-color: #4ade80;
-    --border-color: #1f382a;
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-color-solid: #1f382a;
     --input-bg: rgba(12, 24, 16, 0.95);
+    --glass-blur: blur(12px);
 }
 
 [data-theme="light"] {
     --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-bg-solid: #ffffff;
     --text-color: #1f2937;
     --text-muted: #6b7280;
     --accent-color: #16a34a;
-    --border-color: #e5e7eb;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-solid: #e5e7eb;
     --input-bg: #f9fafb;
+    --glass-blur: blur(12px);
 }
 
 [data-theme="dark-blue"] {
     --bg-color: #0f172a;
-    --card-bg: #1e293b;
+    --card-bg: rgba(30, 41, 59, 0.75);
+    --card-bg-solid: #1e293b;
     --text-color: #f8fafc;
     --text-muted: #94a3b8;
     --accent-color: #38bdf8;
-    --border-color: #334155;
+    --border-color: rgba(255, 255, 255, 0.06);
+    --border-color-solid: #334155;
     --input-bg: #0f172a;
+    --glass-blur: blur(12px);
 }
 
 /* ==========================================
-   2. БАЗОВЫЕ НАСТРОЙКИ
+   2. БАЗОВЫЕ НАСТРОЙКИ И ФОН
    ========================================== */
 * {
     box-sizing: border-box;
@@ -49,7 +58,6 @@ body, input, textarea, button {
 }
 
 body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--bg-color);
     color: var(--text-color);
     display: flex;
@@ -58,6 +66,34 @@ body {
     padding: 30px 20px;
     min-height: 100vh;
     transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Фоновые неоновые переливы */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(120px);
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+body::before {
+    top: -100px;
+    left: -100px;
+    background: #22c55e;
+}
+
+body::after {
+    bottom: -100px;
+    right: -100px;
+    background: #10b981;
 }
 
 /* ==========================================
@@ -71,8 +107,8 @@ body {
 }
 
 .theme-toggle-btn {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+    background: var(--card-bg-solid);
+    border: 1px solid var(--border-color-solid);
     color: var(--text-color);
     width: 45px;
     height: 45px;
@@ -95,8 +131,8 @@ body {
     position: absolute;
     top: 55px;
     right: 0;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
+    background: var(--card-bg-solid);
+    border: 1px solid var(--border-color-solid);
     border-radius: 12px;
     padding: 10px;
     width: 180px;
@@ -126,7 +162,7 @@ body {
 }
 
 .theme-option:hover {
-    background: var(--border-color);
+    background: var(--border-color-solid);
     border-color: var(--accent-color);
 }
 
@@ -142,6 +178,8 @@ body {
    ========================================== */
 #login {
     background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     padding: 35px 25px 25px 25px;
     border-radius: 18px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
@@ -155,7 +193,7 @@ body {
 #login h2 { color: var(--accent-color); font-size: 24px; font-weight: 700; margin-bottom: 22px; }
 #login input[type="password"] {
     width: 100%; padding: 12px 15px; margin-bottom: 15px; background: var(--input-bg);
-    border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-color); outline: none;
+    border: 1px solid var(--border-color-solid); border-radius: 10px; color: var(--text-color); outline: none;
 }
 #login input[type="password"]:focus { border-color: var(--accent-color); }
 #login button {
@@ -178,7 +216,10 @@ h1 {
 }
 
 .form-container {
-    width: 100%; max-width: 520px; background: var(--card-bg);
+    width: 100%; max-width: 520px; 
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--border-color);
     border-radius: 18px; padding: 24px; margin-bottom: 20px; display: flex; flex-direction: column;
 }
@@ -187,7 +228,7 @@ h1 {
 
 input[type="text"], textarea {
     width: 100%; padding: 14px 18px; background: var(--input-bg);
-    border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-color);
+    border: 1px solid var(--border-color-solid); border-radius: 12px; color: var(--text-color);
     outline: none; margin-bottom: 12px; transition: all 0.3s ease;
 }
 input[type="text"]:focus, textarea:focus {
@@ -199,7 +240,9 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     width: 100%;
     max-width: 520px;
     padding: 12px 18px;
-    background: var(--input-bg);
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--border-color);
     border-radius: 12px;
     color: var(--text-color);
@@ -211,7 +254,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .radio-group { display: flex; gap: 20px; margin-bottom: 15px; align-items: center; }
 .radio-label { display: flex; align-items: center; gap: 8px; color: var(--text-color); cursor: pointer; font-size: 14px; font-weight: 500; }
 .radio-label input[type="radio"] {
-    appearance: none; width: 18px; height: 18px; border: 1.5px solid var(--border-color);
+    appearance: none; width: 18px; height: 18px; border: 1.5px solid var(--border-color-solid);
     border-radius: 50%; outline: none; background: var(--input-bg); cursor: pointer; position: relative;
 }
 .radio-label input[type="radio"]:checked { border-color: var(--accent-color); background: var(--accent-color); }
@@ -223,7 +266,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .file-upload-wrapper input[type="file"] { display: none; }
 .file-upload-button {
     display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px 20px;
-    background: var(--input-bg); color: var(--text-color); border: 1.5px dashed var(--border-color);
+    background: var(--input-bg); color: var(--text-color); border: 1.5px dashed var(--border-color-solid);
     border-radius: 12px; cursor: pointer; transition: all 0.3s ease; width: 100%;
 }
 .file-upload-button:hover { border-color: var(--accent-color); }
@@ -232,7 +275,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .toggle-container { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; color: var(--text-color); font-size: 14px; }
 .toggle-container input { display: none; }
 .toggle-slider {
-    width: 44px; height: 24px; background-color: var(--border-color);
+    width: 44px; height: 24px; background-color: var(--border-color-solid);
     border-radius: 20px; position: relative; transition: background-color 0.3s;
 }
 .toggle-slider::before {
@@ -257,23 +300,57 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
    ========================================== */
 .category-filters { display: flex; gap: 10px; margin-bottom: 25px; justify-content: center; flex-wrap: wrap; }
 .filter-btn {
-    background: var(--card-bg); border: 1px solid var(--border-color);
+    background: var(--card-bg); 
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
     color: var(--text-muted); padding: 8px 18px; border-radius: 20px; cursor: pointer; transition: all 0.2s ease;
 }
 .filter-btn:hover, .filter-btn.active { background: var(--accent-color); color: var(--bg-color); border-color: var(--accent-color); }
 
 #notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 100%; }
-.note-card {
-    display: flex; flex-direction: column; background: var(--card-bg);
-    border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; cursor: pointer;
-    transition: transform 0.3s ease, border-color 0.3s ease;
+
+/* Анимация появления и эффект стекла карточек */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
-.note-card:hover { border-color: var(--accent-color); transform: translateY(-4px); }
+
+.note-card {
+    display: flex; flex-direction: column; 
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color); 
+    border-radius: 16px; padding: 18px; cursor: pointer;
+    animation: fadeInUp 0.4s ease forwards;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.note-card:hover { 
+    transform: translateY(-5px); 
+    border-color: rgba(34, 197, 94, 0.4); 
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); 
+}
+
 .note-card.pinned { border: 1px solid var(--accent-color); }
+
+/* Задержка появления для карточек каскадом */
+.note-card:nth-child(1) { animation-delay: 0.05s; }
+.note-card:nth-child(2) { animation-delay: 0.1s; }
+.note-card:nth-child(3) { animation-delay: 0.15s; }
+.note-card:nth-child(4) { animation-delay: 0.2s; }
+.note-card:nth-child(n+5) { animation-delay: 0.25s; }
 
 .category-badge {
     align-self: flex-start; font-size: 11px; background: var(--input-bg);
-    color: var(--accent-color); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 6px; margin-bottom: 8px;
+    color: var(--accent-color); border: 1px solid var(--border-color-solid); padding: 3px 8px; border-radius: 6px; margin-bottom: 8px;
 }
 .pin-badge {
     align-self: flex-start; background: var(--accent-color); color: var(--bg-color);
@@ -284,11 +361,11 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .note-image-container { margin: 8px 0 16px 0; border-radius: 12px; overflow: hidden; display: flex; justify-content: center; }
 .note-image { width: 100%; height: 180px; object-fit: cover; }
 
-.note-actions { display: flex; gap: 6px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color); }
+.note-actions { display: flex; gap: 6px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border-color-solid); }
 .btn-action { padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; }
-.btn-pin { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+.btn-pin { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color-solid); }
 .btn-pin.active { background: var(--accent-color); color: var(--bg-color); }
-.btn-edit { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); }
+.btn-edit { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color-solid); }
 .btn-delete { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
 .btn-copy { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
 
@@ -307,13 +384,16 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .modal-overlay.active .modal-card, .modal-overlay.active .confirm-card { transform: scale(1); }
 
 .modal-card {
-    background: var(--card-bg); border: 1px solid var(--border-color);
+    background: var(--card-bg-solid); 
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
     border-radius: 20px; width: 90%; max-width: 850px; max-height: 85vh; position: relative; overflow: hidden;
 }
 
 .modal-close {
     position: absolute; top: 15px; right: 15px; background: var(--input-bg);
-    border: 1px solid var(--border-color); color: var(--text-color); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 10;
+    border: 1px solid var(--border-color-solid); color: var(--text-color); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 10;
 }
 .modal-close:hover { background: rgba(239, 68, 68, 0.4); }
 
@@ -325,11 +405,11 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 #modalTitle { font-size: 26px; font-weight: 800; color: var(--accent-color); margin-bottom: 16px; word-break: break-word; }
 #modalText {
     font-size: 15px; line-height: 1.6; color: var(--text-color); background: var(--input-bg);
-    border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; white-space: pre-wrap; word-break: break-word; overflow-y: auto;
+    border: 1px solid var(--border-color-solid); border-radius: 12px; padding: 16px; white-space: pre-wrap; word-break: break-word; overflow-y: auto;
 }
 
 .confirm-card {
-    background: var(--card-bg); border: 1px solid var(--border-color);
+    background: var(--card-bg-solid); border: 1px solid var(--border-color-solid);
     border-radius: 18px; padding: 24px; max-width: 420px; width: 100%; text-align: center;
 }
 .confirm-card h3 { color: var(--text-color); font-size: 20px; margin-bottom: 10px; }
@@ -347,85 +427,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 }
 .btn-modal-copy {
     margin-top: 15px; padding: 12px 18px; background: var(--input-bg);
-    color: var(--accent-color); border: 1px solid var(--border-color); border-radius: 12px;
+    color: var(--accent-color); border: 1px solid var(--border-color-solid); border-radius: 12px;
     font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .btn-modal-copy:hover { border-color: var(--accent-color); }
-/* Фоновые неоновые переливы */
-body::before,
-body::after {
-    content: '';
-    position: fixed;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    z-index: -1;
-    filter: blur(120px);
-    opacity: 0.15; /* Мягкое свечение, не мешает читаемости */
-    pointer-events: none;
-}
-
-/* Левый верхний угол */
-body::before {
-    top: -100px;
-    left: -100px;
-    background: #22c55e;
-}
-
-/* Правый нижний угол */
-body::after {
-    bottom: -100px;
-    right: -100px;
-    background: #10b981;
-}
-/* 1. Эффект стекла и тонкие рамки для формы и карточек */
-.note-card, 
-.form-container, /* Замените на точный класс вашего блока формы, если он называется иначе */
-.search-input {
-    background: rgba(18, 22, 19, 0.75); /* Полупрозрачный темный фон */
-    backdrop-filter: blur(12px);          /* Размытие того, что находится под карточкой */
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.06); /* Тонкая элегантная рамка */
-}
-
-/* 2. Плавная анимация появления карточек */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.note-card {
-    animation: fadeInUp 0.4s ease forwards;
-}
-
-/* Задержка появления для соседних карточек, чтобы они выплывали каскадом */
-.note-card:nth-child(1) { animation-delay: 0.05s; }
-.note-card:nth-child(2) { animation-delay: 0.1s; }
-.note-card:nth-child(3) { animation-delay: 0.15s; }
-.note-card:nth-child(4) { animation-delay: 0.2s; }
-.note-card:nth-child(n+5) { animation-delay: 0.25s; }
-/* 1. Эффект приподнимания карточки при наведении */
-.note-card {
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-}
-
-.note-card:hover {
-    transform: translateY(-5px); /* Чуть приподнимается вверх */
-    border-color: rgba(34, 197, 94, 0.4); /* Слегка подсвечиваем рамку зелёным */
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); /* Добавляем объемную тень */
-}
-
-/* 2. Эффект стекла для модального окна просмотра */
-.modal-content, /* Замените на класс вашего окна, если он отличается (например, .modal-body или .modal-card) */
-.modal-box {
-    background: rgba(18, 22, 19, 0.85); /* Полупрозрачный темный фон */
-    backdrop-filter: blur(16px);          /* Сильное размытие фона за окном */
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08); /* Тонкая рамка */
-}
