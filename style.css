@@ -48,16 +48,28 @@ body, input, textarea, button {
     --glass-blur: blur(14px);
 }
 
-//* ==========================================
-   2. БАЗОВЫЕ НАСТРОЙКИ И ЖИВОЙ ФОН
+/* ==========================================
+   2. БАЗОВЫЕ НАСТРОЙКИ И МЯГКИЙ ФОН
    ========================================== */
-* {
+*, *::before, *::after {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
 }
 
-/* Фиксированный фоновый слой на весь экран с плавной анимацией */
+body {
+    margin: 0;
+    padding: 30px 20px;
+    background-color: var(--bg-color) !important;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    transition: color 0.3s ease;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Мягкий фоновый слой, который просто переливается на месте без резких смещений */
 body::before {
     content: '';
     position: fixed;
@@ -66,41 +78,32 @@ body::before {
     width: 100vw;
     height: 100vh;
     z-index: -999;
-    background: linear-gradient(-45deg, var(--bg-color), var(--accent-color), #0f172a, var(--bg-color));
-    background-size: 400% 400%;
-    animation: fullBackgroundShift 15s ease infinite;
+    background: radial-gradient(circle at 50% 50%, var(--accent-color), var(--bg-color));
+    opacity: 0.15; /* Делаем эффект едва уловимым и не ярким */
+    animation: smoothFade 10s ease-in-out infinite alternate;
     pointer-events: none;
 }
 
-body {
-    background-color: var(--bg-color) !important; /* Базовый цвет на случай загрузки */
-    color: var(--text-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px 20px;
-    min-height: 100vh;
-    transition: color 0.3s ease;
-    position: relative;
-    overflow-x: hidden;
-}
-
-/* Убираем старый дубль body::after */
 body::after {
     display: none !important;
 }
 
-/* Плавное переливание градиента */
-@keyframes fullBackgroundShift {
+/* Плавное изменение цвета фона без движения */
+@keyframes smoothFade {
     0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
+        opacity: 0.10;
+        transform: scale(1);
     }
     100% {
-        background-position: 0% 50%;
+        opacity: 0.22;
+        transform: scale(1.08);
     }
+}
+
+/* Исправление для полей ввода, чтобы они не съезжали */
+input[type="text"], input[type="password"], textarea {
+    margin: 0 0 12px 0 !important;
+    padding: 12px 15px !important;
 }
 /* ==========================================
    3. КНОПКА И МЕНЮ СМЕНЫ ТЕМЫ
