@@ -1,4 +1,6 @@
 const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
+const WORKER_TOKEN = "7c40c0a27808af0b8228be8dc2c7bdbe992f042b0f8cffde0b0629db76244185";
+
 let currentImageBase64 = null;
 let currentNotesList = []; 
 let activeCategory = "all"; 
@@ -17,7 +19,10 @@ async function login() {
     try {
         let response = await fetch(WORKER_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${WORKER_TOKEN}`
+            },
             body: JSON.stringify({ password: password })
         });
 
@@ -37,11 +42,36 @@ async function login() {
     }
 }
 
-// Автоматическая привязка кнопки входа после загрузки страницы
+// Автоматическая привязка кнопки входа и инициализация тем
 document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("loginBtn");
     if (loginBtn) {
         loginBtn.addEventListener("click", login);
+    }
+
+    // Восстановление темы
+    const savedTheme = localStorage.getItem("site_theme");
+    if (savedTheme) {
+        if (savedTheme === "default") {
+            document.documentElement.removeAttribute("data-theme");
+        } else {
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        }
+    }
+
+    // Выпадающее меню тем
+    const menuBtn = document.getElementById("themeMenuBtn");
+    const dropdown = document.getElementById("themeDropdown");
+
+    if (menuBtn && dropdown) {
+        menuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle("active");
+        });
+
+        document.addEventListener("click", () => {
+            dropdown.classList.remove("active");
+        });
     }
 });
 
@@ -101,7 +131,10 @@ async function saveNote() {
     try {
         let response = await fetch(WORKER_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${WORKER_TOKEN}`
+            },
             body: JSON.stringify(body)
         });
 
@@ -119,7 +152,12 @@ async function saveNote() {
 // Загрузка записей
 async function loadNotes() {
     try {
-        let response = await fetch(WORKER_URL);
+        let response = await fetch(WORKER_URL, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${WORKER_TOKEN}`
+            }
+        });
         currentNotesList = await response.json();
         applyFiltersAndRender();
     } catch (err) {
@@ -227,10 +265,7 @@ function openNoteModal(id) {
     document.getElementById("modalTitle").innerText = note.title;
     document.getElementById("modalText").innerText = note.content;
 
-    // Работа со ссылкой на Roblox
     let robloxContainer = document.getElementById("modalRobloxContainer");
-    
-    // Если по какой-то причине контейнера нет в разметке, создаем его на лету
     if (!robloxContainer) {
         robloxContainer = document.createElement("div");
         robloxContainer.id = "modalRobloxContainer";
@@ -249,7 +284,6 @@ function openNoteModal(id) {
         robloxContainer.innerHTML = "";
     }
 
-    // Картинка
     let modalImg = document.getElementById("modalImage");
     let modalLeft = document.getElementById("modalLeft");
 
@@ -262,6 +296,7 @@ function openNoteModal(id) {
 
     document.getElementById("modalOverlay").classList.add("active");
 }
+
 // Заполнение формы для редактирования
 function editNote(id) {
     let note = currentNotesList.find(n => n.id == id);
@@ -314,7 +349,10 @@ function resetForm() {
 async function togglePin(id, status) {
     await fetch(WORKER_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${WORKER_TOKEN}`
+        },
         body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status })
     });
     loadNotes();
@@ -343,7 +381,10 @@ async function confirmDelete() {
     try {
         await fetch(WORKER_URL, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${WORKER_TOKEN}`
+            },
             body: JSON.stringify({ action: "delete", id: noteIdToDelete })
         });
         closeConfirmModal();
@@ -356,94 +397,8 @@ async function confirmDelete() {
 function closeModal() {
     document.getElementById("modalOverlay").classList.remove("active");
 }
-// Функция переключения тем
-function toggleTheme() {
-    const html = document.documentElement;
-    const currentTheme = html.getAttribute("data-theme");
-    
-    let newTheme = "";
-    if (currentTheme === "light") {
-        newTheme = "dark-blue";
-    } else if (currentTheme === "dark-blue") {
-        newTheme = ""; // Возвращаем дефолтную (зелёную)
-    } else {
-        newTheme = "light";
-    }
 
-    if (newTheme) {
-        html.setAttribute("data-theme", newTheme);
-        localStorage.setItem("site_theme", newTheme);
-    } else {
-        html.removeAttribute("data-theme");
-        localStorage.removeItem("site_theme");
-    }
-}
-
-// Надежная логика темы с автоприменением
-document.addEventListener("DOMContentLoaded", () => {
-    const themeBtn = document.getElementById("themeToggleBtn");
-    
-    // Восстанавливаем тему при загрузке
-    const savedTheme = localStorage.getItem("site_theme");
-    if (savedTheme && savedTheme !== "default") {
-        document.documentElement.setAttribute("data-theme", savedTheme);
-    }
-
-    // Вешаем обработчик клика прямо через скрипт
-    if (themeBtn) {
-        themeBtn.addEventListener("click", () => {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute("data-theme");
-            
-            let newTheme = "";
-            if (!currentTheme || currentTheme === "default") {
-                newTheme = "light";
-            } else if (currentTheme === "light") {
-                newTheme = "dark-blue";
-            } else {
-                newTheme = "default";
-            }
-
-            if (newTheme === "default") {
-                html.removeAttribute("data-theme");
-                localStorage.setItem("site_theme", "default");
-            } else {
-                html.setAttribute("data-theme", newTheme);
-                localStorage.setItem("site_theme", newTheme);
-            }
-        });
-    }
-});
-// Логика выпадающего меню и смены тем
-document.addEventListener("DOMContentLoaded", () => {
-    const menuBtn = document.getElementById("themeMenuBtn");
-    const dropdown = document.getElementById("themeDropdown");
-
-    // Восстанавливаем сохраненную тему при загрузке
-    const savedTheme = localStorage.getItem("site_theme");
-    if (savedTheme) {
-        if (savedTheme === "default") {
-            document.documentElement.removeAttribute("data-theme");
-        } else {
-            document.documentElement.setAttribute("data-theme", savedTheme);
-        }
-    }
-
-    // Открытие/закрытие меню по клику на иконку кисти
-    if (menuBtn && dropdown) {
-        menuBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle("active");
-        });
-
-        // Закрытие меню при клике в любое другое место экрана
-        document.addEventListener("click", () => {
-            dropdown.classList.remove("active");
-        });
-    }
-});
-
-// Функция применения выбранной темы
+// Управление темами через выпадающее меню
 function setTheme(themeName) {
     const html = document.documentElement;
     const dropdown = document.getElementById("themeDropdown");
@@ -460,48 +415,8 @@ function setTheme(themeName) {
         dropdown.classList.remove("active");
     }
 }
-document.addEventListener("DOMContentLoaded", () => {
-    const menuBtn = document.getElementById("themeMenuBtn");
-    const dropdown = document.getElementById("themeDropdown");
 
-    // Восстанавливаем тему при заходах с разных устройств/браузеров (через localStorage)
-    const savedTheme = localStorage.getItem("site_theme");
-    if (savedTheme) {
-        if (savedTheme === "default") {
-            document.documentElement.removeAttribute("data-theme");
-        } else {
-            document.documentElement.setAttribute("data-theme", savedTheme);
-        }
-    }
-
-    if (menuBtn && dropdown) {
-        menuBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle("active");
-        });
-
-        document.addEventListener("click", () => {
-            dropdown.classList.remove("active");
-        });
-    }
-});
-
-function setTheme(themeName) {
-    const html = document.documentElement;
-    const dropdown = document.getElementById("themeDropdown");
-
-    if (themeName === "default") {
-        html.removeAttribute("data-theme");
-        localStorage.setItem("site_theme", "default");
-    } else {
-        html.setAttribute("data-theme", themeName);
-        localStorage.setItem("site_theme", themeName);
-    }
-
-    if (dropdown) {
-        dropdown.classList.remove("active");
-    }
-}
+// Экспорт функций в глобальную область видимости
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
@@ -516,3 +431,4 @@ window.filterCategory = filterCategory;
 window.closeConfirmModal = closeConfirmModal;
 window.copyToClipboard = copyToClipboard;
 window.copyModalContent = copyModalContent;
+window.setTheme = setTheme;
