@@ -378,3 +378,35 @@ body::after {
     right: -100px;
     background: #10b981;
 }
+/* 1. Эффект стекла и тонкие рамки для формы и карточек */
+.note-card, 
+.form-container, /* Замените на точный класс вашего блока формы, если он называется иначе */
+.search-input {
+    background: rgba(18, 22, 19, 0.75); /* Полупрозрачный темный фон */
+    backdrop-filter: blur(12px);          /* Размытие того, что находится под карточкой */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06); /* Тонкая элегантная рамка */
+}
+
+/* 2. Плавная анимация появления карточек */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.note-card {
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+/* Задержка появления для соседних карточек, чтобы они выплывали каскадом */
+.note-card:nth-child(1) { animation-delay: 0.05s; }
+.note-card:nth-child(2) { animation-delay: 0.1s; }
+.note-card:nth-child(3) { animation-delay: 0.15s; }
+.note-card:nth-child(4) { animation-delay: 0.2s; }
+.note-card:nth-child(n+5) { animation-delay: 0.25s; }
