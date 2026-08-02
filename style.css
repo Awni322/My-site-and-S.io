@@ -310,7 +310,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 
 #notes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 100%; }
 
-/* Анимация появления и эффект стекла карточек */
+/* Анимация появления и эффект стекла карточек с жестким принудительным наведением */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -323,20 +323,23 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 }
 
 .note-card {
-    display: flex; flex-direction: column; 
+    display: flex !important; 
+    flex-direction: column !important; 
     background: var(--card-bg) !important;
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
     border: 1px solid var(--border-color) !important; 
-    border-radius: 16px; padding: 18px; cursor: pointer;
-    animation: fadeInUp 0.4s ease forwards;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    border-radius: 16px !important; 
+    padding: 18px !important; 
+    cursor: pointer !important;
+    animation: fadeInUp 0.4s ease forwards !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
 }
 
 .note-card:hover { 
-    transform: translateY(-5px); 
-    border-color: rgba(34, 197, 94, 0.5) !important; 
-    box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.5); 
+    transform: translateY(-6px) !important; 
+    border-color: rgba(34, 197, 94, 0.6) !important; 
+    box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.5) !important; 
 }
 
 .note-card.pinned { border: 1px solid var(--accent-color) !important; }
@@ -370,7 +373,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .btn-copy { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
 
 /* ==========================================
-   8. МОДАЛЬНЫЕ ОКНА (Эффект стекла для всех вариантов)
+   8. МОДАЛЬНЫЕ ОКНА
    ========================================== */
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
