@@ -76,29 +76,34 @@ body::before {
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100vw;
     z-index: -999;
-    background: radial-gradient(circle at 50% 50%, var(--accent-color), var(--bg-color));
-    opacity: 0.15; /* Делаем эффект едва уловимым и не ярким */
-    animation: smoothFade 10s ease-in-out infinite alternate;
+    /* Используем мягкий многоступенчатый линейный градиент под углом, который не дает ступенек */
+    background: linear-gradient(135deg, var(--bg-color), #07100b, #0d1e15, var(--bg-color));
+    background-size: 300% 300%;
+    /* Добавляем мощное размытие, которое «сливает» любые пиксельные полосы в единое целое */
+    filter: blur(60px);
+    transform: scale(1.2);
+    animation: smoothFade 15s ease-in-out infinite alternate;
     pointer-events: none;
 }
 
-body::after {
-    display: none !important;
-}
 
 /* Плавное изменение цвета фона без движения */
 @keyframes smoothFade {
     0% {
-        opacity: 0.10;
-        transform: scale(1);
+        opacity: 0.8;
+        background-position: 0% 50%;
     }
     100% {
-        opacity: 0.22;
-        transform: scale(1.08);
+        opacity: 1;
+        background-position: 100% 50%;
     }
 }
+body::after {
+    display: none !important;
+}
+
 
 /* Исправление для полей ввода, чтобы они не съезжали */
 input[type="text"], input[type="password"], textarea {
