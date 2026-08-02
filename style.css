@@ -459,3 +459,38 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .btn-modal-copy:hover { border-color: var(--accent-color); }
+/* Красивый скроллбар для всего сайта */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color);
+}
+/* Цвет текста при выделении мышкой */
+::selection {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    text-shadow: none;
+}
+/* Добавьте это к стилям наведения ваших кнопок (hover) */
+.btn-action:hover, button:hover {
+    /* Если у вас кнопки зеленого цвета, они будут светиться зеленым */
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+    transform: translateY(-2px);
+}
+/* Пример класса для главного заголовка */
+.gradient-text {
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
