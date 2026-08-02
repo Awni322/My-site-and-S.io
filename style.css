@@ -73,31 +73,30 @@ body {
 body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vw;
+    top: -20%;
+    left: -20%;
+    width: 140vw;
+    height: 140vh;
     z-index: -999;
-    /* Используем мягкий многоступенчатый линейный градиент под углом, который не дает ступенек */
-    background: linear-gradient(135deg, var(--bg-color), #07100b, #0d1e15, var(--bg-color));
-    background-size: 300% 300%;
-    /* Добавляем мощное размытие, которое «сливает» любые пиксельные полосы в единое целое */
-    filter: blur(60px);
-    transform: scale(1.2);
-    animation: smoothFade 15s ease-in-out infinite alternate;
+    /* Абсолютно ровный и глубокий фон на базе текущей темы */
+    background: var(--bg-color);
+    /* Добавляем мягчайшее свечение акцентного цвета без геометрии и полос */
+    box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.8);
+    animation: pureColorShift 16s ease-in-out infinite alternate;
     pointer-events: none;
 }
 
 
 /* Плавное изменение цвета фона без движения */
-@keyframes smoothFade {
+@keyframes pureColorShift {
     0% {
-        opacity: 0.8;
-        background-position: 0% 50%;
+        filter: hue-rotate(0deg) brightness(1);
+    }
+    50% {
+        filter: hue-rotate(15deg) brightness(1.08);
     }
     100% {
-        opacity: 1;
-        background-position: 100% 50%;
+        filter: hue-rotate(-15deg) brightness(0.95);
     }
 }
 body::after {
