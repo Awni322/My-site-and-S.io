@@ -447,58 +447,33 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 }
 .btn-modal-copy:hover { border-color: var(--accent-color); }
 /* ==========================================
-   ДИНАМИЧЕСКИЙ ГРАДИЕНТНЫЙ ПЕРЕЛИВАЮЩИЙСЯ ФОН
+   ПОЛНОЭКРАННЫЙ ПРЕМИУМ-ГРАДИЕНТ ФОНА
    ========================================== */
 
+body {
+    /* Создаем многослойный фон: базовый цвет темы + живой переливающийся градиент */
+    background: linear-gradient(135deg, var(--bg-color), #050806, #0e1a14, var(--bg-color)) !important;
+    background-size: 400% 400% !important;
+    animation: fullBackgroundShift 20s ease infinite;
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    min-height: 100vh;
+    transition: color 0.3s ease;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Убираем старые круги по краям, если они остались */
 body::before,
 body::after {
-    content: '';
-    position: fixed;
-    border-radius: 50%;
-    z-index: -1;
-    filter: blur(120px);
-    opacity: 0.25;
-    pointer-events: none;
+    display: none !important;
 }
 
-/* Первая сфера с переливающимся цветом */
-body::before {
-    width: 500px;
-    height: 500px;
-    top: -100px;
-    left: -100px;
-    background: linear-gradient(135deg, var(--accent-color), #3b82f6, #10b981);
-    background-size: 300% 300%;
-    animation: floatBlob 18s ease-in-out infinite alternate, gradientShift 12s ease infinite;
-}
-
-/* Вторая сфера с независимым переливом */
-body::after {
-    width: 600px;
-    height: 600px;
-    bottom: -150px;
-    right: -150px;
-    background: linear-gradient(135deg, #10b981, var(--accent-color), #8b5cf6);
-    background-size: 300% 300%;
-    animation: floatBlob 24s ease-in-out infinite alternate, gradientShift 15s ease infinite reverse;
-    animation-delay: -5s;
-}
-
-/* Плавное перемещение */
-@keyframes floatBlob {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    50% {
-        transform: translate(90px, 70px) scale(1.15);
-    }
-    100% {
-        transform: translate(-60px, 100px) scale(0.95);
-    }
-}
-
-/* Плавное переливание оттенков градиента */
-@keyframes gradientShift {
+/* Плавное переливание градиента на весь экран */
+@keyframes fullBackgroundShift {
     0% {
         background-position: 0% 50%;
     }
