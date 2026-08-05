@@ -2,7 +2,8 @@ const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
 
 let currentImageBase64 = null;
 let currentNotesList = []; 
-let activeCategory = "all"; 
+let activeCategory = "all";
+let activeSort = "newest"; 
 let noteIdToDelete = null;
 
 // Авторизация
@@ -186,12 +187,51 @@ async function loadNotes() {
     }
 }
 
+function getNoteTimestamp(note) {
+    if (note.created_at) return Number(note.created_at);
+    // Старые записи без даты — fallback по id
+    return Number(note.id) || 0;
+}
+
+function formatNoteDate(note) {
+    const ts = getNoteTimestamp(note);
+    // Если это маленький id (старые записи) — не показываем странную дату 1970
+    if (!note.created_at && ts < 1000000000) return "дата неизвестна";
+    const d = new Date(ts * 1000);
+    if (isNaN(d.getTime())) return "дата неизвестна";
+    return d.toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
 function applyFiltersAndRender() {
-    let filtered = currentNotesList;
+    let filtered = currentNotesList.slice();
     if (activeCategory !== "all") {
-        filtered = currentNotesList.filter(n => (n.category || "Заметки") === activeCategory);
+        filtered = filtered.filter(n => (n.category || "Заметки") === activeCategory);
     }
+
+    filtered.sort((a, b) => {
+        // Закреплённые всегда сверху
+        const pinA = (a.is_pinned === 1 || a.is_pinned === true) ? 1 : 0;
+        const pinB = (b.is_pinned === 1 || b.is_pinned === true) ? 1 : 0;
+        if (pinA !== pinB) return pinB - pinA;
+
+        const ta = getNoteTimestamp(a);
+        const tb = getNoteTimestamp(b);
+        return activeSort === "oldest" ? ta - tb : tb - ta;
+    });
+
     renderNotes(filtered);
+}
+
+function handleSort() {
+    const sel = document.getElementById("sortSelect");
+    activeSort = sel ? sel.value : "newest";
+    applyFiltersAndRender();
 }
 
 function filterCategory(category, event) {
@@ -204,11 +244,25 @@ function filterCategory(category, event) {
 }
 
 function handleSearch() {
-    let query = document.getElementById("search").value.toLowerCase();
-    let filtered = currentNotesList.filter(n => 
-        n.title.toLowerCase().includes(query) || 
-        n.content.toLowerCase().includes(query)
+    let query = document.getElementById("search").value.toLowerCase().trim();
+    if (!query) {
+        applyFiltersAndRender();
+        return;
+    }
+    let filtered = currentNotesList.filter(n =>
+        (n.title || "").toLowerCase().includes(query) ||
+        (n.content || "").toLowerCase().includes(query)
     );
+
+    filtered.sort((a, b) => {
+        const pinA = (a.is_pinned === 1 || a.is_pinned === true) ? 1 : 0;
+        const pinB = (b.is_pinned === 1 || b.is_pinned === true) ? 1 : 0;
+        if (pinA !== pinB) return pinB - pinA;
+        const ta = getNoteTimestamp(a);
+        const tb = getNoteTimestamp(b);
+        return activeSort === "oldest" ? ta - tb : tb - ta;
+    });
+
     renderNotes(filtered);
 }
 
@@ -267,6 +321,7 @@ function renderNotes(notes) {
             <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
 
             <h3 class="note-title">${safeTitle}</h3>
+            <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             <div class="note-content">${safeContent}</div>
 
             ${safeImage ? `
@@ -308,6 +363,16 @@ function openNoteModal(id) {
 
     document.getElementById("modalTitle").innerText = note.title;
     document.getElementById("modalText").innerText = note.content;
+
+    let dateEl = document.getElementById("modalDate");
+    if (!dateEl) {
+        dateEl = document.createElement("div");
+        dateEl.id = "modalDate";
+        dateEl.className = "modal-date";
+        const titleEl = document.getElementById("modalTitle");
+        titleEl.parentNode.insertBefore(dateEl, titleEl.nextSibling);
+    }
+    dateEl.textContent = "🕒 " + formatNoteDate(note);
 
     let robloxContainer = document.getElementById("modalRobloxContainer");
     if (!robloxContainer) {
@@ -562,6 +627,7 @@ window.saveNote = saveNote;
 window.deleteNote = deleteNote;
 window.editNote = editNote;
 window.handleSearch = handleSearch;
+window.handleSort = handleSort;
 window.togglePin = togglePin;
 window.resetForm = resetForm;
 window.handleImageUpload = handleImageUpload;
