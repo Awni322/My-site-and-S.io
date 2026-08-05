@@ -39,11 +39,11 @@ async function login() {
             message.innerHTML = `⏳ Слишком много попыток. Подождите ~${mins} мин.`;
             message.style.color = "#fbbf24";
         } else {
-            message.innerHTML = "❌ Неверный пароль";
+            message.innerHTML = "❌ Неверный пароль пиши в тг";
             message.style.color = "#f87171";
         }
     } catch (e) {
-        message.innerHTML = "❌ Ошибка соединения";
+        message.innerHTML = "❌ Ошибка соединения пиши в тг";
         message.style.color = "#f87171";
     }
 }
