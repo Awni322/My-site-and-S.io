@@ -51,6 +51,34 @@ body, input, textarea, button {
     --shadow-color: rgba(0, 0, 0, 0.45);
 }
 
+[data-theme="black"] {
+    --bg-color: #000000;
+    --card-bg: rgba(18, 18, 18, 0.9);
+    --card-bg-solid: #121212;
+    --text-color: #f5f5f5;
+    --text-muted: #a3a3a3;
+    --accent-color: #e5e5e5;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --border-color-solid: #2a2a2a;
+    --input-bg: #0a0a0a;
+    --glass-blur: blur(14px);
+    --shadow-color: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="black-red"] {
+    --bg-color: #0a0000;
+    --card-bg: rgba(22, 8, 8, 0.88);
+    --card-bg-solid: #160808;
+    --text-color: #ffeaea;
+    --text-muted: #b07a7a;
+    --accent-color: #ef4444;
+    --border-color: rgba(239, 68, 68, 0.18);
+    --border-color-solid: #3b1515;
+    --input-bg: #120505;
+    --glass-blur: blur(14px);
+    --shadow-color: rgba(80, 0, 0, 0.45);
+}
+
 /* ==========================================
    2. БАЗОВЫЕ НАСТРОЙКИ И МЯГКИЙ ФОН
    ========================================== */
@@ -149,7 +177,7 @@ input[type="text"], input[type="password"], textarea {
     border: 1px solid var(--border-color-solid);
     border-radius: 16px;
     padding: 12px;
-    width: 220px;
+    width: 230px;
     box-shadow: 0 12px 32px var(--shadow-color, rgba(0, 0, 0, 0.4));
     display: flex;
     flex-direction: column;
@@ -252,6 +280,35 @@ input[type="text"], input[type="password"], textarea {
 
 .theme-preview.preview-blue .tp-bg { background: #0f172a; }
 .theme-preview.preview-blue .tp-accent { background: #38bdf8; }
+
+.theme-preview.preview-black .tp-bg { background: #000000; }
+.theme-preview.preview-black .tp-accent { background: #e5e5e5; }
+
+.theme-preview.preview-black-red .tp-bg { background: #0a0000; }
+.theme-preview.preview-black-red .tp-accent { background: #ef4444; }
+
+/* Чёрная / чёрно-красная — кнопки */
+[data-theme="black"] .btn-save,
+[data-theme="black"] .filter-btn.active,
+[data-theme="black"] .filter-btn:hover,
+[data-theme="black"] .pin-badge {
+    color: #000000;
+}
+
+[data-theme="black-red"] .btn-save,
+[data-theme="black-red"] .filter-btn.active,
+[data-theme="black-red"] .filter-btn:hover,
+[data-theme="black-red"] .pin-badge {
+    color: #ffffff;
+}
+
+[data-theme="black-red"] .note-card.pinned {
+    border-color: #ef4444;
+}
+
+[data-theme="black-red"] .note-card:hover {
+    border-color: rgba(239, 68, 68, 0.55);
+}
 
 /* Светлая тема — мягче тени и карточки */
 [data-theme="light"] .note-card:hover {
