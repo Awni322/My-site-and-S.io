@@ -517,6 +517,8 @@ function closeToast() {
 }
 
 // Экспорт функций в глобальную область видимости
+window.copyNoteById = copyNoteById;
+window.escapeHtml = escapeHtml;
 window.login = login;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
