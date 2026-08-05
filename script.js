@@ -284,37 +284,26 @@ function handleSort() {
     setSort(activeSort);
 }
 
-function toggleCategoryMenu(event) {
-    if (event) event.stopPropagation();
-    // закрыть меню сортировки
-    const sortMenu = document.getElementById("sortMenu");
-    const sortTrigger = document.getElementById("sortTrigger");
-    if (sortMenu) sortMenu.classList.remove("active");
-    if (sortTrigger) sortTrigger.classList.remove("open");
-
-    const menu = document.getElementById("categoryMenu");
-    const trigger = document.getElementById("categoryTrigger");
-    if (!menu) return;
-    const open = menu.classList.toggle("active");
-    if (trigger) trigger.classList.toggle("open", open);
-}
-
 function setCategory(category, event) {
-    if (event) event.stopPropagation();
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
     activeCategory = category || "all";
 
+    // Подсветка кнопок категорий
+    document.querySelectorAll(".category-filters .filter-btn").forEach(btn => {
+        const isActive = btn.getAttribute("data-category") === activeCategory;
+        btn.classList.toggle("active", isActive);
+    });
+
+    // Если вдруг остался dropdown-вариант — тоже обновим
     document.querySelectorAll("#categoryMenu .sort-option").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.category === activeCategory);
     });
-
     const labels = { all: "📁 Все", "Заметки": "📝 Заметки", "Скрипты": "📜 Скрипты" };
     const label = document.getElementById("categoryLabel");
     if (label) label.textContent = labels[activeCategory] || "📁 Все";
-
-    const menu = document.getElementById("categoryMenu");
-    const trigger = document.getElementById("categoryTrigger");
-    if (menu) menu.classList.remove("active");
-    if (trigger) trigger.classList.remove("open");
 
     const search = document.getElementById("search");
     if (search && search.value.trim()) {
