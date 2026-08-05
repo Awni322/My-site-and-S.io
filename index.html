@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <!-- МЕНЮ СМЕНЫ ТЕМЫ -->
     <div class="theme-menu-container">
         <button class="theme-toggle-btn" id="themeMenuBtn" title="Сменить тему">🎨</button>
@@ -35,7 +36,10 @@
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
     <div id="content" style="display: none;">
-        <h1>Архив</h1>
+        <div class="header-row">
+            <h1>Архив</h1>
+            <button class="btn-logout" onclick="logout()" title="Выйти">🚪 Выйти</button>
+        </div>
 
         <div class="form-container">
             <h2 id="formTitle">Новая запись</h2>
