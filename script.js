@@ -74,9 +74,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Выпадающее меню тем
-    const menuBtn = document.getElementById("themeMenuBtn");
-    const dropdown = document.getElementById("themeDropdown");
+    // Выпадающее меню настроек
+    const menuBtn = document.getElementById("settingsMenuBtn");
+    const dropdown = document.getElementById("settingsDropdown");
 
     if (menuBtn && dropdown) {
         menuBtn.addEventListener("click", (e) => {
@@ -86,6 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.addEventListener("click", () => {
             dropdown.classList.remove("active");
+        });
+
+        dropdown.addEventListener("click", (e) => {
+            e.stopPropagation();
         });
     }
 });
@@ -444,7 +448,7 @@ function closeModal() {
 // Управление темами через выпадающее меню
 function setTheme(themeName) {
     const html = document.documentElement;
-    const dropdown = document.getElementById("themeDropdown");
+    const dropdown = document.getElementById("settingsDropdown");
 
     if (themeName === "default") {
         html.removeAttribute("data-theme");
@@ -522,6 +526,9 @@ function closeToast() {
 
 // Выход из аккаунта
 async function logout() {
+    const dropdown = document.getElementById("settingsDropdown");
+    if (dropdown) dropdown.classList.remove("active");
+
     try {
         await fetch(WORKER_URL + "logout", {
             method: "POST",
