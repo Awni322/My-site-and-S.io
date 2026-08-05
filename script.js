@@ -31,8 +31,14 @@ async function login() {
             document.getElementById("login").style.display = "none";
             document.getElementById("content").style.display = "flex";
             loadNotes();
+        } else if (response.status === 429) {
+            let data = {};
+            try { data = await response.json(); } catch (_) {}
+            const mins = data.retry_after ? Math.ceil(data.retry_after / 60) : 15;
+            message.innerHTML = `⏳ Слишком много попыток. Подождите ~${mins} мин.`;
+            message.style.color = "#fbbf24";
         } else {
-            message.innerHTML = "❌ Неверный пароль напиши в тг: love40404";
+            message.innerHTML = "❌ Неверный пароль";
             message.style.color = "#f87171";
         }
     } catch (e) {
@@ -223,7 +229,6 @@ function copyModalContent() {
     });
 }
 
-// Рендер карточек
 // Экранирование HTML — защита от XSS
 function escapeHtml(str) {
     if (str == null) return "";
@@ -245,7 +250,6 @@ function renderNotes(notes) {
 
         const safeTitle = escapeHtml(note.title);
         const safeContent = escapeHtml(note.content);
-
         const safeImage = (note.image && note.image.startsWith("data:image/"))
             ? note.image
             : null;
@@ -286,7 +290,6 @@ function renderNotes(notes) {
     document.getElementById("notes").innerHTML = output;
 }
 
-// Копирование по id
 function copyNoteById(id, buttonEl) {
     const note = currentNotesList.find(n => n.id == id);
     if (!note) return;
@@ -308,7 +311,7 @@ function openNoteModal(id) {
         modalTextEl.parentNode.insertBefore(robloxContainer, modalTextEl);
     }
 
-       if (note.roblox_url && note.roblox_url.trim() !== "") {
+    if (note.roblox_url && note.roblox_url.trim() !== "") {
         let raw = note.roblox_url.trim();
         let url = raw.match(/^https?:\/\//i) ? raw : "https://" + raw;
         if (!/^https?:\/\//i.test(url)) {
@@ -323,6 +326,7 @@ function openNoteModal(id) {
     } else {
         robloxContainer.innerHTML = "";
     }
+
     let modalImg = document.getElementById("modalImage");
     let modalLeft = document.getElementById("modalLeft");
 
@@ -516,10 +520,26 @@ function closeToast() {
     }
 }
 
+// Выход из аккаунта
+async function logout() {
+    try {
+        await fetch(WORKER_URL + "logout", {
+            method: "POST",
+            credentials: "include"
+        });
+    } catch (_) {}
+    document.getElementById("content").style.display = "none";
+    document.getElementById("login").style.display = "block";
+    const pass = document.getElementById("password");
+    if (pass) pass.value = "";
+    const msg = document.getElementById("message");
+    if (msg) msg.innerHTML = "";
+    currentNotesList = [];
+}
+
 // Экспорт функций в глобальную область видимости
-window.copyNoteById = copyNoteById;
-window.escapeHtml = escapeHtml;
 window.login = login;
+window.logout = logout;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
 window.editNote = editNote;
@@ -532,6 +552,8 @@ window.closeModal = closeModal;
 window.filterCategory = filterCategory;
 window.closeConfirmModal = closeConfirmModal;
 window.copyToClipboard = copyToClipboard;
+window.copyNoteById = copyNoteById;
 window.copyModalContent = copyModalContent;
 window.setTheme = setTheme;
 window.closeToast = closeToast;
+window.escapeHtml = escapeHtml;
