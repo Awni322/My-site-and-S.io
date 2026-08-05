@@ -94,9 +94,9 @@
 
         <div class="filters-row">
             <div class="category-filters">
-                <button class="filter-btn active" onclick="filterCategory('all', event)">Все</button>
-                <button class="filter-btn" onclick="filterCategory('Заметки', event)">📝 Заметки</button>
-                <button class="filter-btn" onclick="filterCategory('Скрипты', event)">📜 Скрипты</button>
+                <button type="button" class="filter-btn active" data-category="all" onclick="setCategory('all', event)">Все</button>
+                <button type="button" class="filter-btn" data-category="Заметки" onclick="setCategory('Заметки', event)">📝 Заметки</button>
+                <button type="button" class="filter-btn" data-category="Скрипты" onclick="setCategory('Скрипты', event)">📜 Скрипты</button>
             </div>
             <div class="sort-wrap">
                 <button type="button" class="sort-trigger" id="sortTrigger" onclick="toggleSortMenu(event)">
