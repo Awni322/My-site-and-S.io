@@ -89,6 +89,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.addEventListener("click", () => {
             dropdown.classList.remove("active");
+            const sortMenu = document.getElementById("sortMenu");
+            const sortTrigger = document.getElementById("sortTrigger");
+            if (sortMenu) sortMenu.classList.remove("active");
+            if (sortTrigger) sortTrigger.classList.remove("open");
         });
 
         dropdown.addEventListener("click", (e) => {
@@ -228,15 +232,43 @@ function applyFiltersAndRender() {
     renderNotes(filtered);
 }
 
-function handleSort() {
-    const sel = document.getElementById("sortSelect");
-    activeSort = sel ? sel.value : "newest";
+function toggleSortMenu(event) {
+    if (event) event.stopPropagation();
+    const menu = document.getElementById("sortMenu");
+    const trigger = document.getElementById("sortTrigger");
+    if (!menu) return;
+    const open = menu.classList.toggle("active");
+    if (trigger) trigger.classList.toggle("open", open);
+}
+
+function setSort(sort, event) {
+    if (event) event.stopPropagation();
+    activeSort = sort || "newest";
+
+    document.querySelectorAll(".sort-option").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.sort === activeSort);
+    });
+
+    const label = document.getElementById("sortLabel");
+    if (label) {
+        label.textContent = activeSort === "oldest" ? "Сначала старые" : "Сначала новые";
+    }
+
+    const menu = document.getElementById("sortMenu");
+    const trigger = document.getElementById("sortTrigger");
+    if (menu) menu.classList.remove("active");
+    if (trigger) trigger.classList.remove("open");
+
     const search = document.getElementById("search");
     if (search && search.value.trim()) {
         handleSearch();
     } else {
         applyFiltersAndRender();
     }
+}
+
+function handleSort() {
+    setSort(activeSort);
 }
 
 function filterCategory(category, event) {
@@ -334,6 +366,7 @@ function renderNotes(notes) {
                 </div>
             ` : ""}
 
+            <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             <div class="note-footer">
                 <div class="note-actions">
                     <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyNoteById(${note.id}, this)">
@@ -349,7 +382,6 @@ function renderNotes(notes) {
                         🗑
                     </button>
                 </div>
-                <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             </div>
         </div>
         `;
@@ -635,6 +667,8 @@ window.deleteNote = deleteNote;
 window.editNote = editNote;
 window.handleSearch = handleSearch;
 window.handleSort = handleSort;
+window.setSort = setSort;
+window.toggleSortMenu = toggleSortMenu;
 window.togglePin = togglePin;
 window.resetForm = resetForm;
 window.handleImageUpload = handleImageUpload;
