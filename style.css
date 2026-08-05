@@ -926,3 +926,51 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     border: none;
     box-shadow: none;
 }
+
+
+/* Пустое состояние */
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 20px;
+    margin: 10px auto 30px;
+    max-width: 420px;
+    width: 100%;
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px dashed var(--border-color-solid);
+    border-radius: 18px;
+    animation: fadeInUp 0.4s ease forwards;
+}
+
+.empty-icon {
+    font-size: 42px;
+    margin-bottom: 12px;
+    opacity: 0.9;
+}
+
+.empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 6px;
+}
+
+.empty-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+.toast-notification.toast-error {
+    border-color: rgba(239, 68, 68, 0.45);
+}
+
+.toast-notification.toast-ok {
+    border-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
+}
