@@ -106,16 +106,16 @@ input[type="text"], input[type="password"], textarea {
     padding: 12px 15px !important;
 }
 /* ==========================================
-   3. КНОПКА И МЕНЮ СМЕНЫ ТЕМЫ
+   3. КНОПКА И МЕНЮ НАСТРОЕК
    ========================================== */
-.theme-menu-container {
+.settings-menu-container {
     position: fixed;
     top: 20px;
     right: 20px;
     z-index: 2000;
 }
 
-.theme-toggle-btn {
+.settings-toggle-btn {
     background: var(--card-bg-solid);
     border: 1px solid var(--border-color-solid);
     color: var(--text-color);
@@ -131,35 +131,44 @@ input[type="text"], input[type="password"], textarea {
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.theme-toggle-btn:hover {
+.settings-toggle-btn:hover {
     transform: scale(1.1);
     border-color: var(--accent-color);
 }
 
-.theme-dropdown {
+.settings-dropdown {
     position: absolute;
     top: 55px;
     right: 0;
     background: var(--card-bg-solid);
     border: 1px solid var(--border-color-solid);
-    border-radius: 12px;
-    padding: 10px;
-    width: 180px;
+    border-radius: 14px;
+    padding: 12px;
+    width: 200px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     display: none;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
 }
 
-.theme-dropdown.active {
+.settings-dropdown.active {
     display: flex;
 }
 
-.theme-option {
+.settings-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding: 4px 12px 8px;
+}
+
+.settings-option {
     background: transparent;
     border: 1px solid transparent;
     color: var(--text-color);
-    padding: 8px 12px;
+    padding: 10px 12px;
     border-radius: 8px;
     cursor: pointer;
     display: flex;
@@ -167,12 +176,28 @@ input[type="text"], input[type="password"], textarea {
     gap: 10px;
     font-size: 14px;
     text-align: left;
+    width: 100%;
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.theme-option:hover {
+.settings-option:hover {
     background: var(--border-color-solid);
     border-color: var(--accent-color);
+}
+
+.settings-divider {
+    height: 1px;
+    background: var(--border-color-solid);
+    margin: 6px 4px;
+}
+
+.settings-logout {
+    color: #fca5a5 !important;
+}
+
+.settings-logout:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
 }
 
 .theme-preview-dot {
@@ -180,6 +205,7 @@ input[type="text"], input[type="password"], textarea {
     height: 16px;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
 }
 
 /* ==========================================
@@ -222,43 +248,6 @@ h1 {
     font-size: 32px; font-weight: 800; margin-bottom: 25px;
     color: var(--accent-color);
     text-align: center;
-}
-
-.header-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    width: 100%;
-    max-width: 520px;
-    margin-bottom: 10px;
-    position: relative;
-}
-
-.header-row h1 {
-    margin-bottom: 0;
-}
-
-.btn-logout {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 8px 14px;
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-logout:hover {
-    background: rgba(239, 68, 68, 0.3);
-    border-color: #ef4444;
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
 }
 
 .form-container {
