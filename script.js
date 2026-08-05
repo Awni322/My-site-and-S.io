@@ -81,7 +81,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (menuBtn && dropdown) {
         menuBtn.addEventListener("click", (e) => {
             e.stopPropagation();
+            const willOpen = !dropdown.classList.contains("active");
             dropdown.classList.toggle("active");
+            if (willOpen) updateActiveThemeMark();
         });
 
         document.addEventListener("click", () => {
@@ -446,6 +448,13 @@ function closeModal() {
 }
 
 // Управление темами через выпадающее меню
+function updateActiveThemeMark() {
+    const current = localStorage.getItem("site_theme") || "default";
+    document.querySelectorAll(".settings-option[data-theme-value]").forEach(btn => {
+        btn.classList.toggle("active-theme", btn.dataset.themeValue === current);
+    });
+}
+
 function setTheme(themeName) {
     const html = document.documentElement;
     const dropdown = document.getElementById("settingsDropdown");
@@ -457,6 +466,8 @@ function setTheme(themeName) {
         html.setAttribute("data-theme", themeName);
         localStorage.setItem("site_theme", themeName);
     }
+
+    updateActiveThemeMark();
 
     if (dropdown) {
         dropdown.classList.remove("active");
