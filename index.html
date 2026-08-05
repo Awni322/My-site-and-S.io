@@ -92,10 +92,16 @@
         <!-- ПОИСК -->
         <input type="text" id="search" placeholder="Поиск..." oninput="handleSearch()">
 
-        <div class="category-filters">
-            <button class="filter-btn active" onclick="filterCategory('all', event)">Все</button>
-            <button class="filter-btn" onclick="filterCategory('Заметки', event)">📝 Заметки</button>
-            <button class="filter-btn" onclick="filterCategory('Скрипты', event)">📜 Скрипты</button>
+        <div class="filters-row">
+            <div class="category-filters">
+                <button class="filter-btn active" onclick="filterCategory('all', event)">Все</button>
+                <button class="filter-btn" onclick="filterCategory('Заметки', event)">📝 Заметки</button>
+                <button class="filter-btn" onclick="filterCategory('Скрипты', event)">📜 Скрипты</button>
+            </div>
+            <select id="sortSelect" class="sort-select" onchange="handleSort()">
+                <option value="newest">Сначала новые</option>
+                <option value="oldest">Сначала старые</option>
+            </select>
         </div>
 
         <div id="notes"></div>
