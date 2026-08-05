@@ -98,10 +98,10 @@
                 <button class="filter-btn" onclick="filterCategory('Заметки', event)">📝 Заметки</button>
                 <button class="filter-btn" onclick="filterCategory('Скрипты', event)">📜 Скрипты</button>
             </div>
-            <select id="sortSelect" class="sort-select" onchange="handleSort()">
-                <option value="newest">Сначала новые</option>
-                <option value="oldest">Сначала старые</option>
-            </select>
+            <div class="sort-filters">
+                <button class="filter-btn sort-btn active" data-sort="newest" onclick="setSort('newest', event)">↓ Новые</button>
+                <button class="filter-btn sort-btn" data-sort="oldest" onclick="setSort('oldest', event)">↑ Старые</button>
+            </div>
         </div>
 
         <div id="notes"></div>
