@@ -224,6 +224,18 @@ function copyModalContent() {
 }
 
 // Рендер карточек
+// Экранирование HTML — защита от XSS
+function escapeHtml(str) {
+    if (str == null) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+// Рендер карточек
 function renderNotes(notes) {
     let output = "";
 
@@ -231,7 +243,12 @@ function renderNotes(notes) {
         const isPinned = note.is_pinned === 1 || note.is_pinned === true;
         const categoryName = note.category || "Заметки";
 
-        const safeContentForClick = JSON.stringify(note.content);
+        const safeTitle = escapeHtml(note.title);
+        const safeContent = escapeHtml(note.content);
+
+        const safeImage = (note.image && note.image.startsWith("data:image/"))
+            ? note.image
+            : null;
 
         output += `
         <div class="note-card ${isPinned ? 'pinned' : ''}" onclick="openNoteModal(${note.id})">
@@ -239,17 +256,17 @@ function renderNotes(notes) {
             
             <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
 
-            <h3 class="note-title">${note.title}</h3>
-            <div class="note-content">${note.content}</div>
+            <h3 class="note-title">${safeTitle}</h3>
+            <div class="note-content">${safeContent}</div>
 
-            ${note.image ? `
+            ${safeImage ? `
                 <div class="note-image-container">
-                    <img src="${note.image}" class="note-image" alt="Фото">
+                    <img src="${safeImage}" class="note-image" alt="Фото">
                 </div>
             ` : ""}
 
             <div class="note-actions">
-                <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyToClipboard(${safeContentForClick.replace(/"/g, '&quot;')}, this)">
+                <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyNoteById(${note.id}, this)">
                     📋 Копировать
                 </button>
                 <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="event.stopPropagation(); togglePin(${note.id}, ${!isPinned})">
@@ -269,6 +286,13 @@ function renderNotes(notes) {
     document.getElementById("notes").innerHTML = output;
 }
 
+// Копирование по id
+function copyNoteById(id, buttonEl) {
+    const note = currentNotesList.find(n => n.id == id);
+    if (!note) return;
+    copyToClipboard(note.content, buttonEl);
+}
+
 function openNoteModal(id) {
     let note = currentNotesList.find(n => n.id == id);
     if (!note) return;
@@ -284,17 +308,21 @@ function openNoteModal(id) {
         modalTextEl.parentNode.insertBefore(robloxContainer, modalTextEl);
     }
 
-    if (note.roblox_url && note.roblox_url.trim() !== "") {
-        let url = note.roblox_url.startsWith("http") ? note.roblox_url : "https://" + note.roblox_url;
-        robloxContainer.innerHTML = `
-            <a href="${url}" target="_blank" class="roblox-link-btn">
-                📎 Открыть ссылку  
-            </a>
-        `;
+       if (note.roblox_url && note.roblox_url.trim() !== "") {
+        let raw = note.roblox_url.trim();
+        let url = raw.match(/^https?:\/\//i) ? raw : "https://" + raw;
+        if (!/^https?:\/\//i.test(url)) {
+            robloxContainer.innerHTML = "";
+        } else {
+            robloxContainer.innerHTML = `
+                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="roblox-link-btn">
+                    📎 Открыть ссылку  
+                </a>
+            `;
+        }
     } else {
         robloxContainer.innerHTML = "";
     }
-
     let modalImg = document.getElementById("modalImage");
     let modalLeft = document.getElementById("modalLeft");
 
