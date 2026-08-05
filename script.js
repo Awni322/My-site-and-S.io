@@ -228,26 +228,15 @@ function applyFiltersAndRender() {
     renderNotes(filtered);
 }
 
-function setSort(sort, event) {
-    activeSort = sort || "newest";
-    document.querySelectorAll(".sort-btn").forEach(btn => btn.classList.remove("active"));
-    if (event && event.target) {
-        event.target.classList.add("active");
-    } else {
-        const btn = document.querySelector(`.sort-btn[data-sort="${activeSort}"]`);
-        if (btn) btn.classList.add("active");
-    }
-    // Если есть поиск — пересортировать с учётом запроса
+function handleSort() {
+    const sel = document.getElementById("sortSelect");
+    activeSort = sel ? sel.value : "newest";
     const search = document.getElementById("search");
     if (search && search.value.trim()) {
         handleSearch();
     } else {
         applyFiltersAndRender();
     }
-}
-
-function handleSort() {
-    setSort(activeSort);
 }
 
 function filterCategory(category, event) {
@@ -646,7 +635,6 @@ window.deleteNote = deleteNote;
 window.editNote = editNote;
 window.handleSearch = handleSearch;
 window.handleSort = handleSort;
-window.setSort = setSort;
 window.togglePin = togglePin;
 window.resetForm = resetForm;
 window.handleImageUpload = handleImageUpload;
