@@ -228,10 +228,26 @@ function applyFiltersAndRender() {
     renderNotes(filtered);
 }
 
+function setSort(sort, event) {
+    activeSort = sort || "newest";
+    document.querySelectorAll(".sort-btn").forEach(btn => btn.classList.remove("active"));
+    if (event && event.target) {
+        event.target.classList.add("active");
+    } else {
+        const btn = document.querySelector(`.sort-btn[data-sort="${activeSort}"]`);
+        if (btn) btn.classList.add("active");
+    }
+    // Если есть поиск — пересортировать с учётом запроса
+    const search = document.getElementById("search");
+    if (search && search.value.trim()) {
+        handleSearch();
+    } else {
+        applyFiltersAndRender();
+    }
+}
+
 function handleSort() {
-    const sel = document.getElementById("sortSelect");
-    activeSort = sel ? sel.value : "newest";
-    applyFiltersAndRender();
+    setSort(activeSort);
 }
 
 function filterCategory(category, event) {
@@ -321,7 +337,6 @@ function renderNotes(notes) {
             <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
 
             <h3 class="note-title">${safeTitle}</h3>
-            <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             <div class="note-content">${safeContent}</div>
 
             ${safeImage ? `
@@ -330,19 +345,22 @@ function renderNotes(notes) {
                 </div>
             ` : ""}
 
-            <div class="note-actions">
-                <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyNoteById(${note.id}, this)">
-                    📋 Копировать
-                </button>
-                <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="event.stopPropagation(); togglePin(${note.id}, ${!isPinned})">
-                    ${isPinned ? '📌' : '📍'}
-                </button>
-                <button class="btn-action btn-edit" onclick="event.stopPropagation(); editNote(${note.id})">
-                    ✏️
-                </button>
-                <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNote(${note.id})">
-                    🗑
-                </button>
+            <div class="note-footer">
+                <div class="note-actions">
+                    <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyNoteById(${note.id}, this)">
+                        📋 Копировать
+                    </button>
+                    <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="event.stopPropagation(); togglePin(${note.id}, ${!isPinned})">
+                        ${isPinned ? '📌' : '📍'}
+                    </button>
+                    <button class="btn-action btn-edit" onclick="event.stopPropagation(); editNote(${note.id})">
+                        ✏️
+                    </button>
+                    <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNote(${note.id})">
+                        🗑
+                    </button>
+                </div>
+                <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             </div>
         </div>
         `;
@@ -369,8 +387,8 @@ function openNoteModal(id) {
         dateEl = document.createElement("div");
         dateEl.id = "modalDate";
         dateEl.className = "modal-date";
-        const titleEl = document.getElementById("modalTitle");
-        titleEl.parentNode.insertBefore(dateEl, titleEl.nextSibling);
+        const modalRight = document.querySelector(".modal-right");
+        if (modalRight) modalRight.appendChild(dateEl);
     }
     dateEl.textContent = "🕒 " + formatNoteDate(note);
 
@@ -628,6 +646,7 @@ window.deleteNote = deleteNote;
 window.editNote = editNote;
 window.handleSearch = handleSearch;
 window.handleSort = handleSort;
+window.setSort = setSort;
 window.togglePin = togglePin;
 window.resetForm = resetForm;
 window.handleImageUpload = handleImageUpload;
