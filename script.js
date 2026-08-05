@@ -93,6 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const sortTrigger = document.getElementById("sortTrigger");
             if (sortMenu) sortMenu.classList.remove("active");
             if (sortTrigger) sortTrigger.classList.remove("open");
+            const catMenu = document.getElementById("categoryMenu");
+            const catTrigger = document.getElementById("categoryTrigger");
+            if (catMenu) catMenu.classList.remove("active");
+            if (catTrigger) catTrigger.classList.remove("open");
         });
 
         dropdown.addEventListener("click", (e) => {
@@ -165,13 +169,16 @@ async function saveNote() {
         });
 
         if (response.ok) {
+            const wasEdit = !!id;
             resetForm();
             loadNotes();
+            showToast(wasEdit ? "✅ Запись обновлена" : "✅ Запись сохранена");
         } else {
-            alert("Ошибка сохранения на сервере.");
+            showToast("❌ Ошибка сохранения", "error");
         }
     } catch (err) {
         console.error("Ошибка при сохранении:", err);
+        showToast("❌ Ошибка соединения", "error");
     }
 }
 
@@ -234,6 +241,12 @@ function applyFiltersAndRender() {
 
 function toggleSortMenu(event) {
     if (event) event.stopPropagation();
+    // закрыть меню категорий
+    const catMenu = document.getElementById("categoryMenu");
+    const catTrigger = document.getElementById("categoryTrigger");
+    if (catMenu) catMenu.classList.remove("active");
+    if (catTrigger) catTrigger.classList.remove("open");
+
     const menu = document.getElementById("sortMenu");
     const trigger = document.getElementById("sortTrigger");
     if (!menu) return;
@@ -271,25 +284,64 @@ function handleSort() {
     setSort(activeSort);
 }
 
-function filterCategory(category, event) {
-    activeCategory = category;
-    document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
-    if (event && event.target) {
-        event.target.classList.add("active");
+function toggleCategoryMenu(event) {
+    if (event) event.stopPropagation();
+    // закрыть меню сортировки
+    const sortMenu = document.getElementById("sortMenu");
+    const sortTrigger = document.getElementById("sortTrigger");
+    if (sortMenu) sortMenu.classList.remove("active");
+    if (sortTrigger) sortTrigger.classList.remove("open");
+
+    const menu = document.getElementById("categoryMenu");
+    const trigger = document.getElementById("categoryTrigger");
+    if (!menu) return;
+    const open = menu.classList.toggle("active");
+    if (trigger) trigger.classList.toggle("open", open);
+}
+
+function setCategory(category, event) {
+    if (event) event.stopPropagation();
+    activeCategory = category || "all";
+
+    document.querySelectorAll("#categoryMenu .sort-option").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.category === activeCategory);
+    });
+
+    const labels = { all: "📁 Все", "Заметки": "📝 Заметки", "Скрипты": "📜 Скрипты" };
+    const label = document.getElementById("categoryLabel");
+    if (label) label.textContent = labels[activeCategory] || "📁 Все";
+
+    const menu = document.getElementById("categoryMenu");
+    const trigger = document.getElementById("categoryTrigger");
+    if (menu) menu.classList.remove("active");
+    if (trigger) trigger.classList.remove("open");
+
+    const search = document.getElementById("search");
+    if (search && search.value.trim()) {
+        handleSearch();
+    } else {
+        applyFiltersAndRender();
     }
-    applyFiltersAndRender();
+}
+
+function filterCategory(category, event) {
+    setCategory(category, event);
 }
 
 function handleSearch() {
     let query = document.getElementById("search").value.toLowerCase().trim();
-    if (!query) {
-        applyFiltersAndRender();
-        return;
+    let filtered = currentNotesList.slice();
+
+    if (activeCategory !== "all") {
+        filtered = filtered.filter(n => (n.category || "Заметки") === activeCategory);
     }
-    let filtered = currentNotesList.filter(n =>
-        (n.title || "").toLowerCase().includes(query) ||
-        (n.content || "").toLowerCase().includes(query)
-    );
+
+    if (query) {
+        filtered = filtered.filter(n =>
+            (n.title || "").toLowerCase().includes(query) ||
+            (n.content || "").toLowerCase().includes(query)
+        );
+    }
 
     filtered.sort((a, b) => {
         const pinA = (a.is_pinned === 1 || a.is_pinned === true) ? 1 : 0;
@@ -387,7 +439,32 @@ function renderNotes(notes) {
         `;
     });
 
-    document.getElementById("notes").innerHTML = output;
+    const notesEl = document.getElementById("notes");
+    if (!output) {
+        const hasAny = currentNotesList.length > 0;
+        const search = document.getElementById("search");
+        const q = search ? search.value.trim() : "";
+        let title, text;
+        if (!hasAny) {
+            title = "Пока пусто";
+            text = "Добавь первую запись — заметку или скрипт";
+        } else if (q) {
+            title = "Ничего не найдено";
+            text = "Попробуй изменить запрос или сбросить поиск";
+        } else {
+            title = "В этой категории пусто";
+            text = "Выбери другую категорию или создай новую запись";
+        }
+        notesEl.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <div class="empty-title">${title}</div>
+                <div class="empty-text">${text}</div>
+            </div>
+        `;
+    } else {
+        notesEl.innerHTML = output;
+    }
 }
 
 function copyNoteById(id, buttonEl) {
@@ -500,15 +577,20 @@ function resetForm() {
 
 // Закрепление
 async function togglePin(id, status) {
-    await fetch(WORKER_URL, {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status }),
-        credentials: "include"
-    });
-    loadNotes();
+    try {
+        await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status }),
+            credentials: "include"
+        });
+        loadNotes();
+        showToast(status ? "📌 Закреплено" : "📍 Откреплено");
+    } catch (err) {
+        showToast("❌ Не удалось изменить", "error");
+    }
 }
 
 // Удаление
@@ -542,8 +624,10 @@ async function confirmDelete() {
         });
         closeConfirmModal();
         loadNotes();
+        showToast("🗑 Запись удалена");
     } catch (err) {
         console.error("Ошибка удаления:", err);
+        showToast("❌ Ошибка удаления", "error");
     }
 }
 
@@ -608,31 +692,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-// Функции для всплывающего уведомления
-function showAutoLoginToast() {
-    let toast = document.getElementById("autoLoginToast");
+// Универсальные всплывающие уведомления
+function showToast(message, type = "ok") {
+    let toast = document.getElementById("appToast");
     if (!toast) {
         toast = document.createElement("div");
-        toast.id = "autoLoginToast";
+        toast.id = "appToast";
         toast.className = "toast-notification";
         toast.innerHTML = `
-            <span>💡 Так как вы уже вводили пароль, ещё раз вводить его не нужно</span>
+            <span class="toast-message"></span>
             <button class="toast-close" onclick="closeToast()">✕</button>
         `;
         document.body.appendChild(toast);
     }
 
-    setTimeout(() => {
-        toast.classList.add("show");
-    }, 100);
+    const msg = toast.querySelector(".toast-message");
+    if (msg) msg.textContent = message;
 
-    window.toastTimer = setTimeout(() => {
-        closeToast();
-    }, 6000);
+    toast.classList.remove("toast-error", "toast-ok", "show");
+    toast.classList.add(type === "error" ? "toast-error" : "toast-ok");
+
+    // перезапуск анимации
+    void toast.offsetWidth;
+    setTimeout(() => toast.classList.add("show"), 10);
+
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => closeToast(), 3200);
+}
+
+function showAutoLoginToast() {
+    showToast("💡 Пароль уже вводили — повторный вход не нужен");
 }
 
 function closeToast() {
-    const toast = document.getElementById("autoLoginToast");
+    const toast = document.getElementById("appToast") || document.getElementById("autoLoginToast");
     if (toast) {
         toast.classList.remove("show");
         clearTimeout(window.toastTimer);
@@ -675,10 +768,13 @@ window.handleImageUpload = handleImageUpload;
 window.openNoteModal = openNoteModal;
 window.closeModal = closeModal;
 window.filterCategory = filterCategory;
+window.setCategory = setCategory;
+window.toggleCategoryMenu = toggleCategoryMenu;
 window.closeConfirmModal = closeConfirmModal;
 window.copyToClipboard = copyToClipboard;
 window.copyNoteById = copyNoteById;
 window.copyModalContent = copyModalContent;
 window.setTheme = setTheme;
 window.closeToast = closeToast;
+window.showToast = showToast;
 window.escapeHtml = escapeHtml;
