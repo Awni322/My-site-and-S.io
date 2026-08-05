@@ -12,16 +12,16 @@
         <button class="settings-toggle-btn" id="settingsMenuBtn" title="Настройки">⚙️</button>
         <div class="settings-dropdown" id="settingsDropdown">
             <div class="settings-section-title">Тема</div>
-            <button class="settings-option" onclick="setTheme('default')">
-                <span class="theme-preview-dot" style="background: #4ade80;"></span>
+            <button class="settings-option" data-theme-value="default" onclick="setTheme('default')">
+                <span class="theme-preview preview-dark"><span class="tp-bg"></span><span class="tp-accent"></span></span>
                 Тёмная
             </button>
-            <button class="settings-option" onclick="setTheme('light')">
-                <span class="theme-preview-dot" style="background: #f0f2f5; border-color: #ccc;"></span>
+            <button class="settings-option" data-theme-value="light" onclick="setTheme('light')">
+                <span class="theme-preview preview-light"><span class="tp-bg"></span><span class="tp-accent"></span></span>
                 Светлая
             </button>
-            <button class="settings-option" onclick="setTheme('dark-blue')">
-                <span class="theme-preview-dot" style="background: #38bdf8;"></span>
+            <button class="settings-option" data-theme-value="dark-blue" onclick="setTheme('dark-blue')">
+                <span class="theme-preview preview-blue"><span class="tp-bg"></span><span class="tp-accent"></span></span>
                 Тёмно-синяя
             </button>
             <div class="settings-divider"></div>
