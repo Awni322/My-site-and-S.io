@@ -7,21 +7,26 @@
 </head>
 <body>
 
-    <!-- МЕНЮ СМЕНЫ ТЕМЫ -->
-    <div class="theme-menu-container">
-        <button class="theme-toggle-btn" id="themeMenuBtn" title="Сменить тему">🎨</button>
-        <div class="theme-dropdown" id="themeDropdown">
-            <button class="theme-option" onclick="setTheme('default')">
+    <!-- КНОПКА НАСТРОЕК -->
+    <div class="settings-menu-container">
+        <button class="settings-toggle-btn" id="settingsMenuBtn" title="Настройки">⚙️</button>
+        <div class="settings-dropdown" id="settingsDropdown">
+            <div class="settings-section-title">Тема</div>
+            <button class="settings-option" onclick="setTheme('default')">
                 <span class="theme-preview-dot" style="background: #4ade80;"></span>
                 Тёмная
             </button>
-            <button class="theme-option" onclick="setTheme('light')">
+            <button class="settings-option" onclick="setTheme('light')">
                 <span class="theme-preview-dot" style="background: #f0f2f5; border-color: #ccc;"></span>
                 Светлая
             </button>
-            <button class="theme-option" onclick="setTheme('dark-blue')">
+            <button class="settings-option" onclick="setTheme('dark-blue')">
                 <span class="theme-preview-dot" style="background: #38bdf8;"></span>
                 Тёмно-синяя
+            </button>
+            <div class="settings-divider"></div>
+            <button class="settings-option settings-logout" onclick="logout()">
+                🚪 Выйти
             </button>
         </div>
     </div>
@@ -36,10 +41,7 @@
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
     <div id="content" style="display: none;">
-        <div class="header-row">
-            <h1>Архив</h1>
-            <button class="btn-logout" onclick="logout()" title="Выйти">🚪 Выйти</button>
-        </div>
+        <h1>Архив</h1>
 
         <div class="form-container">
             <h2 id="formTitle">Новая запись</h2>
