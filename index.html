@@ -99,10 +99,14 @@
                 <button class="filter-btn" onclick="filterCategory('Скрипты', event)">📜 Скрипты</button>
             </div>
             <div class="sort-wrap">
-                <select id="sortSelect" class="sort-select" onchange="handleSort()">
-                    <option value="newest">Сначала новые</option>
-                    <option value="oldest">Сначала старые</option>
-                </select>
+                <button type="button" class="sort-trigger" id="sortTrigger" onclick="toggleSortMenu(event)">
+                    <span id="sortLabel">Сначала новые</span>
+                    <span class="sort-arrow">▾</span>
+                </button>
+                <div class="sort-menu" id="sortMenu">
+                    <button type="button" class="sort-option active" data-sort="newest" onclick="setSort('newest', event)">Сначала новые</button>
+                    <button type="button" class="sort-option" data-sort="oldest" onclick="setSort('oldest', event)">Сначала старые</button>
+                </div>
             </div>
         </div>
 
