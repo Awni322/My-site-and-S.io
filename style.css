@@ -508,8 +508,8 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 
 .note-card:hover { 
     transform: translateY(-8px); 
-    border-color: rgba(34, 197, 94, 0.6); 
-    box-shadow: 0 16px 35px -8px rgba(0, 0, 0, 0.5); 
+    border-color: color-mix(in srgb, var(--accent-color) 60%, transparent); 
+    box-shadow: 0 16px 35px -8px var(--shadow-color, rgba(0, 0, 0, 0.5)); 
 }
 
 .note-card.pinned { 
@@ -637,11 +637,20 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     color: #ffffff;
     text-shadow: none;
 }
-/* Добавьте это к стилям наведения ваших кнопок (hover) */
+/* Подсветка кнопок при наведении — цвет акцента текущей темы */
 .btn-action:hover, button:hover {
-    /* Если у вас кнопки зеленого цвета, они будут светиться зеленым */
-    box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--accent-color) 45%, transparent);
     transform: translateY(-2px);
+}
+
+.btn-save:hover {
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent-color) 55%, transparent);
+}
+
+.btn-delete:hover,
+.btn-delete-confirm:hover,
+.settings-logout:hover {
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.4) !important;
 }
 /* Контейнер для всплывающих уведомлений */
 .toast-notification {
