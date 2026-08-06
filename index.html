@@ -2,146 +2,193 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Архив Заметок</title>
+    <title>Архив</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Меню настроек и тем -->
+    <!-- КНОПКА НАСТРОЕК -->
     <div class="settings-menu-container">
-        <button id="settingsMenuBtn" class="settings-toggle-btn">⚙️</button>
-        <div id="settingsDropdown" class="settings-dropdown">
-            <button class="settings-option" data-theme-value="default" onclick="setTheme('default')">🌱 Зеленая (Стандарт)</button>
-            <button class="settings-option" data-theme-value="light" onclick="setTheme('light')">☀️ Светлая</button>
-            <button class="settings-option" data-theme-value="dark-blue" onclick="setTheme('dark-blue')">🌌 Темно-синяя</button>
-            <button class="settings-option" data-theme-value="black" onclick="setTheme('black')">🖤 Черная</button>
-            <button class="settings-option" data-theme-value="black-red" onclick="setTheme('black-red')">🔴 Черно-красная</button>
-            <hr style="border: 0; border-top: 1px solid var(--border-color-solid); margin: 6px 0;">
-            <button class="settings-option" onclick="requestLogout()">🚪 Выйти</button>
+        <button class="settings-toggle-btn" id="settingsMenuBtn" title="Настройки">⚙️</button>
+        <div class="settings-dropdown" id="settingsDropdown">
+            <div class="settings-section-title">Тема</div>
+            <button class="settings-option" data-theme-value="default" onclick="setTheme('default')">
+                <span class="theme-preview preview-dark"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Тёмная
+            </button>
+            <button class="settings-option" data-theme-value="light" onclick="setTheme('light')">
+                <span class="theme-preview preview-light"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Светлая
+            </button>
+            <button class="settings-option" data-theme-value="dark-blue" onclick="setTheme('dark-blue')">
+                <span class="theme-preview preview-blue"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Тёмно-синяя
+            </button>
+            <button class="settings-option" data-theme-value="black" onclick="setTheme('black')">
+                <span class="theme-preview preview-black"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Чёрная
+            </button>
+            <button class="settings-option" data-theme-value="black-red" onclick="setTheme('black-red')">
+                <span class="theme-preview preview-black-red"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Чёрно-красная
+            </button>
+            <div class="settings-divider"></div>
+            <button class="settings-option settings-logout" onclick="requestLogout()">
+                🚪 Выйти
+            </button>
         </div>
     </div>
 
-    <!-- Форма входа -->
+    <!-- ЭКРАН ВХОДА -->
     <div id="login">
-        <h2>🔒 Вход в архив</h2>
+        <h2>Вход</h2>
         <input type="password" id="password" placeholder="Введите пароль">
-        <button id="loginBtn">Войти</button>
-        <div id="message" style="margin-top: 10px; font-size: 13px;"></div>
+        <button onclick="login()">Войти</button>
+        <div id="message"></div>
     </div>
 
-    <!-- Основной контент заметок -->
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
     <div id="content" style="display: none;">
-        <h1>Заметки и Скрипты</h1>
+
+        <!-- Стрелка перехода в мини-игры -->
+        <button class="side-arrow side-arrow-right" id="gamesArrowBtn" onclick="openGamesPanel()" title="Мини-игры">›</button>
+
+        <h1>Архив</h1>
 
         <div class="form-container">
-            <h3 id="formTitle" style="margin-top:0;">Новая запись</h3>
-            <input type="text" id="title" placeholder="Заголовок...">
-            <textarea id="contentInput" placeholder="Текст заметки или код..."></textarea>
-            <input type="text" id="robloxUrl" placeholder="Ссылка (необязательно)">
+            <h2 id="formTitle">Новая запись</h2>
             
+            <input type="text" id="title" placeholder="Заголовок">
+            <textarea id="contentInput" placeholder="Введите текст..."></textarea>
+
             <div class="radio-group">
                 <label class="radio-label">
-                    <input type="radio" name="category" value="Заметки" checked> Заметки
+                    <input type="radio" name="category" value="Заметки" checked> 📝 Заметки
                 </label>
                 <label class="radio-label">
-                    <input type="radio" name="category" value="Скрипты"> Скрипты
+                    <input type="radio" name="category" value="Скрипты"> 📜 Скрипты
                 </label>
             </div>
 
-            <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
-                <label for="imageInput" style="cursor: pointer; background: var(--input-bg); border: 1px solid var(--border-color-solid); padding: 8px 12px; border-radius: 8px; font-size: 13px;">
-                    📷 Прикрепить фото
+            <input type="text" id="robloxUrl" placeholder="Ссылка (необязательно)...">
+
+            <div class="file-upload-wrapper">
+                <label class="file-upload-button" for="imageInput">
+                    📎 <span id="fileName">Выберите фото</span>
                 </label>
-                <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
-                <span id="fileName" style="font-size: 12px; color: var(--text-muted);"></span>
+                <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <label style="cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="isPinned"> 📌 Закрепить запись
+            <div class="pin-wrapper">
+                <label class="toggle-container">
+                    <input type="checkbox" id="isPinned">
+                    <span class="toggle-slider"></span>
+                    📌 Закрепить запись
                 </label>
             </div>
 
             <div class="actions-wrapper">
                 <button class="btn-save" onclick="saveNote()">Сохранить</button>
-                <button class="btn-cancel" id="btnCancel" style="display:none;" onclick="resetForm()">Отмена</button>
+                <button class="btn-cancel" id="btnCancel" onclick="resetForm()" style="display: none;">Отмена</button>
             </div>
         </div>
 
-        <input type="text" id="search" placeholder="🔍 Поиск..." oninput="handleSearch()">
+        <!-- ПОИСК -->
+        <input type="text" id="search" placeholder="Поиск..." oninput="handleSearch()">
 
-        <!-- Фильтры категорий -->
-        <div class="category-filters" style="display: flex; gap: 8px; margin-bottom: 20px;">
-            <button class="filter-btn active" data-category="all" onclick="setCategory('all', event)">Все</button>
-            <button class="filter-btn" data-category="Заметки" onclick="setCategory('Заметки', event)">Заметки</button>
-            <button class="filter-btn" data-category="Скрипты" onclick="setCategory('Скрипты', event)">Скрипты</button>
+        <div class="filters-row">
+            <div class="category-filters">
+                <button type="button" class="filter-btn active" data-category="all" onclick="setCategory('all', event)">Все</button>
+                <button type="button" class="filter-btn" data-category="Заметки" onclick="setCategory('Заметки', event)">📝 Заметки</button>
+                <button type="button" class="filter-btn" data-category="Скрипты" onclick="setCategory('Скрипты', event)">📜 Скрипты</button>
+            </div>
+            <div class="sort-wrap">
+                <button type="button" class="sort-trigger" id="sortTrigger" onclick="toggleSortMenu(event)">
+                    <span id="sortLabel">Сначала новые</span>
+                    <span class="sort-arrow">▾</span>
+                </button>
+                <div class="sort-menu" id="sortMenu">
+                    <button type="button" class="sort-option active" data-sort="newest" onclick="setSort('newest', event)">Сначала новые</button>
+                    <button type="button" class="sort-option" data-sort="oldest" onclick="setSort('oldest', event)">Сначала старые</button>
+                </div>
+            </div>
         </div>
 
-        <!-- Контейнер для карточек заметок -->
         <div id="notes"></div>
     </div>
 
-    <!-- Модальное окно просмотра -->
-    <div id="modalOverlay" class="modal-overlay" onclick="closeModal()">
+    <!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
         <div class="modal-card" onclick="event.stopPropagation()">
-            <button style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text-color); font-size: 20px; cursor: pointer;" onclick="closeModal()">✕</button>
-            <div style="display: flex; gap: 20px; padding: 25px; flex-wrap: wrap;">
-                <div id="modalLeft" style="flex: 1; min-width: 250px; display: none; align-items: center; justify-content: center;">
-                    <img id="modalImage" src="" style="max-width: 100%; max-height: 350px; border-radius: 12px; object-fit: contain;">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="modal-body">
+                <div class="modal-left" id="modalLeft">
+                    <img id="modalImage" src="" alt="Превью">
                 </div>
-                <div class="modal-right" style="flex: 1; min-width: 250px; display: flex; flex-direction: column;">
-                    <h2 id="modalTitle" style="margin-top: 0; color: var(--accent-color);"></h2>
-                    <div id="modalText" style="white-space: pre-wrap; font-size: 14px; margin-bottom: 15px; color: var(--text-color);"></div>
-                    <button id="btnModalCopy" class="btn-action btn-copy" style="align-self: flex-start; padding: 8px 16px; margin-top: auto;" onclick="copyModalContent()">📋 Скопировать текст</button>
+                <div class="modal-right">
+                    <h2 id="modalTitle"></h2>
+                    <div id="modalRobloxContainer"></div>
+                    <div id="modalText"></div>
+                    <button class="btn-modal-copy" id="btnModalCopy" onclick="copyModalContent()">
+                        📋 Скопировать текст
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Модальное окно подтверждения -->
-    <div id="confirmOverlay" class="modal-overlay">
-        <div class="modal-card" style="max-width: 400px; padding: 20px; text-align: center;">
-            <h3 id="confirmTitle" style="margin-top:0;"></h3>
-            <p id="confirmText" style="color: var(--text-muted); font-size: 14px;"></p>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="btnConfirmAction" class="btn-save" style="background: #ef4444; color: white;">Подтвердить</button>
-                <button class="btn-cancel" style="flex: 1;" onclick="closeConfirmModal()">Отмена</button>
-            </div>
-        </div>
-    </div>
+    <!-- ПАНЕЛЬ МИНИ-ИГР -->
+    <div class="games-panel" id="gamesPanel">
+        <button class="side-arrow side-arrow-left" id="gamesBackBtn" onclick="closeGamesPanel()" title="Назад к заметкам">‹</button>
 
-    <!-- Стрелка вызова мини-игр -->
-    <button id="sideArrowRight" class="side-arrow side-arrow-right">‹</button>
-
-    <!-- Панель мини-игр -->
-    <div id="gamesPanel" class="games-panel">
-        <button id="sideArrowLeft" class="side-arrow side-arrow-left">›</button>
         <div class="games-panel-inner">
-            <div class="games-title">🎮 Мини-игры</div>
+            <h1 class="games-title">🎮 Мини-игры</h1>
+
             <div class="games-grid">
-                <!-- Колесо -->
+
+                <!-- Колесо фортуны -->
                 <div class="game-card">
-                    <h3>🎡 Колесо Фортуны</h3>
-                    <canvas id="wheelCanvas" width="220" height="220" style="transition: transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1); margin-bottom: 10px;"></canvas>
-                    <div id="wheelResult" style="font-weight: 600; min-height: 24px; margin-bottom: 8px; color: var(--accent-color);"></div>
-                    <button class="game-btn" onclick="spinWheel()">Крутить!</button>
+                    <h2>🎡 Колесо фортуны</h2>
+                    <div class="wheel-wrapper">
+                        <div class="wheel-pointer"></div>
+                        <canvas id="wheelCanvas" width="280" height="280"></canvas>
+                    </div>
+                    <button class="btn-save game-btn" onclick="spinWheel()">Крутить</button>
+                    <div class="game-result" id="wheelResult"></div>
                 </div>
+
                 <!-- Крестики-нолики -->
                 <div class="game-card">
-                    <h3>❌⭕ Крестики-Нолики</h3>
-                    <div id="tttBoard" class="ttt-board"></div>
-                    <div id="tttResult" style="font-weight: 600; min-height: 24px; margin-bottom: 8px; color: var(--accent-color);">Ты играешь за ❌</div>
-                    <button class="game-btn" onclick="resetTicTacToe()">Заново</button>
+                    <h2>❌⭕ Крестики-нолики</h2>
+                    <div class="ttt-board" id="tttBoard"></div>
+                    <div class="game-result" id="tttResult">Ты играешь за ❌. Ходи первым!</div>
+                    <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
                 </div>
+
                 <!-- Угадай число -->
                 <div class="game-card">
-                    <h3>🔢 Угадай Число (1-100)</h3>
-                    <input type="number" id="guessInput" placeholder="Число..." style="text-align: center; margin-bottom: 10px;">
-                    <div id="guessResult" style="font-weight: 600; min-height: 24px; margin-bottom: 8px; color: var(--accent-color);">Загадано число от 1 до 100</div>
-                    <button class="game-btn" onclick="makeGuess()">Проверить</button>
-                    <button class="game-btn" onclick="resetGuessGame()" style="background: transparent; border: 1px solid var(--border-color-solid); color: var(--text-color); margin-top: 6px;">Сброс</button>
+                    <h2>🔢 Угадай число</h2>
+                    <p class="game-hint">Я загадал число от 1 до 100</p>
+                    <div class="guess-input-row">
+                        <input type="text" id="guessInput" placeholder="Введите число" inputmode="numeric">
+                        <button class="btn-save game-btn-inline" onclick="makeGuess()">Проверить</button>
+                    </div>
+                    <div class="game-result" id="guessResult"></div>
+                    <button class="btn-cancel game-btn" onclick="resetGuessGame()">Новая игра</button>
                 </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ОКНО ПОДТВЕРЖДЕНИЯ -->
+    <div class="modal-overlay" id="confirmOverlay">
+        <div class="confirm-card">
+            <h3 id="confirmTitle">Подтверждение</h3>
+            <p id="confirmText">Вы уверены?</p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Отмена</button>
+                <button class="btn-delete-confirm" id="btnConfirmAction">Подтвердить</button>
             </div>
         </div>
     </div>
