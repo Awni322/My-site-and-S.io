@@ -32,6 +32,7 @@ async function login() {
             document.getElementById("login").style.display = "none";
             document.getElementById("content").style.display = "flex";
             loadNotes();
+            connectNotesSocket();
         } else if (response.status === 429) {
             let data = {};
             try { data = await response.json(); } catch (_) {}
@@ -683,6 +684,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (loginContainer) loginContainer.style.display = "none";
             if (contentContainer) contentContainer.style.display = "flex";
             applyFiltersAndRender();
+            connectNotesSocket();
             
             // 👉 ВОТ ЗДЕСЬ ТЕПЕРЬ ВЫЗЫВАЕТСЯ УВЕДОМЛЕНИЕ ПРИ АВТОМАТИЧЕСКОМ ВХОДЕ
             showAutoLoginToast();
@@ -753,6 +755,7 @@ function requestLogout() {
 // Выход из аккаунта
 async function logout() {
     closeConfirmModal();
+    disconnectNotesSocket();
 
     try {
         await fetch(WORKER_URL + "logout", {
@@ -770,6 +773,40 @@ async function logout() {
     currentNotesList = [];
     showToast("🚪 Вы вышли");
 }
+
+// ==========================================
+// РЕАЛЬНОЕ ВРЕМЯ — периодический опрос (polling)
+// ==========================================
+const NOTES_POLL_INTERVAL_MS = 5000;
+let notesPollTimer = null;
+
+function connectNotesSocket() {
+    // Название сохранено для совместимости с остальным кодом (login/logout),
+    // но по сути это запуск обычного опроса сервера через равные интервалы.
+    if (notesPollTimer) return;
+    notesPollTimer = setInterval(() => {
+        const contentVisible = document.getElementById("content")?.style.display !== "none";
+        if (document.visibilityState === "visible" && contentVisible) {
+            loadNotes();
+        }
+    }, NOTES_POLL_INTERVAL_MS);
+}
+
+function disconnectNotesSocket() {
+    if (notesPollTimer) {
+        clearInterval(notesPollTimer);
+        notesPollTimer = null;
+    }
+}
+
+// Сразу опрашиваем сервер, когда пользователь возвращается на вкладку —
+// чтобы не ждать до конца текущего интервала
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        const contentVisible = document.getElementById("content")?.style.display !== "none";
+        if (contentVisible) loadNotes();
+    }
+});
 
 // ==========================================
 // ПАНЕЛЬ МИНИ-ИГР
@@ -1019,3 +1056,5 @@ window.spinWheel = spinWheel;
 window.resetTicTacToe = resetTicTacToe;
 window.makeGuess = makeGuess;
 window.resetGuessGame = resetGuessGame;
+window.connectNotesSocket = connectNotesSocket;
+window.disconnectNotesSocket = disconnectNotesSocket;
