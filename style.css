@@ -981,3 +981,174 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .toast-notification.toast-ok {
     border-color: color-mix(in srgb, var(--accent-color) 40%, transparent);
 }
+
+/* ==========================================
+   9. СТРЕЛКИ ПЕРЕХОДА И ПАНЕЛЬ МИНИ-ИГР
+   ========================================== */
+.side-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--card-bg-solid);
+    border: 1px solid var(--border-color-solid);
+    color: var(--accent-color);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 2500;
+    box-shadow: 0 4px 14px var(--shadow-color, rgba(0, 0, 0, 0.35));
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.side-arrow:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 25%, transparent);
+    transform: translateY(-50%) scale(1.08);
+}
+
+.side-arrow-right { right: 20px; }
+.side-arrow-left { left: 20px; }
+
+.games-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-color);
+    z-index: 2400;
+    transform: translateX(100%);
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+}
+
+.games-panel.active {
+    transform: translateX(0);
+}
+
+.games-panel-inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 90px 20px 60px;
+}
+
+.games-title {
+    text-align: center;
+    color: var(--accent-color);
+    font-size: 30px;
+    font-weight: 800;
+    margin-bottom: 30px;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.game-card {
+    background: var(--card-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.game-card h2 {
+    font-size: 18px;
+    margin: 0 0 16px 0;
+    color: var(--text-color);
+}
+
+.game-btn { margin-top: 14px; width: 100%; max-width: 220px; }
+.game-btn-inline { padding: 0 18px; white-space: nowrap; }
+
+.game-result {
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-muted);
+    min-height: 20px;
+    font-weight: 600;
+}
+
+.game-hint { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+
+.guess-input-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 280px;
+}
+.guess-input-row input { margin-bottom: 0 !important; flex: 1; min-width: 0; }
+
+/* Колесо фортуны */
+.wheel-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin-bottom: 4px;
+}
+.wheel-pointer {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 22px solid var(--accent-color);
+    z-index: 5;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+#wheelCanvas {
+    border-radius: 50%;
+    display: block;
+    border: 4px solid var(--card-bg-solid);
+    box-shadow: 0 8px 24px var(--shadow-color, rgba(0, 0, 0, 0.4));
+    transition: transform 4.5s cubic-bezier(0.12, 0.85, 0.15, 1);
+}
+
+/* Крестики-нолики */
+.ttt-board {
+    display: grid;
+    grid-template-columns: repeat(3, 64px);
+    grid-template-rows: repeat(3, 64px);
+    gap: 6px;
+    margin-bottom: 4px;
+}
+.ttt-cell {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color-solid);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    cursor: pointer;
+    color: var(--accent-color);
+    transition: background 0.2s ease;
+}
+.ttt-cell:hover { background: color-mix(in srgb, var(--accent-color) 12%, transparent); }
+.ttt-cell.taken { cursor: default; }
+
+@media (max-width: 520px) {
+    .ttt-board { grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(3, 56px); }
+    .wheel-wrapper { width: 240px; height: 240px; }
+    #wheelCanvas { width: 240px; height: 240px; }
+}
