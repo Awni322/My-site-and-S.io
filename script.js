@@ -39,11 +39,11 @@ async function login() {
             message.innerHTML = `⏳ Слишком много попыток. Подождите ~${mins} мин.`;
             message.style.color = "#fbbf24";
         } else {
-            message.innerHTML = "❌ Неверный пароль пиши в тг";
+            message.innerHTML = "❌ Неверный пароль";
             message.style.color = "#f87171";
         }
     } catch (e) {
-        message.innerHTML = "❌ Ошибка соединения пиши в тг";
+        message.innerHTML = "❌ Ошибка соединения";
         message.style.color = "#f87171";
     }
 }
@@ -582,22 +582,38 @@ async function togglePin(id, status) {
     }
 }
 
-// Удаление
-function deleteNote(id) {
-    noteIdToDelete = id;
+// Универсальное окно подтверждения
+function openConfirmModal({ title, text, confirmLabel, onConfirm }) {
     const overlay = document.getElementById("confirmOverlay");
-    const confirmBtn = document.getElementById("btnConfirmDelete");
+    const titleEl = document.getElementById("confirmTitle");
+    const textEl = document.getElementById("confirmText");
+    const confirmBtn = document.getElementById("btnConfirmAction");
+    if (!overlay || !confirmBtn) return;
 
-    if (confirmBtn && overlay) {
-        confirmBtn.onclick = () => confirmDelete();
-        overlay.classList.add("active");
-    }
+    if (titleEl) titleEl.textContent = title || "Подтверждение";
+    if (textEl) textEl.textContent = text || "Вы уверены?";
+    confirmBtn.textContent = confirmLabel || "Подтвердить";
+    confirmBtn.onclick = () => {
+        if (typeof onConfirm === "function") onConfirm();
+    };
+    overlay.classList.add("active");
 }
 
 function closeConfirmModal() {
     const overlay = document.getElementById("confirmOverlay");
     if (overlay) overlay.classList.remove("active");
     noteIdToDelete = null;
+}
+
+// Удаление
+function deleteNote(id) {
+    noteIdToDelete = id;
+    openConfirmModal({
+        title: "Удалить запись?",
+        text: "Это действие нельзя будет отменить.",
+        confirmLabel: "Удалить",
+        onConfirm: confirmDelete
+    });
 }
 
 async function confirmDelete() {
@@ -721,10 +737,22 @@ function closeToast() {
     }
 }
 
-// Выход из аккаунта
-async function logout() {
+// Запрос выхода — с подтверждением
+function requestLogout() {
     const dropdown = document.getElementById("settingsDropdown");
     if (dropdown) dropdown.classList.remove("active");
+
+    openConfirmModal({
+        title: "Выйти из архива?",
+        text: "Потребуется снова ввести пароль.",
+        confirmLabel: "Выйти",
+        onConfirm: logout
+    });
+}
+
+// Выход из аккаунта
+async function logout() {
+    closeConfirmModal();
 
     try {
         await fetch(WORKER_URL + "logout", {
@@ -732,6 +760,7 @@ async function logout() {
             credentials: "include"
         });
     } catch (_) {}
+
     document.getElementById("content").style.display = "none";
     document.getElementById("login").style.display = "block";
     const pass = document.getElementById("password");
@@ -739,11 +768,13 @@ async function logout() {
     const msg = document.getElementById("message");
     if (msg) msg.innerHTML = "";
     currentNotesList = [];
+    showToast("🚪 Вы вышли");
 }
 
 // Экспорт функций в глобальную область видимости
 window.login = login;
 window.logout = logout;
+window.requestLogout = requestLogout;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
 window.editNote = editNote;
