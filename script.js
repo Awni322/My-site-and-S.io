@@ -1028,7 +1028,269 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================
+    // 1. УВЕДОМЛЕНИЯ (TOASTS)
+    // ==========================================
+    window.showToast = function (message, type = 'ok') {
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        
+        toast.innerHTML = `
+            <span>${message}</span>
+            <button class="toast-close">&times;</button>
+        `;
 
+        document.body.appendChild(toast);
+
+        // Плавное появление
+        requestAnimationFrame(() => {
+            toast.classList.add('show');
+        });
+
+        const closeToast = () => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        };
+
+        toast.querySelector('.toast-close').addEventListener('click', closeToast);
+        setTimeout(closeToast, 4000);
+    };
+
+    // ==========================================
+    // 2. ВЫДВИЖНАЯ ПАНЕЛЬ ИГР И СТРЕЛКИ
+    // ==========================================
+    const gamesPanel = document.getElementById('gamesPanel');
+    const sideArrowRight = document.getElementById('sideArrowRight');
+    const sideArrowLeft = document.getElementById('sideArrowLeft');
+
+    if (sideArrowRight && gamesPanel) {
+        sideArrowRight.addEventListener('click', () => {
+            gamesPanel.classList.add('active');
+        });
+    }
+
+    if (sideArrowLeft && gamesPanel) {
+        sideArrowLeft.addEventListener('click', () => {
+            gamesPanel.classList.remove('active');
+        });
+    }
+
+    // ==========================================
+    // 3. ИГРА 1: КОЛЕСО ФОРТУНЫ
+    // ==========================================
+    const canvas = document.getElementById('wheelCanvas');
+    const spinBtn = document.getElementById('spinBtn');
+    const wheelResult = document.getElementById('wheelResult');
+
+    if (canvas && spinBtn) {
+        const ctx = canvas.getContext('2d');
+        const sectors = ['100$', '500$', '0$', '10$', '1000$', '50$', '200$', '0$'];
+        const colors = ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+        const numSectors = sectors.length;
+        const arc = (2 * Math.PI) / numSectors;
+
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        function drawWheel() {
+            const radius = canvas.width / 2;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < numSectors; i++) {
+                const angle = i * arc;
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius, angle, angle + arc);
+                ctx.lineTo(radius, radius);
+                ctx.fill();
+
+                // Текст
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(angle + arc / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.fillText(sectors[i], radius - 20, 5);
+                ctx.restore();
+            }
+        }
+
+        drawWheel();
+
+        spinBtn.addEventListener('click', () => {
+            if (isSpinning) return;
+            isSpinning = true;
+            wheelResult.textContent = 'Крутим...';
+
+            const extraSpins = 5 + Math.floor(Math.random() * 5);
+            const randomSectorIndex = Math.floor(Math.random() * numSectors);
+            const targetSectorAngle = (numSectors - randomSectorIndex - 0.5) * arc;
+            
+            // Вращаем канвас
+            const totalDegrees = (extraSpins * 360) + (targetSectorAngle * (180 / Math.PI));
+            currentRotation += totalDegrees;
+
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                const winningPrize = sectors[randomSectorIndex];
+                wheelResult.textContent = `Выигрыш: ${winningPrize}!`;
+                showToast(`Поздравляем! Ваш выигрыш: ${winningPrize}`, 'ok');
+            }, 4500);
+        });
+    }
+
+    // ==========================================
+    // 4. ИГРА 2: КРЕСТИКИ-НОЛИКИ (ПРОТИВ ИИ)
+    // ==========================================
+    const tttBoard = document.getElementById('tttBoard');
+    const tttResult = document.getElementById('tttResult');
+    const tttResetBtn = document.getElementById('tttResetBtn');
+
+    if (tttBoard) {
+        let boardState = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+
+        const winningCombos = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        function initTTT() {
+            tttBoard.innerHTML = '';
+            boardState = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            if (tttResult) tttResult.textContent = 'Ваш ход (X)';
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'ttt-cell';
+                cell.dataset.index = i;
+                cell.addEventListener('click', handleCellClick);
+                tttBoard.appendChild(cell);
+            }
+        }
+
+        function handleCellClick(e) {
+            const index = e.target.dataset.index;
+            if (boardState[index] !== '' || !gameActive) return;
+
+            makeMove(index, 'X');
+
+            if (checkWin('X')) {
+                tttResult.textContent = '🎉 Вы победили!';
+                gameActive = false;
+                return;
+            }
+
+            if (boardState.every(cell => cell !== '')) {
+                tttResult.textContent = '🤝 Ничья!';
+                gameActive = false;
+                return;
+            }
+
+            // Ход компьютера
+            tttResult.textContent = 'Ход компьютера...';
+            setTimeout(aiMove, 400);
+        }
+
+        function aiMove() {
+            if (!gameActive) return;
+
+            const emptyIndices = boardState
+                .map((val, idx) => val === '' ? idx : null)
+                .filter(val => val !== null);
+
+            if (emptyIndices.length === 0) return;
+
+            const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            makeMove(randomIndex, 'O');
+
+            if (checkWin('O')) {
+                tttResult.textContent = '🤖 Победил ИИ!';
+                gameActive = false;
+            } else if (boardState.every(cell => cell !== '')) {
+                tttResult.textContent = '🤝 Ничья!';
+                gameActive = false;
+            } else {
+                tttResult.textContent = 'Ваш ход (X)';
+            }
+        }
+
+        function makeMove(index, player) {
+            boardState[index] = player;
+            const cell = tttBoard.children[index];
+            cell.textContent = player;
+            cell.classList.add('taken');
+            cell.style.color = player === 'X' ? 'var(--accent-color)' : '#ef4444';
+        }
+
+        function checkWin(player) {
+            return winningCombos.some(combo => {
+                return combo.every(idx => boardState[idx] === player);
+            });
+        }
+
+        if (tttResetBtn) {
+            tttResetBtn.addEventListener('click', initTTT);
+        }
+
+        initTTT();
+    }
+
+    // ==========================================
+    // 5. ИГРА 3: УГАДАЙ ЧИСЛО
+    // ==========================================
+    const guessInput = document.getElementById('guessInput');
+    const guessBtn = document.getElementById('guessBtn');
+    const guessResult = document.getElementById('guessResult');
+    const guessResetBtn = document.getElementById('guessResetBtn');
+
+    if (guessInput && guessBtn) {
+        let targetNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+
+        function checkGuess() {
+            const val = parseInt(guessInput.value, 10);
+            if (isNaN(val) || val < 1 || val > 100) {
+                guessResult.textContent = 'Введи число от 1 до 100!';
+                return;
+            }
+
+            attempts++;
+
+            if (val === targetNumber) {
+                guessResult.textContent = `🎉 Браво! Угадано за ${attempts} попыток!`;
+                showToast(`Загаданное число ${targetNumber} угадано!`, 'ok');
+            } else if (val < targetNumber) {
+                guessResult.textContent = '📉 Загаданное число больше!';
+            } else {
+                guessResult.textContent = '📈 Загаданное число меньше!';
+            }
+            guessInput.value = '';
+            guessInput.focus();
+        }
+
+        guessBtn.addEventListener('click', checkGuess);
+        guessInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkGuess();
+        });
+
+        if (guessResetBtn) {
+            guessResetBtn.addEventListener('click', () => {
+                targetNumber = Math.floor(Math.random() * 100) + 1;
+                attempts = 0;
+                guessResult.textContent = 'Число загадано. Попробуй!';
+                guessInput.value = '';
+            });
+        }
+    }
+});
 // Экспорт функций в глобальную область видимости
 window.login = login;
 window.logout = logout;
