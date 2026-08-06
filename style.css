@@ -79,80 +79,6 @@ body, input, textarea, button {
     --shadow-color: rgba(80, 0, 0, 0.45);
 }
 
-/* Midnight + Ember */
-[data-theme="midnight"] {
-    --bg-color: #0D1117;
-    --card-bg: rgba(22, 27, 34, 0.85);
-    --card-bg-solid: #161B22;
-    --text-color: #F0F3F6;
-    --text-muted: #8B949E;
-    --accent-color: #FF6B35;
-    --border-color: rgba(255, 107, 53, 0.15);
-    --border-color-solid: #30363D;
-    --input-bg: #010409;
-    --glass-blur: blur(14px);
-    --shadow-color: rgba(0, 0, 0, 0.55);
-}
-
-/* Mulberry + Mint */
-[data-theme="mulberry"] {
-    --bg-color: #3A2036;
-    --card-bg: rgba(74, 42, 68, 0.82);
-    --card-bg-solid: #4A2A44;
-    --text-color: #F5EEF3;
-    --text-muted: #C4A8BE;
-    --accent-color: #DCE8DB;
-    --border-color: rgba(220, 232, 219, 0.18);
-    --border-color-solid: #5C3A56;
-    --input-bg: #2E192B;
-    --glass-blur: blur(14px);
-    --shadow-color: rgba(30, 10, 28, 0.5);
-}
-
-/* Crimson + Chalk (светлая) */
-[data-theme="chalk"] {
-    --bg-color: #F2EFE7;
-    --card-bg: rgba(255, 253, 249, 0.9);
-    --card-bg-solid: #FFFDF9;
-    --text-color: #2A1218;
-    --text-muted: #8A6A72;
-    --accent-color: #DC143C;
-    --border-color: rgba(220, 20, 60, 0.14);
-    --border-color-solid: #E5DCD3;
-    --input-bg: #EAE6DC;
-    --glass-blur: blur(16px);
-    --shadow-color: rgba(42, 18, 24, 0.1);
-}
-
-/* Slate + Blush */
-[data-theme="slate"] {
-    --bg-color: #2E3F4F;
-    --card-bg: rgba(54, 72, 88, 0.82);
-    --card-bg-solid: #364858;
-    --text-color: #F7F3F0;
-    --text-muted: #A8B6C2;
-    --accent-color: #F5C5B8;
-    --border-color: rgba(245, 197, 184, 0.18);
-    --border-color-solid: #4A5D6E;
-    --input-bg: #243340;
-    --glass-blur: blur(14px);
-    --shadow-color: rgba(15, 25, 35, 0.5);
-}
-
-/* Espresso + Cream */
-[data-theme="espresso"] {
-    --bg-color: #382A21;
-    --card-bg: rgba(72, 54, 42, 0.85);
-    --card-bg-solid: #48362A;
-    --text-color: #F7F0E8;
-    --text-muted: #C4B0A0;
-    --accent-color: #F0E5D3;
-    --border-color: rgba(240, 229, 211, 0.16);
-    --border-color-solid: #5C4638;
-    --input-bg: #2C211A;
-    --glass-blur: blur(14px);
-    --shadow-color: rgba(20, 12, 8, 0.5);
-}
 
 /* ==========================================
    2. БАЗОВЫЕ НАСТРОЙКИ И МЯГКИЙ ФОН
@@ -364,20 +290,7 @@ input[type="text"], input[type="password"], textarea {
 .theme-preview.preview-black-red .tp-bg { background: #0a0000; }
 .theme-preview.preview-black-red .tp-accent { background: #ef4444; }
 
-.theme-preview.preview-midnight .tp-bg { background: #0D1117; }
-.theme-preview.preview-midnight .tp-accent { background: #FF6B35; }
 
-.theme-preview.preview-mulberry .tp-bg { background: #3A2036; }
-.theme-preview.preview-mulberry .tp-accent { background: #DCE8DB; }
-
-.theme-preview.preview-chalk .tp-bg { background: #F2EFE7; }
-.theme-preview.preview-chalk .tp-accent { background: #DC143C; }
-
-.theme-preview.preview-slate .tp-bg { background: #2E3F4F; }
-.theme-preview.preview-slate .tp-accent { background: #F5C5B8; }
-
-.theme-preview.preview-espresso .tp-bg { background: #382A21; }
-.theme-preview.preview-espresso .tp-accent { background: #F0E5D3; }
 
 /* Чёрная / чёрно-красная — кнопки */
 [data-theme="black"] .btn-save,
@@ -402,45 +315,6 @@ input[type="text"], input[type="password"], textarea {
     border-color: rgba(239, 68, 68, 0.55);
 }
 
-[data-theme="midnight"] .btn-save,
-[data-theme="midnight"] .filter-btn.active,
-[data-theme="midnight"] .filter-btn:hover,
-[data-theme="midnight"] .pin-badge {
-    color: #0D1117;
-}
-
-[data-theme="mulberry"] .btn-save,
-[data-theme="mulberry"] .filter-btn.active,
-[data-theme="mulberry"] .filter-btn:hover,
-[data-theme="mulberry"] .pin-badge {
-    color: #3A2036;
-}
-
-[data-theme="chalk"] .btn-save,
-[data-theme="chalk"] .filter-btn.active,
-[data-theme="chalk"] .filter-btn:hover,
-[data-theme="chalk"] .pin-badge {
-    color: #ffffff;
-}
-
-[data-theme="chalk"] .note-card:hover {
-    box-shadow: 0 12px 28px -6px rgba(42, 18, 24, 0.12);
-    border-color: rgba(220, 20, 60, 0.35);
-}
-
-[data-theme="slate"] .btn-save,
-[data-theme="slate"] .filter-btn.active,
-[data-theme="slate"] .filter-btn:hover,
-[data-theme="slate"] .pin-badge {
-    color: #2E3F4F;
-}
-
-[data-theme="espresso"] .btn-save,
-[data-theme="espresso"] .filter-btn.active,
-[data-theme="espresso"] .filter-btn:hover,
-[data-theme="espresso"] .pin-badge {
-    color: #382A21;
-}
 
 
 /* Светлая тема — мягче тени и карточки */
