@@ -49,6 +49,10 @@
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
     <div id="content" style="display: none;">
+
+        <!-- Стрелка перехода в мини-игры -->
+        <button class="side-arrow side-arrow-right" id="gamesArrowBtn" onclick="openGamesPanel()" title="Мини-игры">›</button>
+
         <h1>Архив</h1>
 
         <div class="form-container">
@@ -129,6 +133,50 @@
                         📋 Скопировать текст
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ПАНЕЛЬ МИНИ-ИГР -->
+    <div class="games-panel" id="gamesPanel">
+        <button class="side-arrow side-arrow-left" id="gamesBackBtn" onclick="closeGamesPanel()" title="Назад к заметкам">‹</button>
+
+        <div class="games-panel-inner">
+            <h1 class="games-title">🎮 Мини-игры</h1>
+
+            <div class="games-grid">
+
+                <!-- Колесо фортуны -->
+                <div class="game-card">
+                    <h2>🎡 Колесо фортуны</h2>
+                    <div class="wheel-wrapper">
+                        <div class="wheel-pointer"></div>
+                        <canvas id="wheelCanvas" width="280" height="280"></canvas>
+                    </div>
+                    <button class="btn-save game-btn" onclick="spinWheel()">Крутить</button>
+                    <div class="game-result" id="wheelResult"></div>
+                </div>
+
+                <!-- Крестики-нолики -->
+                <div class="game-card">
+                    <h2>❌⭕ Крестики-нолики</h2>
+                    <div class="ttt-board" id="tttBoard"></div>
+                    <div class="game-result" id="tttResult">Ты играешь за ❌. Ходи первым!</div>
+                    <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
+                </div>
+
+                <!-- Угадай число -->
+                <div class="game-card">
+                    <h2>🔢 Угадай число</h2>
+                    <p class="game-hint">Я загадал число от 1 до 100</p>
+                    <div class="guess-input-row">
+                        <input type="text" id="guessInput" placeholder="Введите число" inputmode="numeric">
+                        <button class="btn-save game-btn-inline" onclick="makeGuess()">Проверить</button>
+                    </div>
+                    <div class="game-result" id="guessResult"></div>
+                    <button class="btn-cancel game-btn" onclick="resetGuessGame()">Новая игра</button>
+                </div>
+
             </div>
         </div>
     </div>
