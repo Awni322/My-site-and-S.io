@@ -771,6 +771,221 @@ async function logout() {
     showToast("🚪 Вы вышли");
 }
 
+// ==========================================
+// ПАНЕЛЬ МИНИ-ИГР
+// ==========================================
+function openGamesPanel() {
+    const panel = document.getElementById("gamesPanel");
+    if (panel) panel.classList.add("active");
+}
+
+function closeGamesPanel() {
+    const panel = document.getElementById("gamesPanel");
+    if (panel) panel.classList.remove("active");
+}
+
+// ─── Колесо фортуны ─────────────────────────────────────────
+const wheelSegments = ["🎉 Приз!", "😢 Мимо", "🔥 Ещё раз", "⭐ Бонус", "💤 Пусто", "🎁 Сюрприз", "🍀 Удача", "💥 Взрыв"];
+const wheelColors = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185", "#4ade80", "#f97316"];
+let currentWheelRotation = 0;
+let wheelSpinning = false;
+
+function drawWheel() {
+    const canvas = document.getElementById("wheelCanvas");
+    if (!canvas || !canvas.getContext) return;
+    const ctx = canvas.getContext("2d");
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const radius = canvas.width / 2 - 4;
+    const segAngle = (2 * Math.PI) / wheelSegments.length;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    wheelSegments.forEach((label, i) => {
+        const start = i * segAngle;
+        const end = start + segAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, start, end);
+        ctx.closePath();
+        ctx.fillStyle = wheelColors[i % wheelColors.length];
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(start + segAngle / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#10151f";
+        ctx.font = "600 13px Inter, sans-serif";
+        ctx.fillText(label, radius - 14, 5);
+        ctx.restore();
+    });
+}
+
+function spinWheel() {
+    if (wheelSpinning) return;
+    const canvas = document.getElementById("wheelCanvas");
+    const resultEl = document.getElementById("wheelResult");
+    if (!canvas) return;
+
+    wheelSpinning = true;
+    if (resultEl) resultEl.textContent = "";
+
+    const segAngle = 360 / wheelSegments.length;
+    const winIndex = Math.floor(Math.random() * wheelSegments.length);
+    const targetCenter = winIndex * segAngle + segAngle / 2;
+
+    // Указатель находится сверху (270° в системе координат canvas)
+    let needed = (270 - targetCenter) % 360;
+    if (needed < 0) needed += 360;
+
+    const extraSpins = 5 + Math.floor(Math.random() * 3);
+    const currentMod = ((currentWheelRotation % 360) + 360) % 360;
+    currentWheelRotation += extraSpins * 360 + ((needed - currentMod) + 360) % 360;
+
+    canvas.style.transform = `rotate(${currentWheelRotation}deg)`;
+
+    setTimeout(() => {
+        wheelSpinning = false;
+        if (resultEl) resultEl.textContent = "Выпало: " + wheelSegments[winIndex];
+    }, 4600);
+}
+
+// ─── Крестики-нолики ────────────────────────────────────────
+let tttBoard = Array(9).fill(null);
+let tttGameOver = false;
+
+function renderTicTacToe() {
+    const boardEl = document.getElementById("tttBoard");
+    if (!boardEl) return;
+    boardEl.innerHTML = "";
+    tttBoard.forEach((val, i) => {
+        const cell = document.createElement("div");
+        cell.className = "ttt-cell" + (val ? " taken" : "");
+        cell.textContent = val || "";
+        cell.onclick = () => tttMove(i);
+        boardEl.appendChild(cell);
+    });
+}
+
+function checkTttWinner(board) {
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (const [a, b, c] of lines) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
+    }
+    if (board.every(v => v)) return "draw";
+    return null;
+}
+
+function getComputerMove(board) {
+    const empty = board.map((v, i) => (v ? null : i)).filter(v => v !== null);
+    if (empty.length === 0) return -1;
+
+    for (const i of empty) {
+        const copy = board.slice();
+        copy[i] = "⭕";
+        if (checkTttWinner(copy) === "⭕") return i;
+    }
+    for (const i of empty) {
+        const copy = board.slice();
+        copy[i] = "❌";
+        if (checkTttWinner(copy) === "❌") return i;
+    }
+    if (board[4] === null) return 4;
+    return empty[Math.floor(Math.random() * empty.length)];
+}
+
+function tttMove(i) {
+    if (tttGameOver || tttBoard[i]) return;
+    tttBoard[i] = "❌";
+    let winner = checkTttWinner(tttBoard);
+
+    if (!winner) {
+        const compMove = getComputerMove(tttBoard);
+        if (compMove !== -1) tttBoard[compMove] = "⭕";
+        winner = checkTttWinner(tttBoard);
+    }
+
+    renderTicTacToe();
+    const resultEl = document.getElementById("tttResult");
+    if (!resultEl) return;
+
+    if (winner === "draw") {
+        tttGameOver = true;
+        resultEl.textContent = "🤝 Ничья!";
+    } else if (winner === "❌") {
+        tttGameOver = true;
+        resultEl.textContent = "🎉 Ты выиграл!";
+    } else if (winner === "⭕") {
+        tttGameOver = true;
+        resultEl.textContent = "😅 Компьютер выиграл!";
+    } else {
+        resultEl.textContent = "Твой ход!";
+    }
+}
+
+function resetTicTacToe() {
+    tttBoard = Array(9).fill(null);
+    tttGameOver = false;
+    renderTicTacToe();
+    const resultEl = document.getElementById("tttResult");
+    if (resultEl) resultEl.textContent = "Ты играешь за ❌. Ходи первым!";
+}
+
+// ─── Угадай число ───────────────────────────────────────────
+let secretNumber = Math.floor(Math.random() * 100) + 1;
+let guessAttempts = 0;
+
+function makeGuess() {
+    const input = document.getElementById("guessInput");
+    const resultEl = document.getElementById("guessResult");
+    if (!input || !resultEl) return;
+
+    const val = parseInt(input.value, 10);
+    if (isNaN(val) || val < 1 || val > 100) {
+        resultEl.textContent = "⚠️ Введи число от 1 до 100";
+        return;
+    }
+
+    guessAttempts++;
+    if (val === secretNumber) {
+        resultEl.textContent = `🎉 Угадал! Число было ${secretNumber}. Попыток: ${guessAttempts}`;
+    } else if (val < secretNumber) {
+        resultEl.textContent = "📈 Больше!";
+    } else {
+        resultEl.textContent = "📉 Меньше!";
+    }
+
+    input.value = "";
+    input.focus();
+}
+
+function resetGuessGame() {
+    secretNumber = Math.floor(Math.random() * 100) + 1;
+    guessAttempts = 0;
+    const resultEl = document.getElementById("guessResult");
+    if (resultEl) resultEl.textContent = "Загадано новое число!";
+    const input = document.getElementById("guessInput");
+    if (input) input.value = "";
+}
+
+// Инициализация игр при загрузке страницы
+document.addEventListener("DOMContentLoaded", () => {
+    drawWheel();
+    renderTicTacToe();
+
+    const guessInput = document.getElementById("guessInput");
+    if (guessInput) {
+        guessInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") makeGuess();
+        });
+    }
+});
+
 // Экспорт функций в глобальную область видимости
 window.login = login;
 window.logout = logout;
@@ -798,3 +1013,9 @@ window.setTheme = setTheme;
 window.closeToast = closeToast;
 window.showToast = showToast;
 window.escapeHtml = escapeHtml;
+window.openGamesPanel = openGamesPanel;
+window.closeGamesPanel = closeGamesPanel;
+window.spinWheel = spinWheel;
+window.resetTicTacToe = resetTicTacToe;
+window.makeGuess = makeGuess;
+window.resetGuessGame = resetGuessGame;
