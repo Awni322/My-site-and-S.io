@@ -1047,7 +1047,6 @@ window.openNoteModal = openNoteModal;
 window.closeModal = closeModal;
 window.filterCategory = filterCategory;
 window.setCategory = setCategory;
-window.toggleCategoryMenu = toggleCategoryMenu;
 window.closeConfirmModal = closeConfirmModal;
 window.copyToClipboard = copyToClipboard;
 window.copyNoteById = copyNoteById;
