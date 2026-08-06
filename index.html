@@ -33,7 +33,7 @@
                 Чёрно-красная
             </button>
             <div class="settings-divider"></div>
-            <button class="settings-option settings-logout" onclick="logout()">
+            <button class="settings-option settings-logout" onclick="requestLogout()">
                 🚪 Выйти
             </button>
         </div>
@@ -133,14 +133,14 @@
         </div>
     </div>
 
-    <!-- ОКНО ПОДТВЕРЖДЕНИЯ УДАЛЕНИЯ -->
+    <!-- ОКНО ПОДТВЕРЖДЕНИЯ -->
     <div class="modal-overlay" id="confirmOverlay">
         <div class="confirm-card">
-            <h3>Удалить запись?</h3>
-            <p>Это действие нельзя будет отменить.</p>
+            <h3 id="confirmTitle">Подтверждение</h3>
+            <p id="confirmText">Вы уверены?</p>
             <div class="confirm-actions">
                 <button class="btn-cancel" onclick="closeConfirmModal()">Отмена</button>
-                <button class="btn-delete-confirm" id="btnConfirmDelete">Удалить</button>
+                <button class="btn-delete-confirm" id="btnConfirmAction">Подтвердить</button>
             </div>
         </div>
     </div>
