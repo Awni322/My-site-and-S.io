@@ -191,8 +191,14 @@ async function loadNotes() {
             credentials: "include"
         });
         if (response.ok) {
-            currentNotesList = await response.json();
-            applyFiltersAndRender();
+            const freshNotes = await response.json();
+            // Перерисовываем карточки только если данные реально изменились —
+            // иначе при каждом опросе (раз в 5с) список будет "прыгать" без причины
+            const hasChanged = JSON.stringify(freshNotes) !== JSON.stringify(currentNotesList);
+            currentNotesList = freshNotes;
+            if (hasChanged) {
+                applyFiltersAndRender();
+            }
         }
     } catch (err) {
         console.error("Ошибка загрузки:", err);
