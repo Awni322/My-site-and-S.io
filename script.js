@@ -1544,14 +1544,15 @@ async function spinWheel() {
         const prize = wheelPrizes[winIndex];
 
         // Обрабатываем приз
-        let coins = prize.coins || 0;
+        let coins = prize.value || 0;
         let message = "";
+        let spins = prize.spins || 0;
 
         if (prize.reroll) {
             message = "Перекрутка! Крути еще раз бесплатно!";
             if (wheelBtn) wheelBtn.disabled = false;
-        } else if (prize.spins) {
-            message = `${prize.spins} прокрута! Крути еще ${prize.spins} раз!`;
+        } else if (spins > 0) {
+            message = `${spins} прокрута! Крути еще ${spins} раз!`;
             if (wheelBtn) wheelBtn.disabled = false;
         } else if (coins > 0) {
             message = `Выпало: ${prize.name}! +${coins} 🪙`;
@@ -1581,7 +1582,7 @@ async function spinWheel() {
                 userTotalWon = data.totalWon;
                 updateGameUI();
 
-                if (!prize.reroll && !prize.spins) {
+                if (!prize.reroll && spins === 0) {
                     lastWheelSpin = Math.floor(Date.now() / 1000);
                     checkWheelCooldown();
                 }
