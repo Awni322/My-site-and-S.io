@@ -101,7 +101,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Мягкий фоновый слой, который просто переливается на месте без резких смещений */
+/* Анимированный фон с движущимися градиентами */
 body::before {
     content: '';
     position: fixed;
@@ -110,25 +110,66 @@ body::before {
     width: 200vw;
     height: 200vh;
     z-index: -999;
-    background: radial-gradient(circle, var(--accent-color) 0%, var(--bg-color) 80%);
-    opacity: 0.15; /* Снизили яркость до 15% — теперь фон вообще не слепит */
-    filter: blur(120px); /* Максимальное размытие, убирающее любые намеки на артефакты */
-    animation: vibrantShift 20s ease-in-out infinite alternate;
+    background:
+        radial-gradient(circle at 20% 30%, var(--accent-color) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, var(--accent-color) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, var(--accent-color) 0%, transparent 40%);
+    opacity: 0.12;
+    filter: blur(80px);
+    animation: floatingGradient 25s ease-in-out infinite alternate;
     pointer-events: none;
 }
 
-@keyframes vibrantShift {
+@keyframes floatingGradient {
     0% {
-        transform: translate(0, 0) scale(1);
-        filter: blur(120px) hue-rotate(0deg);
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    33% {
+        transform: translate(-100px, 100px) scale(1.1) rotate(120deg);
+    }
+    66% {
+        transform: translate(100px, -50px) scale(0.95) rotate(240deg);
     }
     100% {
-        transform: translate(30px, 30px) scale(1.08);
-        filter: blur(130px) hue-rotate(20deg); /* Минимальный поворот цвета для еле заметной динамики */
+        transform: translate(50px, 80px) scale(1.05) rotate(360deg);
     }
 }
+
+/* Дополнительный слой с частицами */
 body::after {
-    display: none !important;
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -998;
+    background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.15), transparent),
+        radial-gradient(2px 2px at 60% 70%, rgba(255, 255, 255, 0.15), transparent),
+        radial-gradient(1px 1px at 50% 50%, rgba(255, 255, 255, 0.1), transparent),
+        radial-gradient(1px 1px at 80% 10%, rgba(255, 255, 255, 0.1), transparent),
+        radial-gradient(2px 2px at 90% 60%, rgba(255, 255, 255, 0.15), transparent),
+        radial-gradient(1px 1px at 33% 85%, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 200%;
+    background-position: 50% 50%;
+    animation: particlesFloat 30s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes particlesFloat {
+    0%, 100% {
+        background-position: 0% 0%;
+    }
+    25% {
+        background-position: 100% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    75% {
+        background-position: 0% 100%;
+    }
 }
 
 
@@ -175,6 +216,57 @@ input[type="text"], input[type="password"], textarea {
     border-radius: 50%;
     object-fit: cover;
     background: var(--input-bg);
+}
+
+/* Настройки профиля */
+.profile-settings-card {
+    max-width: 500px;
+    width: 90%;
+}
+
+.profile-settings-body {
+    padding: 30px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.profile-settings-body h2 {
+    font-size: 24px;
+    color: var(--accent-color);
+    margin: 0 0 30px 0;
+    text-align: center;
+}
+
+.settings-section {
+    background: var(--input-bg);
+    border: 1px solid var(--border-color-solid);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.settings-section h3 {
+    font-size: 16px;
+    color: var(--text-color);
+    margin: 0 0 16px 0;
+    font-weight: 700;
+}
+
+.settings-section input {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.settings-section button {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.settings-message {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
 }
 
 /* ==========================================
@@ -1223,7 +1315,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: var(--bg-color);
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
     z-index: 2400;
     transform: translateX(100%);
     transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
@@ -1237,56 +1329,270 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 }
 
 .games-panel-inner {
-    max-width: 1100px;
+    max-width: 1200px;
     width: 100%;
     padding: 90px 20px 60px;
 }
 
 .games-title {
     text-align: center;
-    color: var(--accent-color);
-    font-size: 30px;
-    font-weight: 800;
-    margin-bottom: 30px;
+    background: linear-gradient(135deg, var(--accent-color), #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 36px;
+    font-weight: 900;
+    margin-bottom: 40px;
+    text-shadow: 0 0 30px rgba(52, 211, 153, 0.3);
 }
 
 .games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 24px;
+    margin-bottom: 40px;
 }
 
 .game-card {
-    background: var(--card-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--border-color);
-    border-radius: 18px;
-    padding: 24px;
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.9), rgba(45, 55, 72, 0.7));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 28px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-color), #60a5fa, var(--accent-color));
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.game-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--accent-color);
+    box-shadow: 0 16px 48px rgba(52, 211, 153, 0.3);
 }
 
 .game-card h2 {
-    font-size: 18px;
-    margin: 0 0 16px 0;
-    color: var(--text-color);
+    font-size: 20px;
+    margin: 0 0 20px 0;
+    color: #ffffff;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.game-btn { margin-top: 14px; width: 100%; max-width: 220px; }
-.game-btn-inline { padding: 0 18px; white-space: nowrap; }
+/* Карточка баланса */
+.balance-card {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.1));
+    border: 2px solid rgba(52, 211, 153, 0.3);
+}
+
+.balance-card::before {
+    background: linear-gradient(90deg, #fbbf24, var(--accent-color), #fbbf24);
+}
+
+.balance-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin: 24px 0;
+}
+
+.balance-amount {
+    font-size: 48px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+}
+
+.balance-icon {
+    font-size: 42px;
+    animation: coinBounce 2s ease-in-out infinite;
+}
+
+@keyframes coinBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-10px) rotate(-10deg); }
+    75% { transform: translateY(-5px) rotate(10deg); }
+}
+
+/* Апгрейдер */
+.upgrader-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.08));
+    border: 2px solid rgba(139, 92, 246, 0.3);
+}
+
+.upgrader-card::before {
+    background: linear-gradient(90deg, #8b5cf6, #ec4899, #8b5cf6);
+}
+
+/* Лидерборд */
+.leaderboard-section {
+    margin-top: 0;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(26, 32, 44, 0.95), rgba(45, 55, 72, 0.85));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 700px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.leaderboard-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #fbbf24, var(--accent-color), #fbbf24);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+    border-radius: 20px 20px 0 0;
+}
+
+.leaderboard-section h2 {
+    font-size: 26px;
+    margin: 0 0 24px 0;
+    background: linear-gradient(135deg, #fbbf24, var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    font-weight: 900;
+}
+
+.leaderboard-item {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.05), rgba(16, 185, 129, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.leaderboard-item:hover {
+    background: linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(16, 185, 129, 0.1));
+    border-color: var(--accent-color);
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 4px 20px rgba(52, 211, 153, 0.2);
+}
+
+.game-btn {
+    margin-top: 14px;
+    width: 100%;
+    max-width: 220px;
+    background: linear-gradient(135deg, var(--accent-color), #10b981);
+    color: #ffffff;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(52, 211, 153, 0.4);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.game-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 211, 153, 0.6);
+}
+
+.game-btn:disabled {
+    background: linear-gradient(135deg, #4a5568, #718096);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.game-btn-inline {
+    padding: 0 18px;
+    white-space: nowrap;
+}
 
 .game-result {
-    margin-top: 12px;
-    font-size: 14px;
-    color: var(--text-muted);
-    min-height: 20px;
-    font-weight: 600;
+    margin-top: 16px;
+    font-size: 15px;
+    color: #ffffff;
+    min-height: 24px;
+    font-weight: 700;
+    padding: 10px 16px;
+    background: rgba(52, 211, 153, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(52, 211, 153, 0.3);
 }
 
-.game-hint { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+.game-hint {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+/* Колесо фортуны */
+.wheel-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin-bottom: 8px;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-top: 24px solid #fbbf24;
+    z-index: 5;
+    filter: drop-shadow(0 4px 8px rgba(251, 191, 36, 0.6));
+}
+
+#wheelCanvas {
+    border-radius: 50%;
+    display: block;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 40px rgba(52, 211, 153, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.3);
+    transition: transform 4.5s cubic-bezier(0.12, 0.85, 0.15, 1);
+}
+
+/* Таймер колеса */
+.wheel-timer {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15));
+    color: #fca5a5;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
+}
 
 /* Баланс монет */
 .balance-card {
