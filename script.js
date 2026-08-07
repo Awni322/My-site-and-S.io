@@ -56,6 +56,21 @@ const ITEMS = {
     legendary3: { id: 'legendary3', name: 'Таинственный контейнер', icon: '✨', price: 5000, tier: 4 }
 };
 
+// Возможные апгрейды (с какого на какой и с каким шансом)
+const UPGRADES = {
+    common1: { to: 'rare1', chance: 60 },
+    common2: { to: 'rare2', chance: 55 },
+    common3: { to: 'rare3', chance: 50 },
+
+    rare1: { to: 'epic1', chance: 30 },
+    rare2: { to: 'epic2', chance: 25 },
+    rare3: { to: 'epic3', chance: 20 },
+
+    epic1: { to: 'legendary1', chance: 10 },
+    epic2: { to: 'legendary2', chance: 8 },
+    epic3: { to: 'legendary3', chance: 5 }
+};
+
 // Призы колеса фортуны
 const wheelPrizes = [
     { name: "50 монет", coins: 50 },
@@ -294,15 +309,21 @@ function updateUserProfile() {
     const avatarEl = document.getElementById("userAvatar");
     const displayNameEl = document.getElementById("userDisplayName");
 
+    // Сохраняем аватарку в localStorage
+    if (currentUser.avatar) {
+        localStorage.setItem("user_avatar", currentUser.avatar);
+    }
+
     if (avatarEl) {
         if (currentUser.avatar) {
             avatarEl.src = currentUser.avatar;
         } else {
+            // Генерируем SVG-аватар на основе первых букв имени
+            const initials = (currentUser.displayName || currentUser.username).split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
             avatarEl.src = "data:image/svg+xml," + encodeURIComponent(`
                 <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <circle cx="18" cy="18" r="18" fill="#4a5568"/>
-                    <circle cx="18" cy="13" r="5" fill="#718096"/>
-                    <path d="M9 29C9 24.5 12 22 18 22C24 22 27 24.5 27 29" fill="#718096"/>
+                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-size="14" fill="white" font-weight="bold">${initials}</text>
                 </svg>
             `);
         }
@@ -310,6 +331,14 @@ function updateUserProfile() {
 
     if (displayNameEl) {
         displayNameEl.textContent = currentUser.displayName;
+    }
+}
+
+// Загрузка сохранённой аватарки из localStorage
+function loadSavedAvatar() {
+    const savedAvatar = localStorage.getItem("user_avatar");
+    if (savedAvatar && currentUser) {
+        currentUser.avatar = savedAvatar;
     }
 }
 
@@ -570,6 +599,9 @@ async function changeAvatar() {
                     message.style.color = "#4ade80";
                     currentUser.avatar = e.target.result;
                     updateUserProfile();
+
+                    // Перезагружаем заметки, чтобы обновить аватарки
+                    loadNotes();
 
                     setTimeout(() => {
                         document.getElementById("avatarPreviewChange").innerHTML = `
@@ -1274,6 +1306,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (response.ok) {
             currentUser = await response.json();
 
+            // Загружаем сохранённую аватарку из localStorage
+            const savedAvatar = localStorage.getItem("user_avatar");
+            if (savedAvatar) {
+                currentUser.avatar = savedAvatar;
+            }
+
             // Загружаем заметки
             let notesResponse = await fetch(WORKER_URL, {
                 method: "GET",
@@ -1706,9 +1744,33 @@ function selectInventoryItem(itemId) {
     if (!selectedSlot1) {
         selectedSlot1 = itemId;
         updateUpgraderSlot(1, item);
-    } else if (!selectedSlot2 && UPGRADES[selectedSlot1]) {
-        // Проверяем, является ли выбранный предмет целевым для апгрейда
-        if (UPGRADES[selectedSlot1].to === itemId) {
+    } else if (!selectedSlot2) {
+        // Если это контейнер - открываем его (выдаём случайный предмет)
+        if (item.type === 'container' || item.name.includes('контейнер')) {
+            showToast("📦 Контейнер открыт! Случайный предмет добавлен в инвентарь", "success");
+            // Выдаём случайный скин
+            const randomSkins = [
+                CS2_SKINS.gp25_glock18, CS2_SKINS.p90_p90,
+                CS2_SKINS.ak47_ak47, CS2_SKINS.m4a1_m4a1, CS2_SKINS.awp_awp,
+                CS2_SKINS.knife_bayonet, CS2_SKINS.knife_flip, CS2_SKINS.knife_gut
+            ];
+            const randomSkin = randomSkins[Math.floor(Math.random() * randomSkins.length)];
+            userInventory[randomSkin.id] = (userInventory[randomSkin.id] || 0) + 1;
+
+            // Удаляем контейнер
+            userInventory[itemId] = (userInventory[itemId] || 1) - 1;
+            if (userInventory[itemId] <= 0) delete userInventory[itemId];
+
+            selectedSlot1 = null;
+            updateUpgraderSlot(1, null);
+            updateUpgraderSlot(2, null);
+            renderInventory();
+            updateGameUI();
+            return;
+        }
+
+        // Для апгрейда
+        if (UPGRADES[selectedSlot1] && UPGRADES[selectedSlot1].to === itemId) {
             showToast("❌ Нельзя выбрать целевой предмет", "error");
             return;
         }
@@ -1868,7 +1930,7 @@ async function switchLeaderboard(type) {
 }
 
 async function loadLeaderboard() {
-    const endpoint = activeLeaderboard === 'balance' ? '/leaderboard/balance' : '/leaderboard/bestwin';
+    const endpoint = activeLeaderboard === 'balance' ? 'leaderboard/balance' : 'leaderboard/bestwin';
 
     try {
         const response = await fetch(WORKER_URL + endpoint, {
@@ -1878,6 +1940,7 @@ async function loadLeaderboard() {
 
         if (response.ok) {
             const leaders = await response.json();
+            console.log("Лидеры:", leaders);
             renderLeaderboard(leaders);
         }
     } catch (err) {
