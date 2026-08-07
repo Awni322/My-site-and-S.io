@@ -112,26 +112,34 @@
         <div id="notes"></div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА -->
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeModal()">✕</button>
-            <div class="modal-body">
-                <div class="modal-left" id="modalLeft">
-                    <img id="modalImage" src="" alt="Превью">
-                </div>
-                <div class="modal-right">
-                    <h2 id="modalTitle"></h2>
-                    <div id="modalRobloxContainer"></div>
-                    <div id="modalText"></div>
-                    <button class="btn-modal-copy" id="btnModalCopy" onclick="copyModalContent()">
-                        📋 Скопировать текст
-                    </button>
-                </div>
-            </div>
-        </div>
+<!-- Единое модальное окно Авторизации -->
+<div id="authModal" class="modal-overlay">
+  <div class="modal-card">
+    
+    <!-- Переключатель Вход / Регистрация -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <button id="tabLoginBtn" style="flex: 1;" onclick="switchAuthTab('login')">Вход</button>
+      <button id="tabRegisterBtn" style="flex: 1;" onclick="switchAuthTab('register')">Регистрация</button>
     </div>
 
+    <!-- Форма Входа -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <h2>Вход в аккаунт</h2>
+      <input type="text" id="loginName" placeholder="Имя пользователя" required style="width: 100%; margin-bottom: 10px;">
+      <input type="password" id="loginPassword" placeholder="Пароль" required style="width: 100%; margin-bottom: 15px;">
+      <button type="submit" style="width: 100%;">Войти</button>
+    </form>
+
+    <!-- Форма Регистрации -->
+    <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+      <h2>Создать аккаунт</h2>
+      <input type="text" id="regName" placeholder="Придумай имя" required style="width: 100%; margin-bottom: 10px;">
+      <input type="password" id="regPassword" placeholder="Придумай пароль" required style="width: 100%; margin-bottom: 15px;">
+      <button type="submit" style="width: 100%;">Зарегистрироваться</button>
+    </form>
+
+  </div>
+</div>
     <!-- ПАНЕЛЬ МИНИ-ИГР -->
     <div class="games-panel" id="gamesPanel">
         <div class="games-top-user" id="gamesTopUser" onclick="openProfileModal(true)">
