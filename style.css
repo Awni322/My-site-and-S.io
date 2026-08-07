@@ -323,12 +323,17 @@ input[type="text"], input[type="password"], textarea {
 }
 
 .settings-message {
+    display: none;
     margin-top: 16px;
     font-size: 14px;
     font-weight: 700;
     text-align: center;
     padding: 12px;
     border-radius: 10px;
+}
+
+.settings-message.show {
+    display: block;
     background: var(--input-bg);
     border: 1px solid var(--border-color-solid);
 }
