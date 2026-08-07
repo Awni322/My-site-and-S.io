@@ -269,6 +269,146 @@ function updateUserProfile() {
     }
 }
 
+// Открытие настроек профиля
+function openProfileSettings() {
+    const overlay = document.getElementById("profileSettingsOverlay");
+    if (overlay) {
+        overlay.classList.add("active");
+        // Очищаем поля
+        document.getElementById("nameChangePassword").value = "";
+        document.getElementById("newDisplayName").value = "";
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+        document.getElementById("nameChangeMessage").innerHTML = "";
+        document.getElementById("passwordChangeMessage").innerHTML = "";
+    }
+}
+
+// Закрытие настроек профиля
+function closeProfileSettings() {
+    const overlay = document.getElementById("profileSettingsOverlay");
+    if (overlay) {
+        overlay.classList.remove("active");
+    }
+}
+
+// Изменение отображаемого имени
+async function changeDisplayName() {
+    const password = document.getElementById("nameChangePassword").value;
+    const newDisplayName = document.getElementById("newDisplayName").value.trim();
+    const message = document.getElementById("nameChangeMessage");
+
+    if (!password || !newDisplayName) {
+        message.innerHTML = "⚠️ Заполните все поля";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    if (newDisplayName.length < 2) {
+        message.innerHTML = "⚠️ Имя должно быть не менее 2 символов";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    message.innerHTML = "Изменение...";
+    message.style.color = "#ffffff";
+
+    try {
+        const response = await fetch(WORKER_URL + "profile/change-name", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                password,
+                newDisplayName
+            }),
+            credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            message.innerHTML = "✅ Имя изменено!";
+            message.style.color = "#4ade80";
+            currentUser.displayName = newDisplayName;
+            updateUserProfile();
+
+            setTimeout(() => {
+                document.getElementById("nameChangePassword").value = "";
+                document.getElementById("newDisplayName").value = "";
+                message.innerHTML = "";
+            }, 2000);
+        } else {
+            message.innerHTML = `❌ ${data.error === "Invalid password" ? "Неверный пароль" : "Ошибка изменения имени"}`;
+            message.style.color = "#f87171";
+        }
+    } catch (e) {
+        message.innerHTML = "❌ Ошибка соединения";
+        message.style.color = "#f87171";
+    }
+}
+
+// Изменение пароля
+async function changePassword() {
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const message = document.getElementById("passwordChangeMessage");
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+        message.innerHTML = "⚠️ Заполните все поля";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        message.innerHTML = "⚠️ Новый пароль должен быть не менее 6 символов";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        message.innerHTML = "⚠️ Пароли не совпадают";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    message.innerHTML = "Изменение...";
+    message.style.color = "#ffffff";
+
+    try {
+        const response = await fetch(WORKER_URL + "profile/change-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                currentPassword,
+                newPassword
+            }),
+            credentials: "include"
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            message.innerHTML = "✅ Пароль изменен!";
+            message.style.color = "#4ade80";
+
+            setTimeout(() => {
+                document.getElementById("currentPassword").value = "";
+                document.getElementById("newPassword").value = "";
+                document.getElementById("confirmPassword").value = "";
+                message.innerHTML = "";
+            }, 2000);
+        } else {
+            message.innerHTML = `❌ ${data.error === "Invalid password" ? "Неверный текущий пароль" : "Ошибка изменения пароля"}`;
+            message.style.color = "#f87171";
+        }
+    } catch (e) {
+        message.innerHTML = "❌ Ошибка соединения";
+        message.style.color = "#f87171";
+    }
+}
+
 // Загрузка игровых данных
 async function loadGameData() {
     try {
@@ -1687,6 +1827,10 @@ window.showLoginForm = showLoginForm;
 window.showRegisterForm = showRegisterForm;
 window.handleAvatarUpload = handleAvatarUpload;
 window.resetAvatar = resetAvatar;
+window.openProfileSettings = openProfileSettings;
+window.closeProfileSettings = closeProfileSettings;
+window.changeDisplayName = changeDisplayName;
+window.changePassword = changePassword;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
 window.editNote = editNote;
