@@ -1302,12 +1302,16 @@ document.addEventListener("visibilitychange", () => {
 // ==========================================
 function openGamesPanel() {
     const panel = document.getElementById("gamesPanel");
+    const arrow = document.getElementById("gamesArrowBtn");
     if (panel) panel.classList.add("active");
+    if (arrow) arrow.style.display = "none";
 }
 
 function closeGamesPanel() {
     const panel = document.getElementById("gamesPanel");
+    const arrow = document.getElementById("gamesArrowBtn");
     if (panel) panel.classList.remove("active");
+    if (arrow) arrow.style.display = "flex";
 }
 
 // ─── Колесо фортуны ─────────────────────────────────────────
@@ -1520,29 +1524,48 @@ function renderInventory() {
 
     grid.innerHTML = "";
 
-    // Добавляем все предметы
+    // Добавляем все предметы, которые есть
     Object.values(ITEMS).forEach(item => {
         const quantity = userInventory[item.id] || 0;
         if (quantity > 0) {
             const itemEl = document.createElement("div");
             itemEl.className = "inventory-item";
-            itemEl.onclick = () => selectInventoryItem(item.id);
             itemEl.innerHTML = `
                 <div class="inventory-item-icon">${item.icon}</div>
                 <div class="inventory-item-name">${item.name}</div>
                 <div class="inventory-item-price">${item.price} 🪙</div>
                 ${quantity > 1 ? `<div class="inventory-item-count">${quantity}</div>` : ''}
             `;
+
+            // Клик для выбора предмета
+            itemEl.onclick = (e) => {
+                if (!e.target.classList.contains('inventory-item-sell')) {
+                    selectInventoryItem(item.id);
+                }
+            };
+
+            // Кнопка продажи
+            const sellBtn = document.createElement("button");
+            sellBtn.className = "inventory-item-sell";
+            sellBtn.textContent = `Продать (${Math.floor(item.price * 0.5)}🪙)`;
+            sellBtn.onclick = (e) => {
+                e.stopPropagation();
+                sellItem(item.id);
+            };
+            itemEl.appendChild(sellBtn);
+
             grid.appendChild(itemEl);
         }
     });
 
     // Показываем кнопки покупки для начальных предметов
-    if (Object.keys(userInventory).length === 0 || userInventory['common1'] === 0) {
+    const hasNoItems = Object.keys(userInventory).length === 0 ||
+                       Object.values(userInventory).every(q => q === 0);
+
+    if (hasNoItems) {
         [ITEMS.common1, ITEMS.common2, ITEMS.common3].forEach(item => {
             const itemEl = document.createElement("div");
-            itemEl.className = "inventory-item";
-            itemEl.style.opacity = "0.6";
+            itemEl.className = "inventory-item inventory-item-buy";
             itemEl.onclick = () => buyItem(item.id);
             itemEl.innerHTML = `
                 <div class="inventory-item-icon">${item.icon}</div>
@@ -1551,6 +1574,43 @@ function renderInventory() {
             `;
             grid.appendChild(itemEl);
         });
+    }
+}
+
+async function sellItem(itemId) {
+    const item = ITEMS[itemId];
+    if (!item || !userInventory[itemId] || userInventory[itemId] === 0) {
+        showToast("❌ У вас нет этого предмета", "error");
+        return;
+    }
+
+    const sellPrice = Math.floor(item.price * 0.5);
+
+    try {
+        const response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "sell_item",
+                itemId: itemId,
+                price: sellPrice
+            }),
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            userBalance += sellPrice;
+            userInventory[itemId] = (userInventory[itemId] || 1) - 1;
+            if (userInventory[itemId] <= 0) {
+                delete userInventory[itemId];
+            }
+            updateGameUI();
+            renderInventory();
+            showToast(`✅ Продано за ${sellPrice} 🪙`);
+        }
+    } catch (err) {
+        console.error("Ошибка продажи:", err);
+        showToast("❌ Ошибка продажи", "error");
     }
 }
 
