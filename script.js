@@ -10,41 +10,74 @@ let noteIdToDelete = null;
 // ПРОФИЛЬ (НИК + АВАТАРКА)
 // ==========================================
 const PROFILE_STORAGE_KEY = "archiveUserProfile";
-const AVATAR_OPTIONS = ["🐱", "🐶", "🦊", "🐻", "🐼", "🦁", "🐸", "🐵", "🦄", "🐧", "🐯", "🐨", "🐔", "🐙", "🦋", "🐢", "🐺", "🦝"];
-let selectedAvatar = null;
+const DEFAULT_AVATAR = "data:image/svg+xml," + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+        <defs><clipPath id="c"><circle cx="100" cy="100" r="100"/></clipPath></defs>
+        <g clip-path="url(#c)">
+            <rect width="200" height="200" fill="#cbd5e1"/>
+            <circle cx="100" cy="80" r="38" fill="#f8fafc"/>
+            <ellipse cx="100" cy="196" rx="72" ry="70" fill="#f8fafc"/>
+        </g>
+    </svg>`
+);
+let selectedAvatar = DEFAULT_AVATAR;
 
 function getProfile() {
     try {
         const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        if (parsed && parsed.name && parsed.avatar) return parsed;
+        if (parsed && parsed.name) return { name: parsed.name, avatar: parsed.avatar || DEFAULT_AVATAR };
         return null;
     } catch (e) {
         return null;
     }
 }
 
-function renderAvatarGrid(preselected) {
-    const grid = document.getElementById("avatarGrid");
-    if (!grid) return;
-    grid.innerHTML = "";
-    AVATAR_OPTIONS.forEach(emoji => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "avatar-option" + (emoji === preselected ? " selected" : "");
-        btn.textContent = emoji;
-        btn.onclick = () => selectAvatar(emoji);
-        grid.appendChild(btn);
+function resizeAvatarImage(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const size = 160;
+                const canvas = document.createElement("canvas");
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext("2d");
+                const scale = Math.max(size / img.width, size / img.height);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                const x = (size - w) / 2;
+                const y = (size - h) / 2;
+                ctx.drawImage(img, x, y, w, h);
+                resolve(canvas.toDataURL("image/jpeg", 0.85));
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
     });
-    selectedAvatar = preselected || null;
 }
 
-function selectAvatar(emoji) {
-    selectedAvatar = emoji;
-    document.querySelectorAll(".avatar-option").forEach(btn => {
-        btn.classList.toggle("selected", btn.textContent === emoji);
-    });
+async function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+        const dataUrl = await resizeAvatarImage(file);
+        selectedAvatar = dataUrl;
+        const preview = document.getElementById("avatarPreview");
+        if (preview) preview.src = dataUrl;
+    } catch (e) {
+        showToast("❌ Не удалось загрузить фото", "error");
+    }
+}
+
+function resetAvatarToDefault() {
+    selectedAvatar = DEFAULT_AVATAR;
+    const preview = document.getElementById("avatarPreview");
+    if (preview) preview.src = DEFAULT_AVATAR;
 }
 
 function openProfileModal(closable) {
@@ -53,20 +86,21 @@ function openProfileModal(closable) {
     const subtitle = document.getElementById("profileModalSubtitle");
     const nameInput = document.getElementById("profileNameInput");
     const cancelBtn = document.getElementById("profileCancelBtn");
+    const preview = document.getElementById("avatarPreview");
     if (!overlay) return;
 
     const existing = getProfile();
 
     if (title) title.textContent = closable ? "Твой профиль" : "Добро пожаловать!";
     if (subtitle) subtitle.textContent = closable
-        ? "Можешь поменять ник или аватарку в любой момент"
-        : "Придумай ник и выбери аватарку — это будет видно у твоих записей";
+        ? "Можешь поменять ник или фото в любой момент"
+        : "Придумай ник и при желании загрузи фото — это будет видно у твоих записей";
     if (nameInput) nameInput.value = existing ? existing.name : "";
     if (cancelBtn) cancelBtn.style.display = closable ? "block" : "none";
 
-    renderAvatarGrid(existing ? existing.avatar : AVATAR_OPTIONS[0]);
+    selectedAvatar = existing ? existing.avatar : DEFAULT_AVATAR;
+    if (preview) preview.src = selectedAvatar;
 
-    // Настройки — можно закрыть по клику на фон, обязательная настройка — нельзя
     overlay.onclick = closable ? (e) => { if (e.target === overlay) closeProfileModal(); } : null;
 
     const settingsDropdown = document.getElementById("settingsDropdown");
@@ -86,10 +120,6 @@ function saveProfile() {
 
     if (!name) {
         showToast("⚠️ Введи ник", "error");
-        return;
-    }
-    if (!selectedAvatar) {
-        showToast("⚠️ Выбери аватарку", "error");
         return;
     }
 
@@ -257,7 +287,7 @@ async function saveNote() {
         image: imageBase64,
         is_pinned: isPinned,
         author_name: profile ? profile.name : "Аноним",
-        author_avatar: profile ? profile.avatar : "❓"
+        author_avatar: profile ? profile.avatar : DEFAULT_AVATAR
     };
 
     if (id) body.id = id;
@@ -520,7 +550,7 @@ function renderNotes(notes) {
             <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             <div class="note-footer">
                 <div class="note-author">
-                    <span class="note-author-avatar">${note.author_avatar || "❓"}</span>
+                    <img class="note-author-avatar" src="${note.author_avatar || DEFAULT_AVATAR}" alt="" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'">
                     <span class="note-author-name">${escapeHtml(note.author_name || "Аноним")}</span>
                 </div>
                 <div class="note-actions">
@@ -1267,7 +1297,7 @@ async function loadLeaderboard() {
         listEl.innerHTML = rows.map((row, i) => `
             <div class="leaderboard-row ${profile && row.author_name === profile.name ? 'is-you' : ''}">
                 <span class="leaderboard-rank">#${i + 1}</span>
-                <span class="leaderboard-avatar">${row.author_avatar || "❓"}</span>
+                <img class="leaderboard-avatar" src="${row.author_avatar || DEFAULT_AVATAR}" alt="" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'">
                 <span class="leaderboard-name">${escapeHtml(row.author_name || "Аноним")}</span>
                 <span class="leaderboard-score">${row.score} 🪙</span>
             </div>
@@ -1320,5 +1350,7 @@ window.resetUpgrader = resetUpgrader;
 window.openProfileModal = openProfileModal;
 window.closeProfileModal = closeProfileModal;
 window.saveProfile = saveProfile;
+window.handleAvatarUpload = handleAvatarUpload;
+window.resetAvatarToDefault = resetAvatarToDefault;
 window.connectNotesSocket = connectNotesSocket;
 window.disconnectNotesSocket = disconnectNotesSocket;
