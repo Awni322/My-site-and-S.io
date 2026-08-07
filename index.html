@@ -40,6 +40,30 @@
                     <button class="btn-save" onclick="changePassword()">Изменить пароль</button>
                     <div id="passwordChangeMessage" class="settings-message"></div>
                 </div>
+
+                <!-- Смена аватарки -->
+                <div class="settings-section">
+                    <h3>Сменить аватарку</h3>
+                    <div class="avatar-preview" id="avatarPreviewChange" style="width: 80px; height: 80px; margin: 0 auto 12px;">
+                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="40" cy="40" r="40" fill="#4a5568"/>
+                            <circle cx="40" cy="30" r="12" fill="#718096"/>
+                            <path d="M20 65C20 55 28 50 40 50C52 50 60 55 60 65" fill="#718096"/>
+                        </svg>
+                    </div>
+                    <div class="avatar-upload-controls" style="flex-wrap: wrap; justify-content: center;">
+                        <label class="avatar-upload-btn" for="newAvatarInput">
+                            📷 Выбрать фото
+                        </label>
+                        <input type="file" id="newAvatarInput" accept="image/*" onchange="handleNewAvatarUpload(event)" style="display: none;">
+                        <button class="avatar-reset-btn" onclick="resetAvatar()" id="resetNewAvatarBtn" style="display: none;">
+                            Сбросить
+                        </button>
+                    </div>
+                    <input type="password" id="currentPasswordAvatar" placeholder="Текущий пароль для подтверждения" style="margin-top: 12px;">
+                    <button class="btn-save" onclick="changeAvatar()">Изменить аватарку</button>
+                    <div id="avatarChangeMessage" class="settings-message"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -236,14 +260,6 @@
                     </div>
                     <button class="btn-save game-btn" id="spinWheelBtn" onclick="spinWheel()">Крутить (бесплатно)</button>
                     <div class="game-result" id="wheelResult"></div>
-                </div>
-
-                <!-- Крестики-нолики -->
-                <div class="game-card">
-                    <h2>❌⭕ Крестики-нолики</h2>
-                    <div class="ttt-board" id="tttBoard"></div>
-                    <div class="game-result" id="tttResult">Ты играешь за ❌. Ходи первым!</div>
-                    <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
                 </div>
 
                 <!-- Апгрейдер -->
