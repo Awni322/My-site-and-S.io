@@ -33,6 +33,10 @@
                 Чёрно-красная
             </button>
             <div class="settings-divider"></div>
+            <button class="settings-option" onclick="openProfileModal(true)">
+                👤 Профиль
+            </button>
+            <div class="settings-divider"></div>
             <button class="settings-option settings-logout" onclick="requestLogout()">
                 🚪 Выйти
             </button>
@@ -165,18 +169,55 @@
                     <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
                 </div>
 
-                <!-- Угадай число -->
+                <!-- Апгрейдер -->
                 <div class="game-card">
-                    <h2>🔢 Угадай число</h2>
-                    <p class="game-hint">Я загадал число от 1 до 100</p>
-                    <div class="guess-input-row">
-                        <input type="text" id="guessInput" placeholder="Введите число" inputmode="numeric">
-                        <button class="btn-save game-btn-inline" onclick="makeGuess()">Проверить</button>
+                    <h2>🆙 Апгрейдер</h2>
+                    <div class="upgrader-balance">
+                        <span class="upgrader-balance-label">Баланс</span>
+                        <span class="upgrader-balance-value" id="upgraderBalance">100</span>
+                        <span class="upgrader-coin">🪙</span>
                     </div>
-                    <div class="game-result" id="guessResult"></div>
-                    <button class="btn-cancel game-btn" onclick="resetGuessGame()">Новая игра</button>
+
+                    <div class="upgrader-stake-row">
+                        <input type="number" id="upgraderStake" min="1" value="10">
+                        <button class="btn-cancel game-btn-inline" onclick="setUpgraderStakeMax()">MAX</button>
+                    </div>
+
+                    <div class="upgrader-mult-row" id="upgraderMultRow"></div>
+
+                    <div class="upgrader-chance-bar">
+                        <div class="upgrader-chance-fill" id="upgraderChanceFill"></div>
+                        <div class="upgrader-chance-marker" id="upgraderMarker"></div>
+                    </div>
+
+                    <button class="btn-save game-btn" id="upgraderBtn" onclick="doUpgrade()">Апгрейд</button>
+                    <div class="game-result" id="upgraderResult"></div>
+                    <button class="btn-cancel game-btn" onclick="resetUpgrader()">Сбросить баланс</button>
                 </div>
 
+                <!-- Лидерборд -->
+                <div class="game-card">
+                    <h2>🏆 Лидерборд</h2>
+                    <p class="game-hint">Лучшие результаты в Апгрейдере</p>
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <div class="leaderboard-empty">Загрузка...</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ПРОФИЛЬ -->
+    <div class="modal-overlay" id="profileOverlay">
+        <div class="confirm-card profile-card">
+            <h3 id="profileModalTitle">Добро пожаловать!</h3>
+            <p id="profileModalSubtitle">Придумай ник и выбери аватарку — это будет видно у твоих записей</p>
+            <input type="text" id="profileNameInput" placeholder="Твой ник" maxlength="20">
+            <div class="avatar-grid" id="avatarGrid"></div>
+            <div class="confirm-actions">
+                <button class="btn-cancel" id="profileCancelBtn" onclick="closeProfileModal()" style="display: none;">Отмена</button>
+                <button class="btn-save" onclick="saveProfile()">Сохранить</button>
             </div>
         </div>
     </div>
