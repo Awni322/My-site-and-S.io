@@ -17,6 +17,7 @@ let lastWheelSpin = 0;
 let selectedSlot1 = null;
 let selectedSlot2 = null;
 let activeLeaderboard = 'balance';
+let currentAvatarFile = null; // Для хранения файла аватарки при смене
 
 // Предметы для апгрейдера
 const ITEMS = {
@@ -83,6 +84,8 @@ function handleAvatarUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    currentAvatarFile = file;
+
     const reader = new FileReader();
     reader.onload = function(event) {
         currentAvatarBase64 = event.target.result;
@@ -99,12 +102,33 @@ function handleAvatarUpload(e) {
     reader.readAsDataURL(file);
 }
 
+// Обработка загрузки новой аватарки в профиле
+function handleNewAvatarUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    currentAvatarFile = file;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const preview = document.getElementById("avatarPreviewChange");
+        if (preview) {
+            preview.innerHTML = `<img src="${event.target.result}" alt="Avatar">`;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
 // Сброс аватарки
 function resetAvatar() {
     currentAvatarBase64 = null;
+    currentAvatarFile = null;
     const preview = document.getElementById("avatarPreview");
     const resetBtn = document.getElementById("resetAvatarBtn");
     const input = document.getElementById("avatarInput");
+    const previewChange = document.getElementById("avatarPreviewChange");
+    const resetNewBtn = document.getElementById("resetNewAvatarBtn");
+    const newInput = document.getElementById("newAvatarInput");
 
     if (preview) {
         preview.innerHTML = `
@@ -120,6 +144,23 @@ function resetAvatar() {
     }
     if (input) {
         input.value = "";
+    }
+
+    // Сброс аватарки в профиле
+    if (previewChange) {
+        previewChange.innerHTML = `
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="40" r="40" fill="#4a5568"/>
+                <circle cx="40" cy="30" r="12" fill="#718096"/>
+                <path d="M20 65C20 55 28 50 40 50C52 50 60 55 60 65" fill="#718096"/>
+            </svg>
+        `;
+    }
+    if (resetNewBtn) {
+        resetNewBtn.style.display = "none";
+    }
+    if (newInput) {
+        newInput.value = "";
     }
 }
 
@@ -493,6 +534,76 @@ function updateWheelTimer(seconds) {
     wheelTimeLeft.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
+// Смена аватарки пользователя в профиле
+async function changeAvatar() {
+    const currentPassword = document.getElementById("currentPasswordAvatar").value;
+    const message = document.getElementById("avatarChangeMessage");
+
+    if (!currentPassword) {
+        message.innerHTML = "⚠️ Введите пароль";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    if (!currentAvatarFile) {
+        message.innerHTML = "⚠️ Выберите файл аватарки";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    message.innerHTML = "Загрузка...";
+    message.style.color = "#ffffff";
+
+    try {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const response = await fetch(WORKER_URL + "profile/change-avatar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        password: currentPassword,
+                        avatar: e.target.result
+                    }),
+                    credentials: "include"
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    message.innerHTML = "✅ Аватарка изменена!";
+                    message.style.color = "#4ade80";
+                    currentUser.avatar = e.target.result;
+                    updateUserProfile();
+
+                    setTimeout(() => {
+                        document.getElementById("currentPasswordAvatar").value = "";
+                        document.getElementById("avatarPreviewChange").innerHTML = `
+                            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="40" cy="40" r="40" fill="#4a5568"/>
+                                <circle cx="40" cy="30" r="12" fill="#718096"/>
+                                <path d="M20 65C20 55 28 50 40 50C52 50 60 55 60 65" fill="#718096"/>
+                            </svg>
+                        `;
+                        currentAvatarFile = null;
+                        document.getElementById("avatarChangeMessage").innerHTML = "";
+                    }, 2000);
+                } else {
+                    message.innerHTML = `❌ ${data.error === "Invalid password" ? "Неверный пароль" : "Ошибка изменения аватарки"}`;
+                    message.style.color = "#f87171";
+                }
+            } catch (err) {
+                message.innerHTML = "❌ Ошибка соединения";
+                message.style.color = "#f87171";
+            }
+        };
+        reader.readAsDataURL(currentAvatarFile);
+    } catch (err) {
+        message.innerHTML = "❌ Ошибка загрузки";
+        message.style.color = "#f87171";
+    }
+}
+
 // Автоматическая привязка событий и инициализация тем
 document.addEventListener("DOMContentLoaded", () => {
     // Поддержка нажатия Enter в формах
@@ -831,6 +942,23 @@ function escapeHtml(str) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+}
+
+// Обработка загрузки новой аватарки для превью
+function handleNewAvatarUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    currentAvatarFile = file;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const preview = document.getElementById("avatarPreviewChange");
+        if (preview) {
+            preview.innerHTML = `<img src="${event.target.result}" alt="Avatar">`;
+        }
+    };
+    reader.readAsDataURL(file);
 }
 
 // Рендер карточек
@@ -1436,87 +1564,6 @@ async function spinWheel() {
     }, 4600);
 }
 
-// ─── Крестики-нолики ────────────────────────────────────────
-let tttBoard = Array(9).fill(null);
-let tttGameOver = false;
-
-function renderTicTacToe() {
-    const boardEl = document.getElementById("tttBoard");
-    if (!boardEl) return;
-    boardEl.innerHTML = "";
-    tttBoard.forEach((val, i) => {
-        const cell = document.createElement("div");
-        cell.className = "ttt-cell" + (val ? " taken" : "");
-        cell.textContent = val || "";
-        cell.onclick = () => tttMove(i);
-        boardEl.appendChild(cell);
-    });
-}
-
-function checkTttWinner(board) {
-    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    for (const [a, b, c] of lines) {
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
-    }
-    if (board.every(v => v)) return "draw";
-    return null;
-}
-
-function getComputerMove(board) {
-    const empty = board.map((v, i) => (v ? null : i)).filter(v => v !== null);
-    if (empty.length === 0) return -1;
-
-    for (const i of empty) {
-        const copy = board.slice();
-        copy[i] = "⭕";
-        if (checkTttWinner(copy) === "⭕") return i;
-    }
-    for (const i of empty) {
-        const copy = board.slice();
-        copy[i] = "❌";
-        if (checkTttWinner(copy) === "❌") return i;
-    }
-    if (board[4] === null) return 4;
-    return empty[Math.floor(Math.random() * empty.length)];
-}
-
-function tttMove(i) {
-    if (tttGameOver || tttBoard[i]) return;
-    tttBoard[i] = "❌";
-    let winner = checkTttWinner(tttBoard);
-
-    if (!winner) {
-        const compMove = getComputerMove(tttBoard);
-        if (compMove !== -1) tttBoard[compMove] = "⭕";
-        winner = checkTttWinner(tttBoard);
-    }
-
-    renderTicTacToe();
-    const resultEl = document.getElementById("tttResult");
-    if (!resultEl) return;
-
-    if (winner === "draw") {
-        tttGameOver = true;
-        resultEl.textContent = "🤝 Ничья!";
-    } else if (winner === "❌") {
-        tttGameOver = true;
-        resultEl.textContent = "🎉 Ты выиграл!";
-    } else if (winner === "⭕") {
-        tttGameOver = true;
-        resultEl.textContent = "😅 Компьютер выиграл!";
-    } else {
-        resultEl.textContent = "Твой ход!";
-    }
-}
-
-function resetTicTacToe() {
-    tttBoard = Array(9).fill(null);
-    tttGameOver = false;
-    renderTicTacToe();
-    const resultEl = document.getElementById("tttResult");
-    if (resultEl) resultEl.textContent = "Ты играешь за ❌. Ходи первым!";
-}
-
 // ─── Апгрейдер ──────────────────────────────────────────────
 function renderInventory() {
     const grid = document.getElementById("inventoryGrid");
@@ -1868,14 +1915,6 @@ function renderLeaderboard(leaders) {
 }
 document.addEventListener("DOMContentLoaded", () => {
     drawWheel();
-    renderTicTacToe();
-
-    const guessInput = document.getElementById("guessInput");
-    if (guessInput) {
-        guessInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") makeGuess();
-        });
-    }
 });
 
 // Экспорт функций в глобальную область видимости
@@ -1916,7 +1955,6 @@ window.escapeHtml = escapeHtml;
 window.openGamesPanel = openGamesPanel;
 window.closeGamesPanel = closeGamesPanel;
 window.spinWheel = spinWheel;
-window.resetTicTacToe = resetTicTacToe;
 window.connectNotesSocket = connectNotesSocket;
 window.disconnectNotesSocket = disconnectNotesSocket;
 window.switchLeaderboard = switchLeaderboard;
