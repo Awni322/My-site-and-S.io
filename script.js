@@ -978,3 +978,75 @@ document.addEventListener("DOMContentLoaded", () => {
     renderUpgraderMultButtons();
     updateUpgraderGauge(UPGRADER_OPTIONS[upgraderSelectedIndex].chance);
 });
+// Переключение между Входом и Регистрацией
+function switchAuthTab(tab) {
+  const loginForm = document.getElementById('loginForm');
+  const regForm = document.getElementById('registerForm');
+  
+  if (tab === 'login') {
+    loginForm.classList.remove('hidden');
+    regForm.classList.add('hidden');
+  } else {
+    loginForm.classList.add('hidden');
+    regForm.classList.remove('hidden');
+  }
+}
+
+// Регистрация аккаунта
+function handleRegister(e) {
+  e.preventDefault();
+  const username = document.getElementById('regName').value.trim();
+  const password = document.getElementById('regPassword').value;
+
+  if (!username || !password) return alert('Заполните все поля!');
+
+  // Проверяем, есть ли уже такой юзер
+  const existingUser = localStorage.getItem('user_' + username);
+  if (existingUser) {
+    return alert('Пользователь с таким именем уже существует!');
+  }
+
+  // Сохраняем данные аккаунта
+  const userData = { username, password, score: 0 };
+  localStorage.setItem('user_' + username, JSON.stringify(userData));
+  localStorage.setItem('currentUser', username);
+
+  alert('Аккаунт успешно создан!');
+  closeAuthModal();
+  updateUI();
+}
+
+// Вход в аккаунт
+function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('loginName').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  const savedData = localStorage.getItem('user_' + username);
+  if (!savedData) {
+    return alert('Пользователь не найден!');
+  }
+
+  const user = JSON.parse(savedData);
+  if (user.password !== password) {
+    return alert('Неверный пароль!');
+  }
+
+  // Успешный вход
+  localStorage.setItem('currentUser', username);
+  closeAuthModal();
+  updateUI();
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').classList.add('hidden');
+}
+
+// Проверка при загрузке страницы
+window.addEventListener('DOMContentLoaded', () => {
+  const currentUser = localStorage.getItem('currentUser');
+  if (currentUser) {
+    closeAuthModal();
+    updateUI();
+  }
+});
