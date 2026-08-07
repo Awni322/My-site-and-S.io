@@ -6,6 +6,104 @@ let activeCategory = "all";
 let activeSort = "newest"; 
 let noteIdToDelete = null;
 
+// ==========================================
+// ПРОФИЛЬ (НИК + АВАТАРКА)
+// ==========================================
+const PROFILE_STORAGE_KEY = "archiveUserProfile";
+const AVATAR_OPTIONS = ["🐱", "🐶", "🦊", "🐻", "🐼", "🦁", "🐸", "🐵", "🦄", "🐧", "🐯", "🐨", "🐔", "🐙", "🦋", "🐢", "🐺", "🦝"];
+let selectedAvatar = null;
+
+function getProfile() {
+    try {
+        const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.name && parsed.avatar) return parsed;
+        return null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function renderAvatarGrid(preselected) {
+    const grid = document.getElementById("avatarGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+    AVATAR_OPTIONS.forEach(emoji => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "avatar-option" + (emoji === preselected ? " selected" : "");
+        btn.textContent = emoji;
+        btn.onclick = () => selectAvatar(emoji);
+        grid.appendChild(btn);
+    });
+    selectedAvatar = preselected || null;
+}
+
+function selectAvatar(emoji) {
+    selectedAvatar = emoji;
+    document.querySelectorAll(".avatar-option").forEach(btn => {
+        btn.classList.toggle("selected", btn.textContent === emoji);
+    });
+}
+
+function openProfileModal(closable) {
+    const overlay = document.getElementById("profileOverlay");
+    const title = document.getElementById("profileModalTitle");
+    const subtitle = document.getElementById("profileModalSubtitle");
+    const nameInput = document.getElementById("profileNameInput");
+    const cancelBtn = document.getElementById("profileCancelBtn");
+    if (!overlay) return;
+
+    const existing = getProfile();
+
+    if (title) title.textContent = closable ? "Твой профиль" : "Добро пожаловать!";
+    if (subtitle) subtitle.textContent = closable
+        ? "Можешь поменять ник или аватарку в любой момент"
+        : "Придумай ник и выбери аватарку — это будет видно у твоих записей";
+    if (nameInput) nameInput.value = existing ? existing.name : "";
+    if (cancelBtn) cancelBtn.style.display = closable ? "block" : "none";
+
+    renderAvatarGrid(existing ? existing.avatar : AVATAR_OPTIONS[0]);
+
+    // Настройки — можно закрыть по клику на фон, обязательная настройка — нельзя
+    overlay.onclick = closable ? (e) => { if (e.target === overlay) closeProfileModal(); } : null;
+
+    const settingsDropdown = document.getElementById("settingsDropdown");
+    if (settingsDropdown) settingsDropdown.classList.remove("active");
+
+    overlay.classList.add("active");
+}
+
+function closeProfileModal() {
+    const overlay = document.getElementById("profileOverlay");
+    if (overlay) overlay.classList.remove("active");
+}
+
+function saveProfile() {
+    const nameInput = document.getElementById("profileNameInput");
+    const name = nameInput ? nameInput.value.trim() : "";
+
+    if (!name) {
+        showToast("⚠️ Введи ник", "error");
+        return;
+    }
+    if (!selectedAvatar) {
+        showToast("⚠️ Выбери аватарку", "error");
+        return;
+    }
+
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify({ name, avatar: selectedAvatar }));
+    closeProfileModal();
+    showToast("✅ Профиль сохранён");
+}
+
+function ensureProfileSetup() {
+    if (!getProfile()) {
+        openProfileModal(false);
+    }
+}
+
 // Авторизация
 async function login() {
     let passwordInput = document.getElementById("password");
@@ -33,6 +131,7 @@ async function login() {
             document.getElementById("content").style.display = "flex";
             loadNotes();
             connectNotesSocket();
+            ensureProfileSetup();
         } else if (response.status === 429) {
             let data = {};
             try { data = await response.json(); } catch (_) {}
@@ -147,6 +246,8 @@ async function saveNote() {
         imageBase64 = await getBase64(imageInput.files[0]);
     }
 
+    const profile = getProfile();
+
     let body = {
         action: action,
         title: title,
@@ -154,7 +255,9 @@ async function saveNote() {
         category: category,
         roblox_url: robloxUrl,
         image: imageBase64,
-        is_pinned: isPinned
+        is_pinned: isPinned,
+        author_name: profile ? profile.name : "Аноним",
+        author_avatar: profile ? profile.avatar : "❓"
     };
 
     if (id) body.id = id;
@@ -416,6 +519,10 @@ function renderNotes(notes) {
 
             <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             <div class="note-footer">
+                <div class="note-author">
+                    <span class="note-author-avatar">${note.author_avatar || "❓"}</span>
+                    <span class="note-author-name">${escapeHtml(note.author_name || "Аноним")}</span>
+                </div>
                 <div class="note-actions">
                     <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyNoteById(${note.id}, this)">
                         📋 Копировать
@@ -691,6 +798,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (contentContainer) contentContainer.style.display = "flex";
             applyFiltersAndRender();
             connectNotesSocket();
+            ensureProfileSetup();
             
             // 👉 ВОТ ЗДЕСЬ ТЕПЕРЬ ВЫЗЫВАЕТСЯ УВЕДОМЛЕНИЕ ПРИ АВТОМАТИЧЕСКОМ ВХОДЕ
             showAutoLoginToast();
@@ -819,12 +927,17 @@ document.addEventListener("visibilitychange", () => {
 // ==========================================
 function openGamesPanel() {
     const panel = document.getElementById("gamesPanel");
+    const arrowBtn = document.getElementById("gamesArrowBtn");
     if (panel) panel.classList.add("active");
+    if (arrowBtn) arrowBtn.classList.add("hidden");
+    loadLeaderboard();
 }
 
 function closeGamesPanel() {
     const panel = document.getElementById("gamesPanel");
+    const arrowBtn = document.getElementById("gamesArrowBtn");
     if (panel) panel.classList.remove("active");
+    if (arrowBtn) arrowBtn.classList.remove("hidden");
 }
 
 // ─── Колесо фортуны ─────────────────────────────────────────
@@ -979,54 +1092,196 @@ function resetTicTacToe() {
     if (resultEl) resultEl.textContent = "Ты играешь за ❌. Ходи первым!";
 }
 
-// ─── Угадай число ───────────────────────────────────────────
-let secretNumber = Math.floor(Math.random() * 100) + 1;
-let guessAttempts = 0;
+// ─── Апгрейдер ──────────────────────────────────────────────
+const UPGRADER_BALANCE_KEY = "upgraderBalance";
+const UPGRADER_BEST_KEY = "upgraderBest";
+const UPGRADER_OPTIONS = [
+    { mult: 2, chance: 47 },
+    { mult: 3, chance: 30 },
+    { mult: 5, chance: 18 },
+    { mult: 10, chance: 9 }
+];
+let upgraderBalance = 100;
+let upgraderSelectedIndex = 0;
+let upgraderBusy = false;
 
-function makeGuess() {
-    const input = document.getElementById("guessInput");
-    const resultEl = document.getElementById("guessResult");
+function loadUpgraderBalance() {
+    const raw = localStorage.getItem(UPGRADER_BALANCE_KEY);
+    const parsed = raw !== null ? parseInt(raw, 10) : NaN;
+    upgraderBalance = isNaN(parsed) ? 100 : parsed;
+}
+
+function saveUpgraderBalance() {
+    localStorage.setItem(UPGRADER_BALANCE_KEY, String(upgraderBalance));
+}
+
+function renderUpgraderBalance() {
+    const el = document.getElementById("upgraderBalance");
+    if (el) el.textContent = upgraderBalance;
+}
+
+function renderUpgraderMultButtons() {
+    const row = document.getElementById("upgraderMultRow");
+    if (!row) return;
+    row.innerHTML = "";
+    UPGRADER_OPTIONS.forEach((opt, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "upgrader-mult-btn" + (i === upgraderSelectedIndex ? " selected" : "");
+        btn.innerHTML = `x${opt.mult}<span>${opt.chance}%</span>`;
+        btn.onclick = () => selectUpgraderMultiplier(i);
+        row.appendChild(btn);
+    });
+}
+
+function selectUpgraderMultiplier(index) {
+    if (upgraderBusy) return;
+    upgraderSelectedIndex = index;
+    renderUpgraderMultButtons();
+    updateUpgraderChanceBar(UPGRADER_OPTIONS[index].chance);
+}
+
+function updateUpgraderChanceBar(chance, markerPos) {
+    const fill = document.getElementById("upgraderChanceFill");
+    const marker = document.getElementById("upgraderMarker");
+    if (fill) fill.style.width = chance + "%";
+    if (marker) marker.style.left = (markerPos !== undefined ? markerPos : chance / 2) + "%";
+}
+
+function setUpgraderStakeMax() {
+    const input = document.getElementById("upgraderStake");
+    if (input) input.value = Math.max(1, upgraderBalance);
+}
+
+function doUpgrade() {
+    if (upgraderBusy) return;
+    const input = document.getElementById("upgraderStake");
+    const resultEl = document.getElementById("upgraderResult");
+    const btn = document.getElementById("upgraderBtn");
     if (!input || !resultEl) return;
 
-    const val = parseInt(input.value, 10);
-    if (isNaN(val) || val < 1 || val > 100) {
-        resultEl.textContent = "⚠️ Введи число от 1 до 100";
+    const stake = parseInt(input.value, 10);
+    if (isNaN(stake) || stake < 1) {
+        resultEl.textContent = "⚠️ Введи корректную ставку";
+        return;
+    }
+    if (stake > upgraderBalance) {
+        resultEl.textContent = "⚠️ Недостаточно коинов";
         return;
     }
 
-    guessAttempts++;
-    if (val === secretNumber) {
-        resultEl.textContent = `🎉 Угадал! Число было ${secretNumber}. Попыток: ${guessAttempts}`;
-    } else if (val < secretNumber) {
-        resultEl.textContent = "📈 Больше!";
-    } else {
-        resultEl.textContent = "📉 Меньше!";
-    }
+    const option = UPGRADER_OPTIONS[upgraderSelectedIndex];
+    const roll = Math.random() * 100;
+    const win = roll < option.chance;
 
-    input.value = "";
-    input.focus();
+    upgraderBusy = true;
+    if (btn) btn.disabled = true;
+    resultEl.textContent = "";
+    updateUpgraderChanceBar(option.chance, roll);
+
+    setTimeout(() => {
+        if (win) {
+            const gain = Math.round(stake * (option.mult - 1));
+            upgraderBalance += gain;
+            resultEl.textContent = `🎉 Апгрейд удался! +${gain} 🪙`;
+        } else {
+            upgraderBalance -= stake;
+            if (upgraderBalance < 0) upgraderBalance = 0;
+            resultEl.textContent = `💥 Не повезло. -${stake} 🪙`;
+        }
+        saveUpgraderBalance();
+        renderUpgraderBalance();
+        checkUpgraderBest();
+
+        upgraderBusy = false;
+        if (btn) btn.disabled = false;
+
+        if (upgraderBalance <= 0) {
+            resultEl.textContent += " Коины закончились — нажми «Сбросить баланс»";
+        }
+    }, 1150);
 }
 
-function resetGuessGame() {
-    secretNumber = Math.floor(Math.random() * 100) + 1;
-    guessAttempts = 0;
-    const resultEl = document.getElementById("guessResult");
-    if (resultEl) resultEl.textContent = "Загадано новое число!";
-    const input = document.getElementById("guessInput");
-    if (input) input.value = "";
+function checkUpgraderBest() {
+    const raw = localStorage.getItem(UPGRADER_BEST_KEY);
+    const best = raw !== null ? parseInt(raw, 10) : 0;
+    if (upgraderBalance > best) {
+        localStorage.setItem(UPGRADER_BEST_KEY, String(upgraderBalance));
+        submitScore(upgraderBalance);
+    }
+}
+
+function resetUpgrader() {
+    upgraderBalance = 100;
+    saveUpgraderBalance();
+    renderUpgraderBalance();
+    const resultEl = document.getElementById("upgraderResult");
+    if (resultEl) resultEl.textContent = "Баланс сброшен до 100 🪙";
+}
+
+function initUpgrader() {
+    loadUpgraderBalance();
+    renderUpgraderBalance();
+    renderUpgraderMultButtons();
+    updateUpgraderChanceBar(UPGRADER_OPTIONS[upgraderSelectedIndex].chance);
+}
+
+// ─── Лидерборд ──────────────────────────────────────────────
+async function submitScore(score) {
+    const profile = getProfile();
+    if (!profile) return;
+    try {
+        await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                action: "submit_score",
+                player_name: profile.name,
+                player_avatar: profile.avatar,
+                score: score
+            })
+        });
+    } catch (e) {
+        console.error("Ошибка отправки результата:", e);
+    }
+}
+
+async function loadLeaderboard() {
+    const listEl = document.getElementById("leaderboardList");
+    if (!listEl) return;
+    try {
+        const response = await fetch(WORKER_URL + "leaderboard", {
+            method: "GET",
+            credentials: "include"
+        });
+        if (!response.ok) throw new Error("bad response");
+        const rows = await response.json();
+
+        if (!rows.length) {
+            listEl.innerHTML = `<div class="leaderboard-empty">Пока никто не играл в Апгрейдер</div>`;
+            return;
+        }
+
+        const profile = getProfile();
+        listEl.innerHTML = rows.map((row, i) => `
+            <div class="leaderboard-row ${profile && row.author_name === profile.name ? 'is-you' : ''}">
+                <span class="leaderboard-rank">#${i + 1}</span>
+                <span class="leaderboard-avatar">${row.author_avatar || "❓"}</span>
+                <span class="leaderboard-name">${escapeHtml(row.author_name || "Аноним")}</span>
+                <span class="leaderboard-score">${row.score} 🪙</span>
+            </div>
+        `).join("");
+    } catch (e) {
+        listEl.innerHTML = `<div class="leaderboard-empty">Не удалось загрузить лидерборд</div>`;
+    }
 }
 
 // Инициализация игр при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
     drawWheel();
     renderTicTacToe();
-
-    const guessInput = document.getElementById("guessInput");
-    if (guessInput) {
-        guessInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") makeGuess();
-        });
-    }
+    initUpgrader();
 });
 
 // Экспорт функций в глобальную область видимости
@@ -1059,7 +1314,11 @@ window.openGamesPanel = openGamesPanel;
 window.closeGamesPanel = closeGamesPanel;
 window.spinWheel = spinWheel;
 window.resetTicTacToe = resetTicTacToe;
-window.makeGuess = makeGuess;
-window.resetGuessGame = resetGuessGame;
+window.setUpgraderStakeMax = setUpgraderStakeMax;
+window.doUpgrade = doUpgrade;
+window.resetUpgrader = resetUpgrader;
+window.openProfileModal = openProfileModal;
+window.closeProfileModal = closeProfileModal;
+window.saveProfile = saveProfile;
 window.connectNotesSocket = connectNotesSocket;
 window.disconnectNotesSocket = disconnectNotesSocket;
