@@ -9,10 +9,39 @@
 
     <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
     <div class="user-profile-container">
-        <button class="user-profile-btn" id="userProfileBtn" title="Профиль">
+        <button class="user-profile-btn" id="userProfileBtn" onclick="openProfileSettings()" title="Профиль">
             <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
             <span id="userDisplayName"></span>
         </button>
+    </div>
+
+    <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК ПРОФИЛЯ -->
+    <div class="modal-overlay" id="profileSettingsOverlay" onclick="closeProfileSettings()">
+        <div class="modal-card profile-settings-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeProfileSettings()">✕</button>
+            <div class="modal-body profile-settings-body">
+                <h2>⚙️ Настройки профиля</h2>
+
+                <!-- Изменение имени -->
+                <div class="settings-section">
+                    <h3>Изменить отображаемое имя</h3>
+                    <input type="password" id="nameChangePassword" placeholder="Текущий пароль">
+                    <input type="text" id="newDisplayName" placeholder="Новое имя">
+                    <button class="btn-save" onclick="changeDisplayName()">Изменить имя</button>
+                    <div id="nameChangeMessage" class="settings-message"></div>
+                </div>
+
+                <!-- Изменение пароля -->
+                <div class="settings-section">
+                    <h3>Изменить пароль</h3>
+                    <input type="password" id="currentPassword" placeholder="Текущий пароль">
+                    <input type="password" id="newPassword" placeholder="Новый пароль">
+                    <input type="password" id="confirmPassword" placeholder="Подтвердите новый пароль">
+                    <button class="btn-save" onclick="changePassword()">Изменить пароль</button>
+                    <div id="passwordChangeMessage" class="settings-message"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- КНОПКА НАСТРОЕК -->
