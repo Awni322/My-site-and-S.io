@@ -224,25 +224,6 @@
 
             <div class="games-grid">
 
-                <!-- Баланс монет -->
-                <div class="game-card balance-card">
-                    <h2>💰 Ваш баланс</h2>
-                    <div class="balance-display">
-                        <span class="balance-amount" id="userBalance">0</span>
-                        <span class="balance-icon">🪙</span>
-                    </div>
-                    <div class="balance-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Лучший выигрыш:</span>
-                            <span class="stat-value" id="bestWin">0 🪙</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Всего выиграно:</span>
-                            <span class="stat-value" id="totalWon">0 🪙</span>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Колесо фортуны -->
                 <div class="game-card">
                     <h2>🎡 Колесо фортуны</h2>
@@ -267,7 +248,26 @@
 
                 <!-- Апгрейдер -->
                 <div class="game-card upgrader-card">
-                    <h2>⚡ Апгрейдер</h2>
+                    <!-- Баланс встроен в апгрейдер -->
+                    <div class="upgrader-header">
+                        <h2>⚡ Апгрейдер</h2>
+                        <div class="balance-display-inline">
+                            <span class="balance-amount" id="userBalance">0</span>
+                            <span class="balance-icon">🪙</span>
+                        </div>
+                    </div>
+
+                    <div class="balance-stats-inline">
+                        <div class="stat-item-inline">
+                            <span class="stat-label">Лучший:</span>
+                            <span class="stat-value" id="bestWin">0 🪙</span>
+                        </div>
+                        <div class="stat-item-inline">
+                            <span class="stat-label">Всего:</span>
+                            <span class="stat-value" id="totalWon">0 🪙</span>
+                        </div>
+                    </div>
+
                     <div class="upgrader-container">
                         <div class="upgrader-items">
                             <div class="upgrader-slot" id="upgraderSlot1" onclick="selectUpgraderSlot(1)">
@@ -289,11 +289,13 @@
                         </button>
                     </div>
 
-                    <!-- Инвентарь -->
+                    <!-- Инвентарь горизонтальный -->
                     <div class="upgrader-inventory">
                         <h3>📦 Ваши предметы</h3>
-                        <div class="inventory-grid" id="inventoryGrid">
-                            <!-- Предметы будут добавлены через JS -->
+                        <div class="inventory-scroll-container">
+                            <div class="inventory-grid-horizontal" id="inventoryGrid">
+                                <!-- Предметы будут добавлены через JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
