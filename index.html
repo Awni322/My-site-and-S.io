@@ -47,7 +47,7 @@
     <div id="login">
         <h2>Вход</h2>
         <input type="password" id="password" placeholder="Введите пароль">
-        <button onclick="login()">Войти</button>
+        <button id="loginBtn" onclick="login()">Войти</button>
         <div id="message"></div>
     </div>
 
@@ -143,6 +143,12 @@
 
     <!-- ПАНЕЛЬ МИНИ-ИГР -->
     <div class="games-panel" id="gamesPanel">
+        <!-- Аватарка и ник в верхнем левом углу -->
+        <div class="games-top-user" id="gamesTopUser" onclick="openProfileModal(true)">
+            <img id="gamesUserAvatar" class="games-user-avatar" src="" alt="Avatar">
+            <span id="gamesUserName" class="games-user-name">Гость</span>
+        </div>
+
         <button class="side-arrow side-arrow-left" id="gamesBackBtn" onclick="closeGamesPanel()" title="Назад к заметкам">‹</button>
 
         <div class="games-panel-inner">
@@ -154,49 +160,55 @@
                 <!-- Колесо фортуны -->
                 <div class="game-card">
                     <h2>🎡 Колесо фортуны</h2>
-                    <p class="game-subtitle">Испытай удачу</p>
+                    <p class="game-subtitle" id="wheelSubtitle">Бесплатный спин раз в день</p>
                     <div class="wheel-wrapper">
                         <div class="wheel-pointer"></div>
                         <canvas id="wheelCanvas" width="280" height="280"></canvas>
                     </div>
-                    <button class="btn-save game-btn" onclick="spinWheel()">Крутить</button>
+                    <button class="btn-save game-btn" id="wheelSpinBtn" onclick="spinWheel()">Крутить</button>
                     <div class="game-result" id="wheelResult"></div>
+                    <div class="wheel-timer-note" id="wheelTimerNote"></div>
                 </div>
 
-                <!-- Крестики-нолики -->
-                <div class="game-card">
-                    <h2>❌⭕ Крестики-нолики</h2>
-                    <p class="game-subtitle">Классика для двоих</p>
-                    <div class="ttt-board" id="tttBoard"></div>
-                    <div class="game-result" id="tttResult">Ты играешь за ❌. Ходи первым!</div>
-                    <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
-                </div>
-
-                <!-- Апгрейдер -->
-                <div class="game-card">
+                <!-- Апгрейдер (Стильный круговой интерфейс) -->
+                <div class="game-card upgrader-card">
                     <h2>🆙 Апгрейдер</h2>
-                    <p class="game-subtitle">Рискни и приумножь</p>
+                    <p class="game-subtitle">Испытай удачу и умножь коины</p>
+
                     <div class="upgrader-balance">
                         <span class="upgrader-balance-label">Баланс</span>
                         <span class="upgrader-balance-value" id="upgraderBalance">100</span>
                         <span class="upgrader-coin">🪙</span>
                     </div>
 
-                    <div class="upgrader-stake-row">
-                        <input type="number" id="upgraderStake" min="1" value="10">
-                        <button class="btn-cancel game-btn-inline" onclick="setUpgraderStakeMax()">MAX</button>
-                    </div>
-
+                    <!-- Выбор множителей -->
                     <div class="upgrader-mult-row" id="upgraderMultRow"></div>
 
-                    <div class="upgrader-chance-bar">
-                        <div class="upgrader-chance-fill" id="upgraderChanceFill"></div>
-                        <div class="upgrader-chance-marker" id="upgraderMarker"></div>
+                    <!-- Круговой прогресс бар (Speedometer Style) -->
+                    <div class="upgrader-gauge-wrapper">
+                        <svg class="upgrader-gauge-svg" viewBox="0 0 100 100">
+                            <path class="gauge-bg" d="M 15,85 A 45,45 0 1,1 85,85" />
+                            <path class="gauge-fill" id="upgraderGaugeFill" d="M 15,85 A 45,45 0 1,1 85,85" />
+                        </svg>
+                        <div class="upgrader-gauge-center">
+                            <span class="gauge-chance-val" id="upgraderChanceText">47%</span>
+                            <span class="gauge-chance-sub">шанс</span>
+                        </div>
+                    </div>
+
+                    <!-- Поле ставки -->
+                    <div class="upgrader-stake-container">
+                        <div class="upgrader-stake-row">
+                            <input type="number" id="upgraderStake" min="1" value="10">
+                            <button class="btn-cancel game-btn-inline" onclick="setUpgraderStake(10)">10</button>
+                            <button class="btn-cancel game-btn-inline" onclick="setUpgraderStake(100)">100</button>
+                            <button class="btn-cancel game-btn-inline" onclick="setUpgraderStakeMax()">MAX</button>
+                        </div>
                     </div>
 
                     <button class="btn-save game-btn" id="upgraderBtn" onclick="doUpgrade()">Апгрейд</button>
                     <div class="game-result" id="upgraderResult"></div>
-                    <button class="btn-cancel game-btn" onclick="resetUpgrader()">Сбросить баланс</button>
+                    <button class="btn-cancel game-btn" onclick="resetUpgrader()" style="margin-top: 8px;">Сбросить баланс</button>
                 </div>
 
                 <!-- Лидерборд -->
