@@ -34,6 +34,14 @@ function getProfile() {
     }
 }
 
+function updateGamesTopUserInfo() {
+    const profile = getProfile();
+    const avatarEl = document.getElementById("gamesUserAvatar");
+    const nameEl = document.getElementById("gamesUserName");
+    if (avatarEl) avatarEl.src = profile ? profile.avatar : DEFAULT_AVATAR;
+    if (nameEl) nameEl.textContent = profile ? profile.name : "Гость";
+}
+
 function resizeAvatarImage(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -114,7 +122,7 @@ function closeProfileModal() {
     if (overlay) overlay.classList.remove("active");
 }
 
-function saveProfile() {
+async function saveProfile() {
     const nameInput = document.getElementById("profileNameInput");
     const name = nameInput ? nameInput.value.trim() : "";
 
@@ -123,7 +131,35 @@ function saveProfile() {
         return;
     }
 
+    const oldProfile = getProfile();
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify({ name, avatar: selectedAvatar }));
+    
+    // Обновляем отображение аватарок в карточках локально
+    if (oldProfile) {
+        currentNotesList.forEach(note => {
+            if (note.author_name === oldProfile.name || !note.author_name) {
+                note.author_name = name;
+                note.author_avatar = selectedAvatar;
+            }
+        });
+        applyFiltersAndRender();
+    }
+
+    // Синхронизация с сервером
+    try {
+        await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+                action: "update_profile",
+                name: name,
+                avatar: selectedAvatar
+            })
+        });
+    } catch (e) {}
+
+    updateGamesTopUserInfo();
     closeProfileModal();
     showToast("✅ Профиль сохранён");
 }
@@ -131,6 +167,8 @@ function saveProfile() {
 function ensureProfileSetup() {
     if (!getProfile()) {
         openProfileModal(false);
+    } else {
+        updateGamesTopUserInfo();
     }
 }
 
@@ -178,24 +216,20 @@ async function login() {
     }
 }
 
-// Автоматическая привязка кнопки входа и инициализация тем
+// Инициализация при загрузке документа
 document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("loginBtn");
     if (loginBtn) {
         loginBtn.addEventListener("click", login);
     }
 
-    // Поддержка нажатия Enter в поле ввода пароля
     const passwordInput = document.getElementById("password");
     if (passwordInput) {
         passwordInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                login();
-            }
+            if (e.key === "Enter") login();
         });
     }
 
-    // Восстановление темы
     const savedTheme = localStorage.getItem("site_theme");
     if (savedTheme) {
         if (savedTheme === "default") {
@@ -205,7 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Выпадающее меню настроек
     const menuBtn = document.getElementById("settingsMenuBtn");
     const dropdown = document.getElementById("settingsDropdown");
 
@@ -223,10 +256,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const sortTrigger = document.getElementById("sortTrigger");
             if (sortMenu) sortMenu.classList.remove("active");
             if (sortTrigger) sortTrigger.classList.remove("open");
-            const catMenu = document.getElementById("categoryMenu");
-            const catTrigger = document.getElementById("categoryTrigger");
-            if (catMenu) catMenu.classList.remove("active");
-            if (catTrigger) catTrigger.classList.remove("open");
         });
 
         dropdown.addEventListener("click", (e) => {
@@ -325,8 +354,6 @@ async function loadNotes() {
         });
         if (response.ok) {
             const freshNotes = await response.json();
-            // Перерисовываем карточки только если данные реально изменились —
-            // иначе при каждом опросе (раз в 5с) список будет "прыгать" без причины
             const hasChanged = JSON.stringify(freshNotes) !== JSON.stringify(currentNotesList);
             currentNotesList = freshNotes;
             if (hasChanged) {
@@ -340,13 +367,11 @@ async function loadNotes() {
 
 function getNoteTimestamp(note) {
     if (note.created_at) return Number(note.created_at);
-    // Старые записи без даты — fallback по id
     return Number(note.id) || 0;
 }
 
 function formatNoteDate(note) {
     const ts = getNoteTimestamp(note);
-    // Если это маленький id (старые записи) — не показываем странную дату 1970
     if (!note.created_at && ts < 1000000000) return "дата неизвестна";
     const d = new Date(ts * 1000);
     if (isNaN(d.getTime())) return "дата неизвестна";
@@ -366,7 +391,6 @@ function applyFiltersAndRender() {
     }
 
     filtered.sort((a, b) => {
-        // Закреплённые всегда сверху
         const pinA = (a.is_pinned === 1 || a.is_pinned === true) ? 1 : 0;
         const pinB = (b.is_pinned === 1 || b.is_pinned === true) ? 1 : 0;
         if (pinA !== pinB) return pinB - pinA;
@@ -381,12 +405,6 @@ function applyFiltersAndRender() {
 
 function toggleSortMenu(event) {
     if (event) event.stopPropagation();
-    // закрыть меню категорий
-    const catMenu = document.getElementById("categoryMenu");
-    const catTrigger = document.getElementById("categoryTrigger");
-    if (catMenu) catMenu.classList.remove("active");
-    if (catTrigger) catTrigger.classList.remove("open");
-
     const menu = document.getElementById("sortMenu");
     const trigger = document.getElementById("sortTrigger");
     if (!menu) return;
@@ -420,9 +438,7 @@ function setSort(sort, event) {
     }
 }
 
-function handleSort() {
-    setSort(activeSort);
-}
+function handleSort() { setSort(activeSort); }
 
 function setCategory(category, event) {
     if (event) {
@@ -431,19 +447,10 @@ function setCategory(category, event) {
     }
     activeCategory = category || "all";
 
-    // Подсветка кнопок категорий
     document.querySelectorAll(".category-filters .filter-btn").forEach(btn => {
         const isActive = btn.getAttribute("data-category") === activeCategory;
         btn.classList.toggle("active", isActive);
     });
-
-    // Если вдруг остался dropdown-вариант — тоже обновим
-    document.querySelectorAll("#categoryMenu .sort-option").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.category === activeCategory);
-    });
-    const labels = { all: "📁 Все", "Заметки": "📝 Заметки", "Скрипты": "📜 Скрипты" };
-    const label = document.getElementById("categoryLabel");
-    if (label) label.textContent = labels[activeCategory] || "📁 Все";
 
     const search = document.getElementById("search");
     if (search && search.value.trim()) {
@@ -453,9 +460,7 @@ function setCategory(category, event) {
     }
 }
 
-function filterCategory(category, event) {
-    setCategory(category, event);
-}
+function filterCategory(category, event) { setCategory(category, event); }
 
 function handleSearch() {
     let query = document.getElementById("search").value.toLowerCase().trim();
@@ -484,18 +489,14 @@ function handleSearch() {
     renderNotes(filtered);
 }
 
-// Быстрое копирование с карточки
 function copyToClipboard(text, buttonEl) {
     navigator.clipboard.writeText(text).then(() => {
         let originalText = buttonEl.innerText;
         buttonEl.innerText = "✅ Скопировано!";
-        setTimeout(() => {
-            buttonEl.innerText = originalText;
-        }, 1500);
+        setTimeout(() => { buttonEl.innerText = originalText; }, 1500);
     }).catch(err => console.error("Ошибка копирования: ", err));
 }
 
-// Копирование из модального окна
 function copyModalContent() {
     let text = document.getElementById("modalText").innerText;
     let btn = document.getElementById("btnModalCopy");
@@ -507,7 +508,6 @@ function copyModalContent() {
     });
 }
 
-// Экранирование HTML — защита от XSS
 function escapeHtml(str) {
     if (str == null) return "";
     return String(str)
@@ -518,7 +518,6 @@ function escapeHtml(str) {
         .replace(/'/g, "&#39;");
 }
 
-// Рендер карточек
 function renderNotes(notes) {
     let output = "";
 
@@ -574,25 +573,11 @@ function renderNotes(notes) {
 
     const notesEl = document.getElementById("notes");
     if (!output) {
-        const hasAny = currentNotesList.length > 0;
-        const search = document.getElementById("search");
-        const q = search ? search.value.trim() : "";
-        let title, text;
-        if (!hasAny) {
-            title = "Пока пусто";
-            text = "Добавь первую запись — заметку или скрипт";
-        } else if (q) {
-            title = "Ничего не найдено";
-            text = "Попробуй изменить запрос или сбросить поиск";
-        } else {
-            title = "В этой категории пусто";
-            text = "Выбери другую категорию или создай новую запись";
-        }
         notesEl.innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon">📭</div>
-                <div class="empty-title">${title}</div>
-                <div class="empty-text">${text}</div>
+                <div class="empty-title">Пока пусто</div>
+                <div class="empty-text">Добавь первую запись или сбрось поисковые фильтры</div>
             </div>
         `;
     } else {
@@ -634,15 +619,11 @@ function openNoteModal(id) {
     if (note.roblox_url && note.roblox_url.trim() !== "") {
         let raw = note.roblox_url.trim();
         let url = raw.match(/^https?:\/\//i) ? raw : "https://" + raw;
-        if (!/^https?:\/\//i.test(url)) {
-            robloxContainer.innerHTML = "";
-        } else {
-            robloxContainer.innerHTML = `
-                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="roblox-link-btn">
-                    📎 Открыть ссылку  
-                </a>
-            `;
-        }
+        robloxContainer.innerHTML = `
+            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="roblox-link-btn">
+                📎 Открыть ссылку  
+            </a>
+        `;
     } else {
         robloxContainer.innerHTML = "";
     }
@@ -660,7 +641,6 @@ function openNoteModal(id) {
     document.getElementById("modalOverlay").classList.add("active");
 }
 
-// Заполнение формы для редактирования
 function editNote(id) {
     let note = currentNotesList.find(n => n.id == id);
     if (!note) return;
@@ -684,7 +664,6 @@ function editNote(id) {
     currentImageBase64 = note.image;
 }
 
-// Сброс формы
 function resetForm() {
     document.getElementById("title").value = "";
     document.getElementById("contentInput").value = "";
@@ -708,14 +687,11 @@ function resetForm() {
     document.getElementById("btnCancel").style.display = "none";
 }
 
-// Закрепление
 async function togglePin(id, status) {
     try {
         await fetch(WORKER_URL, {
             method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status }),
             credentials: "include"
         });
@@ -726,7 +702,6 @@ async function togglePin(id, status) {
     }
 }
 
-// Универсальное окно подтверждения
 function openConfirmModal({ title, text, confirmLabel, onConfirm }) {
     const overlay = document.getElementById("confirmOverlay");
     const titleEl = document.getElementById("confirmTitle");
@@ -749,7 +724,6 @@ function closeConfirmModal() {
     noteIdToDelete = null;
 }
 
-// Удаление
 function deleteNote(id) {
     noteIdToDelete = id;
     openConfirmModal({
@@ -765,9 +739,7 @@ async function confirmDelete() {
     try {
         await fetch(WORKER_URL, {
             method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: "delete", id: noteIdToDelete }),
             credentials: "include"
         });
@@ -775,7 +747,6 @@ async function confirmDelete() {
         loadNotes();
         showToast("🗑 Запись удалена");
     } catch (err) {
-        console.error("Ошибка удаления:", err);
         showToast("❌ Ошибка удаления", "error");
     }
 }
@@ -784,7 +755,6 @@ function closeModal() {
     document.getElementById("modalOverlay").classList.remove("active");
 }
 
-// Управление темами через выпадающее меню
 function updateActiveThemeMark() {
     const current = localStorage.getItem("site_theme") || "default";
     document.querySelectorAll(".settings-option[data-theme-value]").forEach(btn => {
@@ -805,13 +775,10 @@ function setTheme(themeName) {
     }
 
     updateActiveThemeMark();
-
-    if (dropdown) {
-        dropdown.classList.remove("active");
-    }
+    if (dropdown) dropdown.classList.remove("active");
 }
 
-// Автоматическая проверка сессии (входа без пароля) при загрузке страницы
+// Автоматическая проверка сессии при открытии
 document.addEventListener("DOMContentLoaded", async () => {
     const loginContainer = document.getElementById("login");
     const contentContainer = document.getElementById("content");
@@ -829,21 +796,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             applyFiltersAndRender();
             connectNotesSocket();
             ensureProfileSetup();
-            
-            // 👉 ВОТ ЗДЕСЬ ТЕПЕРЬ ВЫЗЫВАЕТСЯ УВЕДОМЛЕНИЕ ПРИ АВТОМАТИЧЕСКОМ ВХОДЕ
             showAutoLoginToast();
         } else {
             if (loginContainer) loginContainer.style.display = "block";
             if (contentContainer) contentContainer.style.display = "none";
         }
     } catch (error) {
-        console.error("Ошибка при проверке сессии:", error);
         if (loginContainer) loginContainer.style.display = "block";
         if (contentContainer) contentContainer.style.display = "none";
     }
 });
 
-// Универсальные всплывающие уведомления
 function showToast(message, type = "ok") {
     let toast = document.getElementById("appToast");
     if (!toast) {
@@ -863,7 +826,6 @@ function showToast(message, type = "ok") {
     toast.classList.remove("toast-error", "toast-ok", "show");
     toast.classList.add(type === "error" ? "toast-error" : "toast-ok");
 
-    // перезапуск анимации
     void toast.offsetWidth;
     setTimeout(() => toast.classList.add("show"), 10);
 
@@ -876,14 +838,13 @@ function showAutoLoginToast() {
 }
 
 function closeToast() {
-    const toast = document.getElementById("appToast") || document.getElementById("autoLoginToast");
+    const toast = document.getElementById("appToast");
     if (toast) {
         toast.classList.remove("show");
         clearTimeout(window.toastTimer);
     }
 }
 
-// Запрос выхода — с подтверждением
 function requestLogout() {
     const dropdown = document.getElementById("settingsDropdown");
     if (dropdown) dropdown.classList.remove("active");
@@ -896,7 +857,7 @@ function requestLogout() {
     });
 }
 
-// Выход из аккаунта
+// Полноценный запуск процесса выхода
 async function logout() {
     closeConfirmModal();
     disconnectNotesSocket();
@@ -919,14 +880,12 @@ async function logout() {
 }
 
 // ==========================================
-// РЕАЛЬНОЕ ВРЕМЯ — периодический опрос (polling)
+// РЕАЛЬНОЕ ВРЕМЯ (Polling)
 // ==========================================
 const NOTES_POLL_INTERVAL_MS = 5000;
 let notesPollTimer = null;
 
 function connectNotesSocket() {
-    // Название сохранено для совместимости с остальным кодом (login/logout),
-    // но по сути это запуск обычного опроса сервера через равные интервалы.
     if (notesPollTimer) return;
     notesPollTimer = setInterval(() => {
         const contentVisible = document.getElementById("content")?.style.display !== "none";
@@ -943,8 +902,6 @@ function disconnectNotesSocket() {
     }
 }
 
-// Сразу опрашиваем сервер, когда пользователь возвращается на вкладку —
-// чтобы не ждать до конца текущего интервала
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
         const contentVisible = document.getElementById("content")?.style.display !== "none";
@@ -960,7 +917,9 @@ function openGamesPanel() {
     const arrowBtn = document.getElementById("gamesArrowBtn");
     if (panel) panel.classList.add("active");
     if (arrowBtn) arrowBtn.classList.add("hidden");
+    updateGamesTopUserInfo();
     loadLeaderboard();
+    checkWheelCooldown();
 }
 
 function closeGamesPanel() {
@@ -970,11 +929,22 @@ function closeGamesPanel() {
     if (arrowBtn) arrowBtn.classList.remove("hidden");
 }
 
-// ─── Колесо фортуны ─────────────────────────────────────────
-const wheelSegments = ["🎉 Приз!", "😢 Мимо", "🔥 Ещё раз", "⭐ Бонус", "💤 Пусто", "🎁 Сюрприз", "🍀 Удача", "💥 Взрыв"];
+// ─── Колесо фортуны (Раз в 24 часа) ──────────────────────
+const WHEEL_LAST_SPIN_KEY = "wheelLastSpinTimestamp";
+const wheelSegments = [
+    { label: "+50 🪙", type: "coin", value: 50 },
+    { label: "😢 Пусто", type: "none", value: 0 },
+    { label: "+200 🪙", type: "coin", value: 200 },
+    { label: "⚡ Сброс КД", type: "cooldown", value: 0 },
+    { label: "+10 🪙", type: "coin", value: 10 },
+    { label: "🍀 Удача", type: "coin", value: 100 },
+    { label: "+500 🪙", type: "coin", value: 500 },
+    { label: "⭐ Джекпот", type: "coin", value: 1000 }
+];
 const wheelColors = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185", "#4ade80", "#f97316"];
 let currentWheelRotation = 0;
 let wheelSpinning = false;
+let wheelTimerInterval = null;
 
 function drawWheel() {
     const canvas = document.getElementById("wheelCanvas");
@@ -987,7 +957,7 @@ function drawWheel() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    wheelSegments.forEach((label, i) => {
+    wheelSegments.forEach((seg, i) => {
         const start = i * segAngle;
         const end = start + segAngle;
 
@@ -997,7 +967,7 @@ function drawWheel() {
         ctx.closePath();
         ctx.fillStyle = wheelColors[i % wheelColors.length];
         ctx.fill();
-        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+        ctx.strokeStyle = "rgba(255,255,255,0.25)";
         ctx.lineWidth = 2;
         ctx.stroke();
 
@@ -1006,26 +976,73 @@ function drawWheel() {
         ctx.rotate(start + segAngle / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#10151f";
-        ctx.font = "600 13px Inter, sans-serif";
-        ctx.fillText(label, radius - 14, 5);
+        ctx.font = "700 13px Inter, sans-serif";
+        ctx.fillText(seg.label, radius - 12, 5);
         ctx.restore();
     });
 }
 
+function checkWheelCooldown() {
+    const lastSpin = parseInt(localStorage.getItem(WHEEL_LAST_SPIN_KEY) || "0", 10);
+    const now = Date.now();
+    const cooldownMs = 24 * 60 * 60 * 1000;
+    const btn = document.getElementById("wheelSpinBtn");
+    const timerNote = document.getElementById("wheelTimerNote");
+
+    if (now - lastSpin < cooldownMs) {
+        if (btn) btn.disabled = true;
+        startWheelTimer(cooldownMs - (now - lastSpin));
+        return false;
+    } else {
+        if (btn) btn.disabled = false;
+        if (timerNote) timerNote.textContent = "✨ Колесо готово к прокруту!";
+        if (wheelTimerInterval) clearInterval(wheelTimerInterval);
+        return true;
+    }
+}
+
+function startWheelTimer(remainingMs) {
+    if (wheelTimerInterval) clearInterval(wheelTimerInterval);
+    const timerNote = document.getElementById("wheelTimerNote");
+    
+    function update() {
+        if (remainingMs <= 0) {
+            clearInterval(wheelTimerInterval);
+            checkWheelCooldown();
+            return;
+        }
+        const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+        const mins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((remainingMs % (1000 * 60)) / 1000);
+        if (timerNote) {
+            timerNote.textContent = `⏳ До следующего вращения: ${hours}ч ${mins}м ${secs}с`;
+        }
+        remainingMs -= 1000;
+    }
+    update();
+    wheelTimerInterval = setInterval(update, 1000);
+}
+
 function spinWheel() {
     if (wheelSpinning) return;
+    if (!checkWheelCooldown()) {
+        showToast("⏳ Колесо будет доступно позже!", "error");
+        return;
+    }
+
     const canvas = document.getElementById("wheelCanvas");
     const resultEl = document.getElementById("wheelResult");
+    const btn = document.getElementById("wheelSpinBtn");
     if (!canvas) return;
 
     wheelSpinning = true;
+    if (btn) btn.disabled = true;
     if (resultEl) resultEl.textContent = "";
 
     const segAngle = 360 / wheelSegments.length;
     const winIndex = Math.floor(Math.random() * wheelSegments.length);
     const targetCenter = winIndex * segAngle + segAngle / 2;
 
-    // Указатель находится сверху (270° в системе координат canvas)
     let needed = (270 - targetCenter) % 360;
     if (needed < 0) needed += 360;
 
@@ -1037,102 +1054,39 @@ function spinWheel() {
 
     setTimeout(() => {
         wheelSpinning = false;
-        if (resultEl) resultEl.textContent = "Выпало: " + wheelSegments[winIndex];
+        const prize = wheelSegments[winIndex];
+        
+        if (prize.type === "coin") {
+            upgraderBalance += prize.value;
+            saveUpgraderBalance();
+            renderUpgraderBalance();
+            checkUpgraderBest();
+            if (resultEl) resultEl.textContent = `🎉 Награда: +${prize.value} 🪙!`;
+        } else if (prize.type === "cooldown") {
+            localStorage.removeItem(WHEEL_LAST_SPIN_KEY);
+            if (resultEl) resultEl.textContent = "⚡ Кулдаун сброшен! Можно крутить ещё раз!";
+            checkWheelCooldown();
+            return;
+        } else {
+            if (resultEl) resultEl.textContent = "😢 К сожалению, ничего не выпало!";
+        }
+
+        localStorage.setItem(WHEEL_LAST_SPIN_KEY, String(Date.now()));
+        checkWheelCooldown();
     }, 4600);
 }
 
-// ─── Крестики-нолики ────────────────────────────────────────
-let tttBoard = Array(9).fill(null);
-let tttGameOver = false;
-
-function renderTicTacToe() {
-    const boardEl = document.getElementById("tttBoard");
-    if (!boardEl) return;
-    boardEl.innerHTML = "";
-    tttBoard.forEach((val, i) => {
-        const cell = document.createElement("div");
-        cell.className = "ttt-cell" + (val ? " taken" : "");
-        cell.textContent = val || "";
-        cell.onclick = () => tttMove(i);
-        boardEl.appendChild(cell);
-    });
-}
-
-function checkTttWinner(board) {
-    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    for (const [a, b, c] of lines) {
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
-    }
-    if (board.every(v => v)) return "draw";
-    return null;
-}
-
-function getComputerMove(board) {
-    const empty = board.map((v, i) => (v ? null : i)).filter(v => v !== null);
-    if (empty.length === 0) return -1;
-
-    for (const i of empty) {
-        const copy = board.slice();
-        copy[i] = "⭕";
-        if (checkTttWinner(copy) === "⭕") return i;
-    }
-    for (const i of empty) {
-        const copy = board.slice();
-        copy[i] = "❌";
-        if (checkTttWinner(copy) === "❌") return i;
-    }
-    if (board[4] === null) return 4;
-    return empty[Math.floor(Math.random() * empty.length)];
-}
-
-function tttMove(i) {
-    if (tttGameOver || tttBoard[i]) return;
-    tttBoard[i] = "❌";
-    let winner = checkTttWinner(tttBoard);
-
-    if (!winner) {
-        const compMove = getComputerMove(tttBoard);
-        if (compMove !== -1) tttBoard[compMove] = "⭕";
-        winner = checkTttWinner(tttBoard);
-    }
-
-    renderTicTacToe();
-    const resultEl = document.getElementById("tttResult");
-    if (!resultEl) return;
-
-    if (winner === "draw") {
-        tttGameOver = true;
-        resultEl.textContent = "🤝 Ничья!";
-    } else if (winner === "❌") {
-        tttGameOver = true;
-        resultEl.textContent = "🎉 Ты выиграл!";
-    } else if (winner === "⭕") {
-        tttGameOver = true;
-        resultEl.textContent = "😅 Компьютер выиграл!";
-    } else {
-        resultEl.textContent = "Твой ход!";
-    }
-}
-
-function resetTicTacToe() {
-    tttBoard = Array(9).fill(null);
-    tttGameOver = false;
-    renderTicTacToe();
-    const resultEl = document.getElementById("tttResult");
-    if (resultEl) resultEl.textContent = "Ты играешь за ❌. Ходи первым!";
-}
-
-// ─── Апгрейдер ──────────────────────────────────────────────
+// ─── Апгрейдер (Стильный круговой интерфейс) ──────────────
 const UPGRADER_BALANCE_KEY = "upgraderBalance";
 const UPGRADER_BEST_KEY = "upgraderBest";
 const UPGRADER_OPTIONS = [
+    { mult: 1.5, chance: 60 },
     { mult: 2, chance: 47 },
-    { mult: 3, chance: 30 },
     { mult: 5, chance: 18 },
     { mult: 10, chance: 9 }
 ];
 let upgraderBalance = 100;
-let upgraderSelectedIndex = 0;
+let upgraderSelectedIndex = 1;
 let upgraderBusy = false;
 
 function loadUpgraderBalance() {
@@ -1158,7 +1112,7 @@ function renderUpgraderMultButtons() {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "upgrader-mult-btn" + (i === upgraderSelectedIndex ? " selected" : "");
-        btn.innerHTML = `x${opt.mult}<span>${opt.chance}%</span>`;
+        btn.innerHTML = `x${opt.mult}`;
         btn.onclick = () => selectUpgraderMultiplier(i);
         row.appendChild(btn);
     });
@@ -1168,14 +1122,26 @@ function selectUpgraderMultiplier(index) {
     if (upgraderBusy) return;
     upgraderSelectedIndex = index;
     renderUpgraderMultButtons();
-    updateUpgraderChanceBar(UPGRADER_OPTIONS[index].chance);
+    updateUpgraderGauge(UPGRADER_OPTIONS[index].chance);
 }
 
-function updateUpgraderChanceBar(chance, markerPos) {
-    const fill = document.getElementById("upgraderChanceFill");
-    const marker = document.getElementById("upgraderMarker");
-    if (fill) fill.style.width = chance + "%";
-    if (marker) marker.style.left = (markerPos !== undefined ? markerPos : chance / 2) + "%";
+function updateUpgraderGauge(chance) {
+    const chanceText = document.getElementById("upgraderChanceText");
+    const gaugeFill = document.getElementById("upgraderGaugeFill");
+    if (chanceText) chanceText.textContent = chance + "%";
+    
+    if (gaugeFill) {
+        // Заполняем дугу на основе шанса (Длина дуги 212)
+        const totalLen = 212;
+        const offset = totalLen - (totalLen * chance) / 100;
+        gaugeFill.style.strokeDasharray = `${totalLen}`;
+        gaugeFill.style.strokeDashoffset = `${offset}`;
+    }
+}
+
+function setUpgraderStake(val) {
+    const input = document.getElementById("upgraderStake");
+    if (input) input.value = val;
 }
 
 function setUpgraderStakeMax() {
@@ -1206,30 +1172,30 @@ function doUpgrade() {
 
     upgraderBusy = true;
     if (btn) btn.disabled = true;
-    resultEl.textContent = "";
-    updateUpgraderChanceBar(option.chance, roll);
+    resultEl.textContent = "🎰 Апгрейдим...";
 
     setTimeout(() => {
         if (win) {
             const gain = Math.round(stake * (option.mult - 1));
             upgraderBalance += gain;
-            resultEl.textContent = `🎉 Апгрейд удался! +${gain} 🪙`;
+            resultEl.textContent = `🎉 Успех! +${gain} 🪙`;
+            // Сразу же обновляем лидерборд при выигрыше
+            checkUpgraderBest();
         } else {
             upgraderBalance -= stake;
             if (upgraderBalance < 0) upgraderBalance = 0;
-            resultEl.textContent = `💥 Не повезло. -${stake} 🪙`;
+            resultEl.textContent = `💥 Неудача. -${stake} 🪙`;
         }
         saveUpgraderBalance();
         renderUpgraderBalance();
-        checkUpgraderBest();
 
         upgraderBusy = false;
         if (btn) btn.disabled = false;
 
         if (upgraderBalance <= 0) {
-            resultEl.textContent += " Коины закончились — нажми «Сбросить баланс»";
+            resultEl.textContent += " Коины закончились — сбрось баланс!";
         }
-    }, 1150);
+    }, 1000);
 }
 
 function checkUpgraderBest() {
@@ -1253,7 +1219,7 @@ function initUpgrader() {
     loadUpgraderBalance();
     renderUpgraderBalance();
     renderUpgraderMultButtons();
-    updateUpgraderChanceBar(UPGRADER_OPTIONS[upgraderSelectedIndex].chance);
+    updateUpgraderGauge(UPGRADER_OPTIONS[upgraderSelectedIndex].chance);
 }
 
 // ─── Лидерборд ──────────────────────────────────────────────
@@ -1272,6 +1238,8 @@ async function submitScore(score) {
                 score: score
             })
         });
+        // Сразу перезагружаем актуальный лидерборд
+        loadLeaderboard();
     } catch (e) {
         console.error("Ошибка отправки результата:", e);
     }
@@ -1307,14 +1275,13 @@ async function loadLeaderboard() {
     }
 }
 
-// Инициализация игр при загрузке страницы
+// Инициализация при завантажении
 document.addEventListener("DOMContentLoaded", () => {
     drawWheel();
-    renderTicTacToe();
     initUpgrader();
 });
 
-// Экспорт функций в глобальную область видимости
+// Глобальный экспорт
 window.login = login;
 window.logout = logout;
 window.requestLogout = requestLogout;
@@ -1343,7 +1310,7 @@ window.escapeHtml = escapeHtml;
 window.openGamesPanel = openGamesPanel;
 window.closeGamesPanel = closeGamesPanel;
 window.spinWheel = spinWheel;
-window.resetTicTacToe = resetTicTacToe;
+window.setUpgraderStake = setUpgraderStake;
 window.setUpgraderStakeMax = setUpgraderStakeMax;
 window.doUpgrade = doUpgrade;
 window.resetUpgrader = resetUpgrader;
