@@ -60,7 +60,6 @@
                             Сбросить
                         </button>
                     </div>
-                    <input type="password" id="currentPasswordAvatar" placeholder="Текущий пароль для подтверждения" style="margin-top: 12px;">
                     <button class="btn-save" onclick="changeAvatar()">Изменить аватарку</button>
                     <div id="avatarChangeMessage" class="settings-message"></div>
                 </div>
@@ -264,7 +263,6 @@
 
                 <!-- Апгрейдер -->
                 <div class="game-card upgrader-card">
-                    <!-- Баланс встроен в апгрейдер -->
                     <div class="upgrader-header">
                         <h2>⚡ Апгрейдер</h2>
                         <div class="balance-display-inline">
@@ -272,7 +270,6 @@
                             <span class="balance-icon">🪙</span>
                         </div>
                     </div>
-
                     <div class="balance-stats-inline">
                         <div class="stat-item-inline">
                             <span class="stat-label">Лучший:</span>
@@ -298,20 +295,16 @@
                             <div class="chance-circle">
                                 <span id="chancePercent">0%</span>
                             </div>
-                            <div class="chance-label">Шанс успеха</div>
                         </div>
                         <button class="btn-save game-btn" id="upgradeBtn" onclick="performUpgrade()" disabled>
                             Улучшить
                         </button>
                     </div>
 
-                    <!-- Инвентарь горизонтальный -->
                     <div class="upgrader-inventory">
-                        <h3>📦 Ваши предметы</h3>
+                        <h3>📦 Скины</h3>
                         <div class="inventory-scroll-container">
-                            <div class="inventory-grid-horizontal" id="inventoryGrid">
-                                <!-- Предметы будут добавлены через JS -->
-                            </div>
+                            <div class="inventory-grid-horizontal" id="inventoryGrid"></div>
                         </div>
                     </div>
                 </div>
