@@ -1,46 +1,129 @@
 const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
 
 let currentImageBase64 = null;
-let currentNotesList = []; 
+let currentAvatarBase64 = null;
+let currentNotesList = [];
 let activeCategory = "all";
-let activeSort = "newest"; 
+let activeSort = "newest";
 let noteIdToDelete = null;
+let currentUser = null;
 
-// Авторизация
-async function login() {
-    let passwordInput = document.getElementById("password");
-    let message = document.getElementById("message");
-    if (!passwordInput || !message) return;
+// Показать форму входа
+function showLoginForm() {
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("registerForm").style.display = "none";
+    document.getElementById("loginMessage").innerHTML = "";
+}
 
-    let password = passwordInput.value;
-    message.innerHTML = "Проверка...";
+// Показать форму регистрации
+function showRegisterForm() {
+    document.getElementById("registerForm").style.display = "block";
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("registerMessage").innerHTML = "";
+}
+
+// Обработка загрузки аватарки
+function handleAvatarUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        currentAvatarBase64 = event.target.result;
+        const preview = document.getElementById("avatarPreview");
+        const resetBtn = document.getElementById("resetAvatarBtn");
+
+        if (preview) {
+            preview.innerHTML = `<img src="${currentAvatarBase64}" alt="Avatar">`;
+        }
+        if (resetBtn) {
+            resetBtn.style.display = "block";
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+// Сброс аватарки
+function resetAvatar() {
+    currentAvatarBase64 = null;
+    const preview = document.getElementById("avatarPreview");
+    const resetBtn = document.getElementById("resetAvatarBtn");
+    const input = document.getElementById("avatarInput");
+
+    if (preview) {
+        preview.innerHTML = `
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="40" r="40" fill="#4a5568"/>
+                <circle cx="40" cy="30" r="12" fill="#718096"/>
+                <path d="M20 65C20 55 28 50 40 50C52 50 60 55 60 65" fill="#718096"/>
+            </svg>
+        `;
+    }
+    if (resetBtn) {
+        resetBtn.style.display = "none";
+    }
+    if (input) {
+        input.value = "";
+    }
+}
+
+// Регистрация
+async function register() {
+    const username = document.getElementById("regUsername").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const displayName = document.getElementById("regDisplayName").value.trim();
+    const message = document.getElementById("registerMessage");
+
+    if (!username || !password || !displayName) {
+        message.innerHTML = "⚠️ Заполните все поля";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    if (username.length < 3) {
+        message.innerHTML = "⚠️ Имя пользователя должно быть не менее 3 символов";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    if (password.length < 6) {
+        message.innerHTML = "⚠️ Пароль должен быть не менее 6 символов";
+        message.style.color = "#fbbf24";
+        return;
+    }
+
+    message.innerHTML = "Создание аккаунта...";
     message.style.color = "#ffffff";
 
     try {
-        let response = await fetch(WORKER_URL + "login", {
+        const response = await fetch(WORKER_URL + "register", {
             method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ password: password }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username,
+                password,
+                displayName,
+                avatar: currentAvatarBase64
+            }),
             credentials: "include"
         });
 
+        const data = await response.json();
+
         if (response.ok) {
-            message.innerHTML = "✅ Пароль верный";
+            message.innerHTML = "✅ Аккаунт создан!";
             message.style.color = "#4ade80";
-            document.getElementById("login").style.display = "none";
-            document.getElementById("content").style.display = "flex";
-            loadNotes();
-            connectNotesSocket();
-        } else if (response.status === 429) {
-            let data = {};
-            try { data = await response.json(); } catch (_) {}
-            const mins = data.retry_after ? Math.ceil(data.retry_after / 60) : 15;
-            message.innerHTML = `⏳ Слишком много попыток. Подождите ~${mins} мин.`;
-            message.style.color = "#fbbf24";
+            currentUser = data.user;
+
+            setTimeout(() => {
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("content").style.display = "flex";
+                updateUserProfile();
+                loadNotes();
+                connectNotesSocket();
+            }, 800);
         } else {
-            message.innerHTML = "❌ Неверный пароль";
+            message.innerHTML = `❌ ${data.error === "Username already exists" ? "Это имя уже занято" : "Ошибка регистрации"}`;
             message.style.color = "#f87171";
         }
     } catch (e) {
@@ -49,19 +132,100 @@ async function login() {
     }
 }
 
-// Автоматическая привязка кнопки входа и инициализация тем
-document.addEventListener("DOMContentLoaded", () => {
-    const loginBtn = document.getElementById("loginBtn");
-    if (loginBtn) {
-        loginBtn.addEventListener("click", login);
+// Авторизация
+async function login() {
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const message = document.getElementById("loginMessage");
+
+    if (!username || !password) {
+        message.innerHTML = "⚠️ Заполните все поля";
+        message.style.color = "#fbbf24";
+        return;
     }
 
-    // Поддержка нажатия Enter в поле ввода пароля
-    const passwordInput = document.getElementById("password");
-    if (passwordInput) {
-        passwordInput.addEventListener("keydown", (e) => {
+    message.innerHTML = "Проверка...";
+    message.style.color = "#ffffff";
+
+    try {
+        const response = await fetch(WORKER_URL + "login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            message.innerHTML = "✅ Вход выполнен";
+            message.style.color = "#4ade80";
+            currentUser = data.user;
+
+            setTimeout(() => {
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("content").style.display = "flex";
+                updateUserProfile();
+                loadNotes();
+                connectNotesSocket();
+            }, 500);
+        } else if (response.status === 429) {
+            const data = await response.json();
+            const mins = data.retry_after ? Math.ceil(data.retry_after / 60) : 15;
+            message.innerHTML = `⏳ Слишком много попыток. Подождите ~${mins} мин.`;
+            message.style.color = "#fbbf24";
+        } else {
+            message.innerHTML = "❌ Неверные данные";
+            message.style.color = "#f87171";
+        }
+    } catch (e) {
+        message.innerHTML = "❌ Ошибка соединения";
+        message.style.color = "#f87171";
+    }
+}
+
+// Обновление информации о пользователе в интерфейсе
+function updateUserProfile() {
+    if (!currentUser) return;
+
+    const avatarEl = document.getElementById("userAvatar");
+    const displayNameEl = document.getElementById("userDisplayName");
+
+    if (avatarEl) {
+        if (currentUser.avatar) {
+            avatarEl.src = currentUser.avatar;
+        } else {
+            avatarEl.src = "data:image/svg+xml," + encodeURIComponent(`
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="18" cy="18" r="18" fill="#4a5568"/>
+                    <circle cx="18" cy="13" r="5" fill="#718096"/>
+                    <path d="M9 29C9 24.5 12 22 18 22C24 22 27 24.5 27 29" fill="#718096"/>
+                </svg>
+            `);
+        }
+    }
+
+    if (displayNameEl) {
+        displayNameEl.textContent = currentUser.displayName;
+    }
+}
+
+// Автоматическая привязка событий и инициализация тем
+document.addEventListener("DOMContentLoaded", () => {
+    // Поддержка нажатия Enter в формах
+    const loginPassword = document.getElementById("loginPassword");
+    if (loginPassword) {
+        loginPassword.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
                 login();
+            }
+        });
+    }
+
+    const regPassword = document.getElementById("regPassword");
+    if (regPassword) {
+        regPassword.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                register();
             }
         });
     }
@@ -674,33 +838,44 @@ function setTheme(themeName) {
     }
 }
 
-// Автоматическая проверка сессии (входа без пароля) при загрузке страницы
+// Автоматическая проверка сессии при загрузке страницы
 document.addEventListener("DOMContentLoaded", async () => {
-    const loginContainer = document.getElementById("login");
+    const authScreen = document.getElementById("authScreen");
     const contentContainer = document.getElementById("content");
 
     try {
-        let response = await fetch(WORKER_URL, {
+        // Проверяем текущего пользователя
+        let response = await fetch(WORKER_URL + "me", {
             method: "GET",
             credentials: "include"
         });
 
         if (response.ok) {
-            currentNotesList = await response.json();
-            if (loginContainer) loginContainer.style.display = "none";
+            currentUser = await response.json();
+
+            // Загружаем заметки
+            let notesResponse = await fetch(WORKER_URL, {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (notesResponse.ok) {
+                currentNotesList = await notesResponse.json();
+            }
+
+            if (authScreen) authScreen.style.display = "none";
             if (contentContainer) contentContainer.style.display = "flex";
+            updateUserProfile();
             applyFiltersAndRender();
             connectNotesSocket();
-            
-            // 👉 ВОТ ЗДЕСЬ ТЕПЕРЬ ВЫЗЫВАЕТСЯ УВЕДОМЛЕНИЕ ПРИ АВТОМАТИЧЕСКОМ ВХОДЕ
             showAutoLoginToast();
         } else {
-            if (loginContainer) loginContainer.style.display = "block";
+            if (authScreen) authScreen.style.display = "flex";
             if (contentContainer) contentContainer.style.display = "none";
         }
     } catch (error) {
         console.error("Ошибка при проверке сессии:", error);
-        if (loginContainer) loginContainer.style.display = "block";
+        if (authScreen) authScreen.style.display = "flex";
         if (contentContainer) contentContainer.style.display = "none";
     }
 });
@@ -771,12 +946,19 @@ async function logout() {
     } catch (_) {}
 
     document.getElementById("content").style.display = "none";
-    document.getElementById("login").style.display = "block";
-    const pass = document.getElementById("password");
-    if (pass) pass.value = "";
-    const msg = document.getElementById("message");
-    if (msg) msg.innerHTML = "";
+    document.getElementById("authScreen").style.display = "flex";
+
+    // Очищаем формы
+    const loginUsername = document.getElementById("loginUsername");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginMessage = document.getElementById("loginMessage");
+    if (loginUsername) loginUsername.value = "";
+    if (loginPassword) loginPassword.value = "";
+    if (loginMessage) loginMessage.innerHTML = "";
+
     currentNotesList = [];
+    currentUser = null;
+    showLoginForm();
     showToast("🚪 Вы вышли");
 }
 
@@ -1031,8 +1213,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Экспорт функций в глобальную область видимости
 window.login = login;
+window.register = register;
 window.logout = logout;
 window.requestLogout = requestLogout;
+window.showLoginForm = showLoginForm;
+window.showRegisterForm = showRegisterForm;
+window.handleAvatarUpload = handleAvatarUpload;
+window.resetAvatar = resetAvatar;
 window.saveNote = saveNote;
 window.deleteNote = deleteNote;
 window.editNote = editNote;
