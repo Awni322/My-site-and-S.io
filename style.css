@@ -1700,34 +1700,34 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
 .upgrader-items {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .upgrader-slot {
-    width: 90px;
-    height: 90px;
+    width: 70px;
+    height: 70px;
     background: var(--input-bg);
     border: 1px solid var(--border-color-solid);
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
 }
 
 .upgrader-slot:hover {
     border-color: var(--accent-color);
-    transform: scale(1.03);
+    transform: scale(1.05);
 }
 
 .upgrader-slot.selected {
@@ -1737,7 +1737,7 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 
 .slot-empty {
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 10px;
     text-align: center;
     padding: 8px;
 }
@@ -1747,28 +1747,29 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    padding: 6px;
+    padding: 4px;
 }
 
 .slot-item-icon {
-    font-size: 36px;
+    font-size: 32px;
 }
 
 .slot-item-name {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--text-color);
     text-align: center;
+    line-height: 1.1;
 }
 
 .slot-item-price {
-    font-size: 9px;
+    font-size: 8px;
     color: var(--accent-color);
     font-weight: 700;
 }
 
 .upgrader-arrow {
-    font-size: 24px;
+    font-size: 20px;
     color: var(--accent-color);
     font-weight: 700;
 }
@@ -1777,12 +1778,12 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .chance-circle {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     background: conic-gradient(var(--accent-color) 0% 0%, var(--border-color-solid) 0% 100%);
     display: flex;
@@ -1795,8 +1796,8 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .chance-circle::before {
     content: '';
     position: absolute;
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background: var(--card-bg-solid);
 }
@@ -1804,28 +1805,22 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 .chance-circle span {
     position: relative;
     z-index: 1;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--accent-color);
 }
 
-.chance-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
 /* Инвентарь горизонтальный */
 .upgrader-inventory {
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 1px solid var(--border-color-solid);
     width: 100%;
 }
 
 .upgrader-inventory h3 {
-    font-size: 14px;
-    margin-bottom: 10px;
+    font-size: 13px;
+    margin-bottom: 8px;
     color: var(--text-color);
 }
 
@@ -1833,11 +1828,11 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
 }
 
 .inventory-scroll-container::-webkit-scrollbar {
-    height: 6px;
+    height: 5px;
 }
 
 .inventory-scroll-container::-webkit-scrollbar-track {
@@ -1856,22 +1851,22 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 
 .inventory-grid-horizontal {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     padding: 4px 0;
 }
 
 .inventory-item {
-    width: 80px;
-    height: 90px;
+    width: 70px;
+    height: 80px;
     background: var(--input-bg);
     border: 1px solid var(--border-color-solid);
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     padding: 6px;
     position: relative;
     flex-shrink: 0;
@@ -1883,16 +1878,16 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
 }
 
 .inventory-item-icon {
-    font-size: 32px;
-    margin-bottom: 4px;
+    font-size: 28px;
+    margin-bottom: 2px;
 }
 
 .inventory-item-name {
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 600;
     color: var(--text-color);
     text-align: center;
-    line-height: 1.2;
+    line-height: 1.1;
 }
 
 .inventory-item-price {
@@ -1907,22 +1902,22 @@ textarea { height: 110px; resize: vertical; font-family: inherit; }
     right: 4px;
     background: var(--accent-color);
     color: var(--bg-color);
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
     padding: 2px 5px;
-    border-radius: 10px;
-    min-width: 18px;
+    border-radius: 8px;
+    min-width: 16px;
     text-align: center;
 }
 
 .inventory-item-sell {
     width: 100%;
-    padding: 4px;
+    padding: 3px;
     background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 6px;
-    font-size: 9px;
+    font-size: 8px;
     font-weight: 700;
     cursor: pointer;
     margin-top: 4px;
