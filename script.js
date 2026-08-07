@@ -8,6 +8,62 @@ let activeSort = "newest";
 let noteIdToDelete = null;
 let currentUser = null;
 
+// Игровые данные
+let userBalance = 100;
+let userBestWin = 0;
+let userTotalWon = 0;
+let userInventory = [];
+let lastWheelSpin = 0;
+let selectedSlot1 = null;
+let selectedSlot2 = null;
+let activeLeaderboard = 'balance';
+
+// Предметы для апгрейдера
+const ITEMS = {
+    common1: { id: 'common1', name: 'Деревянный меч', icon: '🗡️', price: 50, tier: 1 },
+    common2: { id: 'common2', name: 'Каменный топор', icon: '🪓', price: 60, tier: 1 },
+    common3: { id: 'common3', name: 'Железный щит', icon: '🛡️', price: 70, tier: 1 },
+
+    rare1: { id: 'rare1', name: 'Стальной меч', icon: '⚔️', price: 150, tier: 2 },
+    rare2: { id: 'rare2', name: 'Золотой топор', icon: '🔱', price: 180, tier: 2 },
+    rare3: { id: 'rare3', name: 'Кристальный щит', icon: '💎', price: 200, tier: 2 },
+
+    epic1: { id: 'epic1', name: 'Огненный меч', icon: '🔥', price: 500, tier: 3 },
+    epic2: { id: 'epic2', name: 'Ледяной топор', icon: '❄️', price: 550, tier: 3 },
+    epic3: { id: 'epic3', name: 'Драконий щит', icon: '🐉', price: 600, tier: 3 },
+
+    legendary1: { id: 'legendary1', name: 'Легендарный меч', icon: '⚡', price: 1500, tier: 4 },
+    legendary2: { id: 'legendary2', name: 'Божественный топор', icon: '🌟', price: 1800, tier: 4 },
+    legendary3: { id: 'legendary3', name: 'Небесный щит', icon: '✨', price: 2000, tier: 4 }
+};
+
+// Возможные апгрейды (с какого на какой и с каким шансом)
+const UPGRADES = {
+    common1: { to: 'rare1', chance: 60 },
+    common2: { to: 'rare2', chance: 55 },
+    common3: { to: 'rare3', chance: 50 },
+
+    rare1: { to: 'epic1', chance: 30 },
+    rare2: { to: 'epic2', chance: 25 },
+    rare3: { to: 'epic3', chance: 20 },
+
+    epic1: { to: 'legendary1', chance: 10 },
+    epic2: { to: 'legendary2', chance: 8 },
+    epic3: { to: 'legendary3', chance: 5 }
+};
+
+// Призы колеса фортуны
+const wheelPrizes = [
+    { name: "50 монет", coins: 50 },
+    { name: "100 монет", coins: 100 },
+    { name: "Перекрутка", coins: 0, reroll: true },
+    { name: "200 монет", coins: 200 },
+    { name: "Пусто", coins: 0 },
+    { name: "3 прокрута", coins: 0, spins: 3 },
+    { name: "500 монет", coins: 500 },
+    { name: "Пусто", coins: 0 }
+];
+
 // Показать форму входа
 function showLoginForm() {
     document.getElementById("loginForm").style.display = "block";
@@ -121,6 +177,8 @@ async function register() {
                 updateUserProfile();
                 loadNotes();
                 connectNotesSocket();
+                loadGameData();
+                loadLeaderboard();
             }, 800);
         } else {
             message.innerHTML = `❌ ${data.error === "Username already exists" ? "Это имя уже занято" : "Ошибка регистрации"}`;
@@ -167,6 +225,8 @@ async function login() {
                 updateUserProfile();
                 loadNotes();
                 connectNotesSocket();
+                loadGameData();
+                loadLeaderboard();
             }, 500);
         } else if (response.status === 429) {
             const data = await response.json();
@@ -207,6 +267,90 @@ function updateUserProfile() {
     if (displayNameEl) {
         displayNameEl.textContent = currentUser.displayName;
     }
+}
+
+// Загрузка игровых данных
+async function loadGameData() {
+    try {
+        const response = await fetch(WORKER_URL + "game/data", {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            userBalance = data.balance;
+            userBestWin = data.bestWin;
+            userTotalWon = data.totalWon;
+            lastWheelSpin = data.lastWheelSpin;
+
+            // Преобразуем items в удобный формат
+            userInventory = {};
+            data.items.forEach(item => {
+                userInventory[item.item_id] = item.quantity;
+            });
+
+            updateGameUI();
+            checkWheelCooldown();
+            renderInventory();
+        }
+    } catch (err) {
+        console.error("Ошибка загрузки игровых данных:", err);
+    }
+}
+
+// Обновление UI игр
+function updateGameUI() {
+    const balanceEl = document.getElementById("userBalance");
+    const bestWinEl = document.getElementById("bestWin");
+    const totalWonEl = document.getElementById("totalWon");
+
+    if (balanceEl) balanceEl.textContent = userBalance;
+    if (bestWinEl) bestWinEl.textContent = `${userBestWin} 🪙`;
+    if (totalWonEl) totalWonEl.textContent = `${userTotalWon} 🪙`;
+}
+
+// Проверка кулдауна колеса
+function checkWheelCooldown() {
+    const now = Math.floor(Date.now() / 1000);
+    const timeSinceLastSpin = now - lastWheelSpin;
+    const cooldown = 3600; // 1 час
+
+    const wheelBtn = document.getElementById("spinWheelBtn");
+    const wheelTimer = document.getElementById("wheelTimer");
+    const wheelTimeLeft = document.getElementById("wheelTimeLeft");
+
+    if (timeSinceLastSpin < cooldown) {
+        const timeLeft = cooldown - timeSinceLastSpin;
+        if (wheelBtn) wheelBtn.disabled = true;
+        if (wheelTimer) wheelTimer.style.display = "block";
+
+        updateWheelTimer(timeLeft);
+
+        // Обновляем таймер каждую секунду
+        const interval = setInterval(() => {
+            const newTimeLeft = cooldown - (Math.floor(Date.now() / 1000) - lastWheelSpin);
+            if (newTimeLeft <= 0) {
+                clearInterval(interval);
+                if (wheelBtn) wheelBtn.disabled = false;
+                if (wheelTimer) wheelTimer.style.display = "none";
+            } else {
+                updateWheelTimer(newTimeLeft);
+            }
+        }, 1000);
+    } else {
+        if (wheelBtn) wheelBtn.disabled = false;
+        if (wheelTimer) wheelTimer.style.display = "none";
+    }
+}
+
+function updateWheelTimer(seconds) {
+    const wheelTimeLeft = document.getElementById("wheelTimeLeft");
+    if (!wheelTimeLeft) return;
+
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    wheelTimeLeft.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
 // Автоматическая привязка событий и инициализация тем
@@ -563,10 +707,15 @@ function renderNotes(notes) {
             ? note.image
             : null;
 
+        const authorName = escapeHtml(note.author_name || "Аноним");
+        const authorAvatar = (note.author_avatar && note.author_avatar.startsWith("data:image/"))
+            ? note.author_avatar
+            : null;
+
         output += `
         <div class="note-card ${isPinned ? 'pinned' : ''}" onclick="openNoteModal(${note.id})">
             ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
-            
+
             <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
 
             <h3 class="note-title">${safeTitle}</h3>
@@ -580,6 +729,16 @@ function renderNotes(notes) {
 
             <div class="note-date">🕒 ${formatNoteDate(note)}</div>
             <div class="note-footer">
+                <div class="note-author">
+                    ${authorAvatar ? `<img src="${authorAvatar}" class="note-author-avatar" alt="Avatar">` : `
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="note-author-avatar">
+                            <circle cx="12" cy="12" r="12" fill="#4a5568"/>
+                            <circle cx="12" cy="9" r="3.5" fill="#718096"/>
+                            <path d="M6 19C6 16 8.5 14.5 12 14.5C15.5 14.5 18 16 18 19" fill="#718096"/>
+                        </svg>
+                    `}
+                    <span class="note-author-name">${authorName}</span>
+                </div>
                 <div class="note-actions">
                     <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyNoteById(${note.id}, this)">
                         📋 Копировать
@@ -869,6 +1028,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             applyFiltersAndRender();
             connectNotesSocket();
             showAutoLoginToast();
+            loadGameData();
+            loadLeaderboard();
         } else {
             if (authScreen) authScreen.style.display = "flex";
             if (contentContainer) contentContainer.style.display = "none";
@@ -1010,7 +1171,6 @@ function closeGamesPanel() {
 }
 
 // ─── Колесо фортуны ─────────────────────────────────────────
-const wheelSegments = ["🎉 Приз!", "😢 Мимо", "🔥 Ещё раз", "⭐ Бонус", "💤 Пусто", "🎁 Сюрприз", "🍀 Удача", "💥 Взрыв"];
 const wheelColors = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185", "#4ade80", "#f97316"];
 let currentWheelRotation = 0;
 let wheelSpinning = false;
@@ -1022,11 +1182,11 @@ function drawWheel() {
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
     const radius = canvas.width / 2 - 4;
-    const segAngle = (2 * Math.PI) / wheelSegments.length;
+    const segAngle = (2 * Math.PI) / wheelPrizes.length;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    wheelSegments.forEach((label, i) => {
+    wheelPrizes.forEach((prize, i) => {
         const start = i * segAngle;
         const end = start + segAngle;
 
@@ -1045,26 +1205,27 @@ function drawWheel() {
         ctx.rotate(start + segAngle / 2);
         ctx.textAlign = "right";
         ctx.fillStyle = "#10151f";
-        ctx.font = "600 13px Inter, sans-serif";
-        ctx.fillText(label, radius - 14, 5);
+        ctx.font = "600 12px Inter, sans-serif";
+        ctx.fillText(prize.name, radius - 14, 5);
         ctx.restore();
     });
 }
 
-function spinWheel() {
+async function spinWheel() {
     if (wheelSpinning) return;
     const canvas = document.getElementById("wheelCanvas");
     const resultEl = document.getElementById("wheelResult");
+    const wheelBtn = document.getElementById("spinWheelBtn");
     if (!canvas) return;
 
     wheelSpinning = true;
     if (resultEl) resultEl.textContent = "";
+    if (wheelBtn) wheelBtn.disabled = true;
 
-    const segAngle = 360 / wheelSegments.length;
-    const winIndex = Math.floor(Math.random() * wheelSegments.length);
+    const segAngle = 360 / wheelPrizes.length;
+    const winIndex = Math.floor(Math.random() * wheelPrizes.length);
     const targetCenter = winIndex * segAngle + segAngle / 2;
 
-    // Указатель находится сверху (270° в системе координат canvas)
     let needed = (270 - targetCenter) % 360;
     if (needed < 0) needed += 360;
 
@@ -1074,9 +1235,60 @@ function spinWheel() {
 
     canvas.style.transform = `rotate(${currentWheelRotation}deg)`;
 
-    setTimeout(() => {
+    setTimeout(async () => {
         wheelSpinning = false;
-        if (resultEl) resultEl.textContent = "Выпало: " + wheelSegments[winIndex];
+        const prize = wheelPrizes[winIndex];
+
+        // Обрабатываем приз
+        let coins = prize.coins || 0;
+        let message = "";
+
+        if (prize.reroll) {
+            message = "Перекрутка! Крути еще раз бесплатно!";
+            if (wheelBtn) wheelBtn.disabled = false;
+        } else if (prize.spins) {
+            message = `${prize.spins} прокрута! Крути еще ${prize.spins} раз!`;
+            if (wheelBtn) wheelBtn.disabled = false;
+        } else if (coins > 0) {
+            message = `Выпало: ${prize.name}! +${coins} 🪙`;
+        } else {
+            message = "Пусто! Попробуй через час.";
+        }
+
+        if (resultEl) resultEl.textContent = message;
+
+        // Отправляем результат на сервер
+        try {
+            const response = await fetch(WORKER_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "spin_wheel",
+                    prize: prize.name,
+                    amount: coins
+                }),
+                credentials: "include"
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                userBalance = data.newBalance;
+                userBestWin = data.bestWin;
+                userTotalWon = data.totalWon;
+                updateGameUI();
+
+                if (!prize.reroll && !prize.spins) {
+                    lastWheelSpin = Math.floor(Date.now() / 1000);
+                    checkWheelCooldown();
+                }
+
+                if (coins > 0) {
+                    showToast(`+${coins} 🪙 монет!`);
+                }
+            }
+        } catch (err) {
+            console.error("Ошибка при вращении колеса:", err);
+        }
     }, 4600);
 }
 
@@ -1161,44 +1373,299 @@ function resetTicTacToe() {
     if (resultEl) resultEl.textContent = "Ты играешь за ❌. Ходи первым!";
 }
 
-// ─── Угадай число ───────────────────────────────────────────
-let secretNumber = Math.floor(Math.random() * 100) + 1;
-let guessAttempts = 0;
+// ─── Апгрейдер ──────────────────────────────────────────────
+function renderInventory() {
+    const grid = document.getElementById("inventoryGrid");
+    if (!grid) return;
 
-function makeGuess() {
-    const input = document.getElementById("guessInput");
-    const resultEl = document.getElementById("guessResult");
-    if (!input || !resultEl) return;
+    grid.innerHTML = "";
 
-    const val = parseInt(input.value, 10);
-    if (isNaN(val) || val < 1 || val > 100) {
-        resultEl.textContent = "⚠️ Введи число от 1 до 100";
+    // Добавляем все предметы
+    Object.values(ITEMS).forEach(item => {
+        const quantity = userInventory[item.id] || 0;
+        if (quantity > 0) {
+            const itemEl = document.createElement("div");
+            itemEl.className = "inventory-item";
+            itemEl.onclick = () => selectInventoryItem(item.id);
+            itemEl.innerHTML = `
+                <div class="inventory-item-icon">${item.icon}</div>
+                <div class="inventory-item-name">${item.name}</div>
+                <div class="inventory-item-price">${item.price} 🪙</div>
+                ${quantity > 1 ? `<div class="inventory-item-count">${quantity}</div>` : ''}
+            `;
+            grid.appendChild(itemEl);
+        }
+    });
+
+    // Показываем кнопки покупки для начальных предметов
+    if (Object.keys(userInventory).length === 0 || userInventory['common1'] === 0) {
+        [ITEMS.common1, ITEMS.common2, ITEMS.common3].forEach(item => {
+            const itemEl = document.createElement("div");
+            itemEl.className = "inventory-item";
+            itemEl.style.opacity = "0.6";
+            itemEl.onclick = () => buyItem(item.id);
+            itemEl.innerHTML = `
+                <div class="inventory-item-icon">${item.icon}</div>
+                <div class="inventory-item-name">Купить</div>
+                <div class="inventory-item-price">${item.price} 🪙</div>
+            `;
+            grid.appendChild(itemEl);
+        });
+    }
+}
+
+async function buyItem(itemId) {
+    const item = ITEMS[itemId];
+    if (!item) return;
+
+    if (userBalance < item.price) {
+        showToast("❌ Недостаточно монет", "error");
         return;
     }
 
-    guessAttempts++;
-    if (val === secretNumber) {
-        resultEl.textContent = `🎉 Угадал! Число было ${secretNumber}. Попыток: ${guessAttempts}`;
-    } else if (val < secretNumber) {
-        resultEl.textContent = "📈 Больше!";
+    try {
+        const response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "buy_item",
+                itemId: itemId,
+                price: item.price
+            }),
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            userBalance -= item.price;
+            userInventory[itemId] = (userInventory[itemId] || 0) + 1;
+            updateGameUI();
+            renderInventory();
+            showToast(`✅ Куплен: ${item.name}`);
+        }
+    } catch (err) {
+        console.error("Ошибка покупки:", err);
+        showToast("❌ Ошибка покупки", "error");
+    }
+}
+
+function selectInventoryItem(itemId) {
+    const item = ITEMS[itemId];
+    if (!item || !userInventory[itemId] || userInventory[itemId] === 0) return;
+
+    if (!selectedSlot1) {
+        selectedSlot1 = itemId;
+        updateUpgraderSlot(1, item);
+    } else if (!selectedSlot2 && UPGRADES[selectedSlot1]) {
+        // Проверяем, является ли выбранный предмет целевым для апгрейда
+        if (UPGRADES[selectedSlot1].to === itemId) {
+            showToast("❌ Нельзя выбрать целевой предмет", "error");
+            return;
+        }
+        selectedSlot2 = itemId;
+        updateUpgraderSlot(2, item);
     } else {
-        resultEl.textContent = "📉 Меньше!";
+        // Сбрасываем выбор
+        selectedSlot1 = itemId;
+        selectedSlot2 = null;
+        updateUpgraderSlot(1, item);
+        updateUpgraderSlot(2, null);
     }
 
-    input.value = "";
-    input.focus();
+    calculateUpgradeChance();
 }
 
-function resetGuessGame() {
-    secretNumber = Math.floor(Math.random() * 100) + 1;
-    guessAttempts = 0;
-    const resultEl = document.getElementById("guessResult");
-    if (resultEl) resultEl.textContent = "Загадано новое число!";
-    const input = document.getElementById("guessInput");
-    if (input) input.value = "";
+function selectUpgraderSlot(slotNum) {
+    if (slotNum === 1) {
+        selectedSlot1 = null;
+        selectedSlot2 = null;
+        updateUpgraderSlot(1, null);
+        updateUpgraderSlot(2, null);
+        calculateUpgradeChance();
+    } else if (slotNum === 2) {
+        selectedSlot2 = null;
+        updateUpgraderSlot(2, null);
+        calculateUpgradeChance();
+    }
 }
 
-// Инициализация игр при загрузке страницы
+function updateUpgraderSlot(slotNum, item) {
+    const slot = document.getElementById(`upgraderSlot${slotNum}`);
+    if (!slot) return;
+
+    if (item) {
+        slot.innerHTML = `
+            <div class="slot-item">
+                <div class="slot-item-icon">${item.icon}</div>
+                <div class="slot-item-name">${item.name}</div>
+                <div class="slot-item-price">${item.price} 🪙</div>
+            </div>
+        `;
+        slot.classList.add("selected");
+    } else {
+        slot.innerHTML = `<div class="slot-empty">Выбери предмет</div>`;
+        slot.classList.remove("selected");
+    }
+}
+
+function calculateUpgradeChance() {
+    const chanceEl = document.getElementById("chancePercent");
+    const upgradeBtn = document.getElementById("upgradeBtn");
+    const chanceCircle = document.querySelector(".chance-circle");
+
+    if (!selectedSlot1 || !UPGRADES[selectedSlot1]) {
+        if (chanceEl) chanceEl.textContent = "0%";
+        if (upgradeBtn) upgradeBtn.disabled = true;
+        if (chanceCircle) chanceCircle.style.background = "conic-gradient(var(--accent-color) 0% 0%, var(--border-color-solid) 0% 100%)";
+
+        // Автоматически показываем целевой предмет
+        if (selectedSlot1 && UPGRADES[selectedSlot1]) {
+            const targetItem = ITEMS[UPGRADES[selectedSlot1].to];
+            updateUpgraderSlot(2, targetItem);
+        }
+        return;
+    }
+
+    const upgrade = UPGRADES[selectedSlot1];
+    const targetItem = ITEMS[upgrade.to];
+
+    // Показываем целевой предмет
+    updateUpgraderSlot(2, targetItem);
+
+    const chance = upgrade.chance;
+    if (chanceEl) chanceEl.textContent = `${chance}%`;
+    if (upgradeBtn) upgradeBtn.disabled = false;
+
+    if (chanceCircle) {
+        const percent = chance;
+        chanceCircle.style.background = `conic-gradient(var(--accent-color) 0% ${percent}%, var(--border-color-solid) ${percent}% 100%)`;
+    }
+}
+
+async function performUpgrade() {
+    if (!selectedSlot1 || !UPGRADES[selectedSlot1]) {
+        showToast("❌ Выбери предмет для улучшения", "error");
+        return;
+    }
+
+    const upgrade = UPGRADES[selectedSlot1];
+    const fromItem = ITEMS[selectedSlot1];
+    const toItem = ITEMS[upgrade.to];
+    const chance = upgrade.chance;
+
+    // Проверяем наличие предмета
+    if (!userInventory[selectedSlot1] || userInventory[selectedSlot1] === 0) {
+        showToast("❌ У вас нет этого предмета", "error");
+        return;
+    }
+
+    // Рандомим успех
+    const random = Math.random() * 100;
+    const success = random < chance;
+
+    try {
+        const response = await fetch(WORKER_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "upgrade",
+                fromItem: selectedSlot1,
+                toItem: upgrade.to,
+                success: success
+            }),
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            // Обновляем локальный инвентарь
+            userInventory[selectedSlot1] = (userInventory[selectedSlot1] || 1) - 1;
+            if (userInventory[selectedSlot1] <= 0) {
+                delete userInventory[selectedSlot1];
+            }
+
+            if (success) {
+                userInventory[upgrade.to] = (userInventory[upgrade.to] || 0) + 1;
+                showToast(`✅ Успех! Получен ${toItem.name}`);
+            } else {
+                showToast(`❌ Провал! Предмет утерян`, "error");
+            }
+
+            // Сбрасываем выбор
+            selectedSlot1 = null;
+            selectedSlot2 = null;
+            updateUpgraderSlot(1, null);
+            updateUpgraderSlot(2, null);
+            calculateUpgradeChance();
+            renderInventory();
+        }
+    } catch (err) {
+        console.error("Ошибка апгрейда:", err);
+        showToast("❌ Ошибка апгрейда", "error");
+    }
+}
+
+// ─── Лидерборд ──────────────────────────────────────────────
+async function switchLeaderboard(type) {
+    activeLeaderboard = type;
+
+    document.querySelectorAll(".leaderboard-tab").forEach(tab => {
+        tab.classList.remove("active");
+    });
+
+    event.target.classList.add("active");
+
+    await loadLeaderboard();
+}
+
+async function loadLeaderboard() {
+    const endpoint = activeLeaderboard === 'balance' ? '/leaderboard/balance' : '/leaderboard/bestwin';
+
+    try {
+        const response = await fetch(WORKER_URL + endpoint, {
+            method: "GET",
+            credentials: "include"
+        });
+
+        if (response.ok) {
+            const leaders = await response.json();
+            renderLeaderboard(leaders);
+        }
+    } catch (err) {
+        console.error("Ошибка загрузки лидерборда:", err);
+    }
+}
+
+function renderLeaderboard(leaders) {
+    const list = document.getElementById("leaderboardList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    leaders.forEach((leader, index) => {
+        const rank = index + 1;
+        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+
+        const avatar = leader.avatar ? leader.avatar :
+            `data:image/svg+xml,${encodeURIComponent(`
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="20" fill="#4a5568"/>
+                    <circle cx="20" cy="15" r="6" fill="#718096"/>
+                    <path d="M10 32C10 27 14 24 20 24C26 24 30 27 30 32" fill="#718096"/>
+                </svg>
+            `)}`;
+
+        const itemEl = document.createElement("div");
+        itemEl.className = "leaderboard-item";
+        itemEl.innerHTML = `
+            <div class="leaderboard-rank ${rankClass}">${rank}</div>
+            <img src="${avatar}" class="leaderboard-avatar" alt="Avatar">
+            <div class="leaderboard-info">
+                <div class="leaderboard-name">${escapeHtml(leader.name)}</div>
+            </div>
+            <div class="leaderboard-value">${leader.value} 🪙</div>
+        `;
+        list.appendChild(itemEl);
+    });
+}
 document.addEventListener("DOMContentLoaded", () => {
     drawWheel();
     renderTicTacToe();
@@ -1246,7 +1713,8 @@ window.openGamesPanel = openGamesPanel;
 window.closeGamesPanel = closeGamesPanel;
 window.spinWheel = spinWheel;
 window.resetTicTacToe = resetTicTacToe;
-window.makeGuess = makeGuess;
-window.resetGuessGame = resetGuessGame;
 window.connectNotesSocket = connectNotesSocket;
 window.disconnectNotesSocket = disconnectNotesSocket;
+window.switchLeaderboard = switchLeaderboard;
+window.selectUpgraderSlot = selectUpgraderSlot;
+window.performUpgrade = performUpgrade;
