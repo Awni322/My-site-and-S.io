@@ -7,6 +7,14 @@
 </head>
 <body>
 
+    <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
+    <div class="user-profile-container">
+        <button class="user-profile-btn" id="userProfileBtn" title="Профиль">
+            <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
+            <span id="userDisplayName"></span>
+        </button>
+    </div>
+
     <!-- КНОПКА НАСТРОЕК -->
     <div class="settings-menu-container">
         <button class="settings-toggle-btn" id="settingsMenuBtn" title="Настройки">⚙️</button>
@@ -39,12 +47,53 @@
         </div>
     </div>
 
-    <!-- ЭКРАН ВХОДА -->
-    <div id="login">
-        <h2>Вход</h2>
-        <input type="password" id="password" placeholder="Введите пароль">
-        <button onclick="login()">Войти</button>
-        <div id="message"></div>
+    <!-- ЭКРАН ВХОДА/РЕГИСТРАЦИИ -->
+    <div id="authScreen">
+        <!-- Экран входа -->
+        <div id="loginForm" class="auth-form">
+            <h2>Вход</h2>
+            <input type="text" id="loginUsername" placeholder="Имя пользователя">
+            <input type="password" id="loginPassword" placeholder="Пароль">
+            <button onclick="login()">Войти</button>
+            <div class="auth-switch">
+                Нет аккаунта? <a href="#" onclick="showRegisterForm(); return false;">Зарегистрироваться</a>
+            </div>
+            <div id="loginMessage" class="auth-message"></div>
+        </div>
+
+        <!-- Экран регистрации -->
+        <div id="registerForm" class="auth-form" style="display: none;">
+            <h2>Регистрация</h2>
+            <input type="text" id="regUsername" placeholder="Имя пользователя">
+            <input type="password" id="regPassword" placeholder="Пароль">
+            <input type="text" id="regDisplayName" placeholder="Отображаемое имя">
+
+            <div class="avatar-upload-section">
+                <div class="avatar-preview" id="avatarPreview">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="40" cy="40" r="40" fill="#4a5568"/>
+                        <circle cx="40" cy="30" r="12" fill="#718096"/>
+                        <path d="M20 65C20 55 28 50 40 50C52 50 60 55 60 65" fill="#718096"/>
+                    </svg>
+                </div>
+                <div class="avatar-upload-controls">
+                    <label class="avatar-upload-btn" for="avatarInput">
+                        📷 Выбрать фото
+                    </label>
+                    <button class="avatar-reset-btn" onclick="resetAvatar()" style="display: none;" id="resetAvatarBtn">
+                        Сбросить
+                    </button>
+                    <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarUpload(event)" style="display: none;">
+                </div>
+                <div class="avatar-hint">Или оставьте стандартную аватарку</div>
+            </div>
+
+            <button onclick="register()">Создать аккаунт</button>
+            <div class="auth-switch">
+                Уже есть аккаунт? <a href="#" onclick="showLoginForm(); return false;">Войти</a>
+            </div>
+            <div id="registerMessage" class="auth-message"></div>
+        </div>
     </div>
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
