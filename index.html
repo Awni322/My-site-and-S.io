@@ -7,66 +7,6 @@
 </head>
 <body>
 
-    <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
-    <div class="user-profile-container">
-        <button class="user-profile-btn" id="userProfileBtn" onclick="openProfileSettings()" title="Профиль">
-            <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
-            <span id="userDisplayName"></span>
-        </button>
-    </div>
-
-    <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК ПРОФИЛЯ -->
-    <div class="modal-overlay" id="profileSettingsOverlay" onclick="closeProfileSettings()">
-        <div class="modal-card profile-settings-card" onclick="event.stopPropagation()">
-            <button class="modal-close" onclick="closeProfileSettings()">✕</button>
-            <div class="modal-body profile-settings-body">
-                <h2>⚙️ Настройки профиля</h2>
-
-                <!-- Изменение имени -->
-                <div class="settings-section">
-                    <h3>Изменить отображаемое имя</h3>
-                    <input type="password" id="nameChangePassword" placeholder="Текущий пароль">
-                    <input type="text" id="newDisplayName" placeholder="Новое имя">
-                    <button class="btn-save" onclick="changeDisplayName()">Изменить имя</button>
-                    <div id="nameChangeMessage" class="settings-message"></div>
-                </div>
-
-                <!-- Изменение пароля -->
-                <div class="settings-section">
-                    <h3>Изменить пароль</h3>
-                    <input type="password" id="currentPassword" placeholder="Текущий пароль">
-                    <input type="password" id="newPassword" placeholder="Новый пароль">
-                    <input type="password" id="confirmPassword" placeholder="Подтвердите новый пароль">
-                    <button class="btn-save" onclick="changePassword()">Изменить пароль</button>
-                    <div id="passwordChangeMessage" class="settings-message"></div>
-                </div>
-
-                <!-- Смена аватарки -->
-                <div class="settings-section">
-                    <h3>Сменить аватарку</h3>
-                    <div class="avatar-preview" id="avatarPreviewChange" style="width: 80px; height: 80px; margin: 0 auto 12px;">
-                        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="40" cy="40" r="40" fill="#4a5568"/>
-                            <circle cx="40" cy="30" r="12" fill="#718096"/>
-                            <path d="M20 65C20 55 28 50 40 50C52 50 60 55 60 65" fill="#718096"/>
-                        </svg>
-                    </div>
-                    <div class="avatar-upload-controls" style="flex-wrap: wrap; justify-content: center;">
-                        <label class="avatar-upload-btn" for="newAvatarInput">
-                            📷 Выбрать фото
-                        </label>
-                        <input type="file" id="newAvatarInput" accept="image/*" onchange="handleNewAvatarUpload(event)" style="display: none;">
-                        <button class="avatar-reset-btn" onclick="resetAvatar()" id="resetNewAvatarBtn" style="display: none;">
-                            Сбросить
-                        </button>
-                    </div>
-                    <button class="btn-save" onclick="changeAvatar()">Изменить аватарку</button>
-                    <div id="avatarChangeMessage" class="settings-message"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- КНОПКА НАСТРОЕК -->
     <div class="settings-menu-container">
         <button class="settings-toggle-btn" id="settingsMenuBtn" title="Настройки">⚙️</button>
@@ -93,59 +33,22 @@
                 Чёрно-красная
             </button>
             <div class="settings-divider"></div>
+            <button class="settings-option" onclick="openProfileModal(true)">
+                👤 Профиль
+            </button>
+            <div class="settings-divider"></div>
             <button class="settings-option settings-logout" onclick="requestLogout()">
                 🚪 Выйти
             </button>
         </div>
     </div>
 
-    <!-- ЭКРАН ВХОДА/РЕГИСТРАЦИИ -->
-    <div id="authScreen">
-        <!-- Экран входа -->
-        <div id="loginForm" class="auth-form">
-            <h2>Вход</h2>
-            <input type="text" id="loginUsername" placeholder="Имя пользователя">
-            <input type="password" id="loginPassword" placeholder="Пароль">
-            <button onclick="login()">Войти</button>
-            <div class="auth-switch">
-                Нет аккаунта? <a href="#" onclick="showRegisterForm(); return false;">Зарегистрироваться</a>
-            </div>
-            <div id="loginMessage" class="auth-message"></div>
-        </div>
-
-        <!-- Экран регистрации -->
-        <div id="registerForm" class="auth-form" style="display: none;">
-            <h2>Регистрация</h2>
-            <input type="text" id="regUsername" placeholder="Имя пользователя">
-            <input type="password" id="regPassword" placeholder="Пароль">
-            <input type="text" id="regDisplayName" placeholder="Отображаемое имя">
-
-            <div class="avatar-upload-section">
-                <div class="avatar-preview" id="avatarPreview">
-                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="40" cy="40" r="40" fill="#4a5568"/>
-                        <circle cx="40" cy="30" r="12" fill="#718096"/>
-                        <path d="M20 65C20 55 28 50 40 50C52 50 60 55 60 65" fill="#718096"/>
-                    </svg>
-                </div>
-                <div class="avatar-upload-controls">
-                    <label class="avatar-upload-btn" for="avatarInput">
-                        📷 Выбрать фото
-                    </label>
-                    <button class="avatar-reset-btn" onclick="resetAvatar()" style="display: none;" id="resetAvatarBtn">
-                        Сбросить
-                    </button>
-                    <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarUpload(event)" style="display: none;">
-                </div>
-                <div class="avatar-hint">Или оставьте стандартную аватарку</div>
-            </div>
-
-            <button onclick="register()">Создать аккаунт</button>
-            <div class="auth-switch">
-                Уже есть аккаунт? <a href="#" onclick="showLoginForm(); return false;">Войти</a>
-            </div>
-            <div id="registerMessage" class="auth-message"></div>
-        </div>
+    <!-- ЭКРАН ВХОДА -->
+    <div id="login">
+        <h2>Вход</h2>
+        <input type="password" id="password" placeholder="Введите пароль">
+        <button onclick="login()">Войти</button>
+        <div id="message"></div>
     </div>
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
@@ -244,83 +147,92 @@
 
         <div class="games-panel-inner">
             <h1 class="games-title">🎮 Мини-игры</h1>
+            <p class="games-subtitle-main">Отвлекись на пару минут</p>
 
             <div class="games-grid">
 
                 <!-- Колесо фортуны -->
                 <div class="game-card">
                     <h2>🎡 Колесо фортуны</h2>
-                    <div class="wheel-timer" id="wheelTimer" style="display: none;">
-                        Доступно через: <span id="wheelTimeLeft"></span>
-                    </div>
+                    <p class="game-subtitle">Испытай удачу</p>
                     <div class="wheel-wrapper">
                         <div class="wheel-pointer"></div>
                         <canvas id="wheelCanvas" width="280" height="280"></canvas>
                     </div>
-                    <button class="btn-save game-btn" id="spinWheelBtn" onclick="spinWheel()">Крутить (бесплатно)</button>
+                    <button class="btn-save game-btn" onclick="spinWheel()">Крутить</button>
                     <div class="game-result" id="wheelResult"></div>
                 </div>
 
+                <!-- Крестики-нолики -->
+                <div class="game-card">
+                    <h2>❌⭕ Крестики-нолики</h2>
+                    <p class="game-subtitle">Классика для двоих</p>
+                    <div class="ttt-board" id="tttBoard"></div>
+                    <div class="game-result" id="tttResult">Ты играешь за ❌. Ходи первым!</div>
+                    <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
+                </div>
+
                 <!-- Апгрейдер -->
-                <div class="game-card upgrader-card">
-                    <div class="upgrader-header">
-                        <h2>⚡ Апгрейдер</h2>
-                        <div class="balance-display-inline">
-                            <span class="balance-amount" id="userBalance">0</span>
-                            <span class="balance-icon">🪙</span>
-                        </div>
-                    </div>
-                    <div class="balance-stats-inline">
-                        <div class="stat-item-inline">
-                            <span class="stat-label">Лучший:</span>
-                            <span class="stat-value" id="bestWin">0 🪙</span>
-                        </div>
-                        <div class="stat-item-inline">
-                            <span class="stat-label">Всего:</span>
-                            <span class="stat-value" id="totalWon">0 🪙</span>
-                        </div>
+                <div class="game-card">
+                    <h2>🆙 Апгрейдер</h2>
+                    <p class="game-subtitle">Рискни и приумножь</p>
+                    <div class="upgrader-balance">
+                        <span class="upgrader-balance-label">Баланс</span>
+                        <span class="upgrader-balance-value" id="upgraderBalance">100</span>
+                        <span class="upgrader-coin">🪙</span>
                     </div>
 
-                    <div class="upgrader-container">
-                        <div class="upgrader-items">
-                            <div class="upgrader-slot" id="upgraderSlot1" onclick="selectUpgraderSlot(1)">
-                                <div class="slot-empty">Выбери предмет</div>
-                            </div>
-                            <div class="upgrader-arrow">→</div>
-                            <div class="upgrader-slot" id="upgraderSlot2" onclick="selectUpgraderSlot(2)">
-                                <div class="slot-empty">Выбери предмет</div>
-                            </div>
-                        </div>
-                        <div class="upgrader-chance" id="upgraderChance">
-                            <div class="chance-circle">
-                                <span id="chancePercent">0%</span>
-                            </div>
-                        </div>
-                        <button class="btn-save game-btn" id="upgradeBtn" onclick="performUpgrade()" disabled>
-                            Улучшить
-                        </button>
+                    <div class="upgrader-stake-row">
+                        <input type="number" id="upgraderStake" min="1" value="10">
+                        <button class="btn-cancel game-btn-inline" onclick="setUpgraderStakeMax()">MAX</button>
                     </div>
 
-                    <div class="upgrader-inventory">
-                        <h3>📦 Скины</h3>
-                        <div class="inventory-scroll-container">
-                            <div class="inventory-grid-horizontal" id="inventoryGrid"></div>
-                        </div>
+                    <div class="upgrader-mult-row" id="upgraderMultRow"></div>
+
+                    <div class="upgrader-chance-bar">
+                        <div class="upgrader-chance-fill" id="upgraderChanceFill"></div>
+                        <div class="upgrader-chance-marker" id="upgraderMarker"></div>
+                    </div>
+
+                    <button class="btn-save game-btn" id="upgraderBtn" onclick="doUpgrade()">Апгрейд</button>
+                    <div class="game-result" id="upgraderResult"></div>
+                    <button class="btn-cancel game-btn" onclick="resetUpgrader()">Сбросить баланс</button>
+                </div>
+
+                <!-- Лидерборд -->
+                <div class="game-card">
+                    <h2>🏆 Лидерборд</h2>
+                    <p class="game-subtitle">Лучшие результаты в Апгрейдере</p>
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <div class="leaderboard-empty">Загрузка...</div>
                     </div>
                 </div>
 
             </div>
+        </div>
+    </div>
 
-            <!-- Лидерборд -->
-            <div class="leaderboard-section">
-                <h2>🏆 Лидерборд</h2>
-                <div class="leaderboard-tabs">
-                    <button class="leaderboard-tab active" onclick="switchLeaderboard('balance')">💰 По балансу</button>
-                    <button class="leaderboard-tab" onclick="switchLeaderboard('bestwin')">🎯 Лучший выигрыш</button>
+    <!-- ПРОФИЛЬ -->
+    <div class="modal-overlay" id="profileOverlay">
+        <div class="confirm-card profile-card">
+            <h3 id="profileModalTitle">Добро пожаловать!</h3>
+            <p id="profileModalSubtitle">Придумай ник и выбери аватарку — это будет видно у твоих записей</p>
+            <input type="text" id="profileNameInput" placeholder="Твой ник" maxlength="20">
+
+            <div class="avatar-picker">
+                <div class="avatar-preview-wrap">
+                    <img id="avatarPreview" class="avatar-preview" src="" alt="Аватар">
                 </div>
-                <div class="leaderboard-list" id="leaderboardList">
-                    <!-- Лидеры будут добавлены через JS -->
-                </div>
+                <label class="file-upload-button avatar-upload-btn" for="avatarFileInput">
+                    📷 Загрузить фото
+                </label>
+                <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)" style="display: none;">
+                <button type="button" class="avatar-reset-btn" onclick="resetAvatarToDefault()">Сбросить на стандартную</button>
+            </div>
+
+            <div class="confirm-actions">
+                <button class="btn-cancel" id="profileCancelBtn" onclick="closeProfileModal()" style="display: none;">Отмена</button>
+                <button class="btn-save" onclick="saveProfile()">Сохранить</button>
             </div>
         </div>
     </div>
