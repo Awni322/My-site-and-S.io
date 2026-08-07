@@ -12,42 +12,43 @@
         <button class="settings-toggle-btn" id="settingsMenuBtn" title="Настройки">⚙️</button>
         <div class="settings-dropdown" id="settingsDropdown">
             <div class="settings-section-title">Тема</div>
-            <button class="settings-option" data-theme-value="default" onclick="setTheme('default')">Тёмная</button>
-            <button class="settings-option" data-theme-value="light" onclick="setTheme('light')">Светлая</button>
-            <button class="settings-option" data-theme-value="dark-blue" onclick="setTheme('dark-blue')">Тёмно-синяя</button>
-            <button class="settings-option" data-theme-value="black" onclick="setTheme('black')">Чёрная</button>
-            <button class="settings-option" data-theme-value="black-red" onclick="setTheme('black-red')">Чёрно-красная</button>
+            <button class="settings-option" data-theme-value="default" onclick="setTheme('default')">
+                <span class="theme-preview preview-dark"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Тёмная
+            </button>
+            <button class="settings-option" data-theme-value="light" onclick="setTheme('light')">
+                <span class="theme-preview preview-light"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Светлая
+            </button>
+            <button class="settings-option" data-theme-value="dark-blue" onclick="setTheme('dark-blue')">
+                <span class="theme-preview preview-blue"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Тёмно-синяя
+            </button>
+            <button class="settings-option" data-theme-value="black" onclick="setTheme('black')">
+                <span class="theme-preview preview-black"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Чёрная
+            </button>
+            <button class="settings-option" data-theme-value="black-red" onclick="setTheme('black-red')">
+                <span class="theme-preview preview-black-red"><span class="tp-bg"></span><span class="tp-accent"></span></span>
+                Чёрно-красная
+            </button>
             <div class="settings-divider"></div>
-            <button class="settings-option" onclick="openProfileModal(true)">👤 Профиль</button>
-            <div class="settings-divider"></div>
-            <button class="settings-option settings-logout" onclick="requestLogout()">🚪 Выйти</button>
+            <button class="settings-option settings-logout" onclick="requestLogout()">
+                🚪 Выйти
+            </button>
         </div>
     </div>
 
     <!-- ЭКРАН ВХОДА -->
     <div id="login">
         <h2>Вход</h2>
-        
-        <div class="password-input-group">
-            <input type="password" id="password" placeholder="Введите пароль" autocomplete="current-password">
-            <button type="button" class="btn-saved-passwords" onclick="toggleSavedPasswordsMenu()" title="Сохранённые пароли">🔑</button>
-            
-            <div class="saved-passwords-dropdown" id="savedPasswordsDropdown">
-                <div class="saved-pass-title">Выбрать сохранённый пароль:</div>
-                <div id="savedPasswordsList"></div>
-            </div>
-        </div>
-
-        <button id="loginBtn" onclick="login()">Войти</button>
-        <button type="button" class="btn-already-account" onclick="fillSavedAccount()">💡 Уже есть аккаунт?</button>
+        <input type="password" id="password" placeholder="Введите пароль">
+        <button onclick="login()">Войти</button>
         <div id="message"></div>
     </div>
 
     <!-- ОСНОВНОЙ КОНТЕНТ -->
     <div id="content" style="display: none;">
-
-        <button class="side-arrow side-arrow-right" id="gamesArrowBtn" onclick="openGamesPanel()" title="Мини-игры">›</button>
-
         <h1>Архив</h1>
 
         <div class="form-container">
@@ -71,7 +72,7 @@
                 <label class="file-upload-button" for="imageInput">
                     📎 <span id="fileName">Выберите фото</span>
                 </label>
-                <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)" style="display:none;">
+                <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
             </div>
 
             <div class="pin-wrapper">
@@ -88,7 +89,7 @@
             </div>
         </div>
 
-        <!-- ПОИСК И ФИЛЬТРЫ -->
+        <!-- ПОИСК -->
         <input type="text" id="search" placeholder="Поиск..." oninput="handleSearch()">
 
         <div class="filters-row">
@@ -112,139 +113,27 @@
         <div id="notes"></div>
     </div>
 
-<!-- Единое модальное окно Авторизации -->
-<div id="authModal" class="modal-overlay">
-  <div class="modal-card">
-    
-    <!-- Переключатель Вход / Регистрация -->
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-      <button id="tabLoginBtn" style="flex: 1;" onclick="switchAuthTab('login')">Вход</button>
-      <button id="tabRegisterBtn" style="flex: 1;" onclick="switchAuthTab('register')">Регистрация</button>
-    </div>
-
-    <!-- Форма Входа -->
-    <form id="loginForm" onsubmit="handleLogin(event)">
-      <h2>Вход в аккаунт</h2>
-      <input type="text" id="loginName" placeholder="Имя пользователя" required style="width: 100%; margin-bottom: 10px;">
-      <input type="password" id="loginPassword" placeholder="Пароль" required style="width: 100%; margin-bottom: 15px;">
-      <button type="submit" style="width: 100%;">Войти</button>
-    </form>
-
-    <!-- Форма Регистрации -->
-    <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
-      <h2>Создать аккаунт</h2>
-      <input type="text" id="regName" placeholder="Придумай имя" required style="width: 100%; margin-bottom: 10px;">
-      <input type="password" id="regPassword" placeholder="Придумай пароль" required style="width: 100%; margin-bottom: 15px;">
-      <button type="submit" style="width: 100%;">Зарегистрироваться</button>
-    </form>
-
-  </div>
-</div>
-    <!-- ПАНЕЛЬ МИНИ-ИГР -->
-    <div class="games-panel" id="gamesPanel">
-        <div class="games-top-user" id="gamesTopUser" onclick="openProfileModal(true)">
-            <img id="gamesUserAvatar" class="games-user-avatar" src="" alt="Avatar">
-            <span id="gamesUserName" class="games-user-name">Гость</span>
-        </div>
-
-        <button class="side-arrow side-arrow-left" id="gamesBackBtn" onclick="closeGamesPanel()" title="Назад">‹</button>
-
-        <div class="games-panel-inner">
-            <h1 class="games-title">🎮 Мини-игры</h1>
-            <p class="games-subtitle-main">Отвлекись на пару минут</p>
-
-            <div class="games-grid">
-
-                <!-- Колесо фортуны -->
-                <div class="game-card">
-                    <h2>🎡 Колесо фортуны</h2>
-                    <p class="game-subtitle" id="wheelSubtitle">Бесплатный спин раз в день</p>
-                    <div class="wheel-wrapper">
-                        <div class="wheel-pointer"></div>
-                        <canvas id="wheelCanvas" width="260" height="260"></canvas>
-                    </div>
-                    <button class="btn-save game-btn" id="wheelSpinBtn" onclick="spinWheel()">Крутить</button>
-                    <div class="game-result" id="wheelResult"></div>
-                    <div class="wheel-timer-note" id="wheelTimerNote"></div>
+    <!-- МОДАЛЬНОЕ ОКНО ПРОСМОТРА -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <div class="modal-body">
+                <div class="modal-left" id="modalLeft">
+                    <img id="modalImage" src="" alt="Превью">
                 </div>
-
-                <!-- Апгрейдер -->
-                <div class="game-card upgrader-card">
-                    <h2>🆙 Апгрейдер</h2>
-                    <p class="game-subtitle">Испытай удачу и умножь коины</p>
-
-                    <div class="upgrader-balance">
-                        <span class="upgrader-balance-label">Баланс</span>
-                        <span class="upgrader-balance-value" id="upgraderBalance">100</span>
-                        <span class="upgrader-coin">🪙</span>
-                    </div>
-
-                    <div class="upgrader-mult-row" id="upgraderMultRow"></div>
-
-                    <div class="upgrader-gauge-wrapper">
-                        <svg class="upgrader-gauge-svg" viewBox="0 0 100 100">
-                            <path class="gauge-bg" d="M 15,85 A 45,45 0 1,1 85,85" />
-                            <path class="gauge-fill" id="upgraderGaugeFill" d="M 15,85 A 45,45 0 1,1 85,85" />
-                        </svg>
-                        <div class="upgrader-gauge-center">
-                            <span class="gauge-chance-val" id="upgraderChanceText">47%</span>
-                            <span class="gauge-chance-sub">шанс</span>
-                        </div>
-                    </div>
-
-                    <div class="upgrader-stake-container">
-                        <div class="upgrader-stake-row">
-                            <input type="number" id="upgraderStake" min="1" value="10">
-                            <button class="btn-cancel game-btn-inline" onclick="setUpgraderStake(10)">10</button>
-                            <button class="btn-cancel game-btn-inline" onclick="setUpgraderStake(100)">100</button>
-                            <button class="btn-cancel game-btn-inline" onclick="setUpgraderStakeMax()">MAX</button>
-                        </div>
-                    </div>
-
-                    <button class="btn-save game-btn" id="upgraderBtn" onclick="doUpgrade()">Апгрейд</button>
-                    <div class="game-result" id="upgraderResult"></div>
-                    <button class="btn-cancel game-btn" onclick="resetUpgrader()" style="margin-top: 8px;">Сбросить баланс</button>
+                <div class="modal-right">
+                    <h2 id="modalTitle"></h2>
+                    <div id="modalRobloxContainer"></div>
+                    <div id="modalText"></div>
+                    <button class="btn-modal-copy" id="btnModalCopy" onclick="copyModalContent()">
+                        📋 Скопировать текст
+                    </button>
                 </div>
-
-                <!-- Лидерборд -->
-                <div class="game-card">
-                    <h2>🏆 Лидерборд</h2>
-                    <p class="game-subtitle">Лучшие результаты в Апгрейдере</p>
-                    <div class="leaderboard-list" id="leaderboardList">
-                        <div class="leaderboard-empty">Загрузка...</div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
 
-    <!-- МОДАЛКА ПРОФИЛЯ -->
-    <div class="modal-overlay" id="profileOverlay">
-        <div class="confirm-card profile-card">
-            <h3 id="profileModalTitle">Добро пожаловать!</h3>
-            <p id="profileModalSubtitle">Придумай ник и выбери аватарку</p>
-            <input type="text" id="profileNameInput" placeholder="Твой ник" maxlength="20">
-
-            <div class="avatar-picker">
-                <div class="avatar-preview-wrap">
-                    <img id="avatarPreview" class="avatar-preview" src="" alt="Аватар">
-                </div>
-                <label class="file-upload-button avatar-upload-btn" for="avatarFileInput">
-                    📷 Загрузить фото
-                </label>
-                <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)" style="display: none;">
-                <button type="button" class="avatar-reset-btn" onclick="resetAvatarToDefault()">Сбросить на стандартную</button>
-            </div>
-
-            <div class="confirm-actions">
-                <button class="btn-cancel" id="profileCancelBtn" onclick="closeProfileModal()" style="display: none;">Отмена</button>
-                <button class="btn-save" onclick="saveProfile()">Сохранить</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ПОДТВЕРЖДЕНИЕ -->
+    <!-- ОКНО ПОДТВЕРЖДЕНИЯ -->
     <div class="modal-overlay" id="confirmOverlay">
         <div class="confirm-card">
             <h3 id="confirmTitle">Подтверждение</h3>
