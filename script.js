@@ -19,38 +19,41 @@ let selectedSlot2 = null;
 let activeLeaderboard = 'balance';
 let currentAvatarFile = null; // Для хранения файла аватарки при смене
 
-// Предметы для апгрейдера
-const ITEMS = {
-    common1: { id: 'common1', name: 'Деревянный меч', icon: '🗡️', price: 50, tier: 1 },
-    common2: { id: 'common2', name: 'Каменный топор', icon: '🪓', price: 60, tier: 1 },
-    common3: { id: 'common3', name: 'Железный щит', icon: '🛡️', price: 70, tier: 1 },
-
-    rare1: { id: 'rare1', name: 'Стальной меч', icon: '⚔️', price: 150, tier: 2 },
-    rare2: { id: 'rare2', name: 'Золотой топор', icon: '🔱', price: 180, tier: 2 },
-    rare3: { id: 'rare3', name: 'Кристальный щит', icon: '💎', price: 200, tier: 2 },
-
-    epic1: { id: 'epic1', name: 'Огненный меч', icon: '🔥', price: 500, tier: 3 },
-    epic2: { id: 'epic2', name: 'Ледяной топор', icon: '❄️', price: 550, tier: 3 },
-    epic3: { id: 'epic3', name: 'Драконий щит', icon: '🐉', price: 600, tier: 3 },
-
-    legendary1: { id: 'legendary1', name: 'Легендарный меч', icon: '⚡', price: 1500, tier: 4 },
-    legendary2: { id: 'legendary2', name: 'Божественный топор', icon: '🌟', price: 1800, tier: 4 },
-    legendary3: { id: 'legendary3', name: 'Небесный щит', icon: '✨', price: 2000, tier: 4 }
+// Скины из CS2 (оружие и ножи)
+const CS2_SKINS = {
+    // Пистолеты
+    gp25_glock18: { id: 'gp25_glock18', name: 'Glock-18 | Grotto', icon: '🔫', price: 150, type: 'weapon', rarity: 'consumer' },
+    p90_p90: { id: 'p90_p90', name: 'P90 | Asiimov', icon: '🔫', price: 200, type: 'weapon', rarity: 'milspec' },
+    // Винтовки
+    ak47_ak47: { id: 'ak47_ak47', name: 'AK-47 | Slate', icon: '🪖', price: 350, type: 'weapon', rarity: 'milspec' },
+    m4a1_m4a1: { id: 'm4a1_m4a1', name: 'M4A1-S | Cyberopsis', icon: '🪖', price: 400, type: 'weapon', rarity: 'restricted' },
+    // Снайперские винтовки
+    awp_awp: { id: 'awp_awp', name: 'AWP | Atheris', icon: '🎯', price: 600, type: 'weapon', rarity: 'covert' },
+    // Ножи
+    knife_bayonet: { id: 'knife_bayonet', name: 'Bayonet | Doppler', icon: '🔪', price: 1500, type: 'knife', rarity: 'classified' },
+    knife_flip: { id: 'knife_flip', name: 'Flip Knife | Fade', icon: '🔪', price: 2000, type: 'knife', rarity: 'covert' },
+    knife_gut: { id: 'knife_gut', name: 'Gut Knife | Fade', icon: '🔪', price: 1800, type: 'knife', rarity: 'covert' },
+    knife_karambit: { id: 'knife_karambit', name: 'Karambit | Fade', icon: '🔪', price: 2500, type: 'knife', rarity: 'Covert' },
+    knife_m9: { id: 'knife_m9', name: 'M9 Bayonet | Fade', icon: '🔪', price: 2200, type: 'knife', rarity: 'covert' }
 };
 
-// Возможные апгрейды (с какого на какой и с каким шансом)
-const UPGRADES = {
-    common1: { to: 'rare1', chance: 60 },
-    common2: { to: 'rare2', chance: 55 },
-    common3: { to: 'rare3', chance: 50 },
+// Предметы для апгрейдера (микроконтейнеры)
+const ITEMS = {
+    common1: { id: 'common1', name: 'Малый контейнер', icon: '📦', price: 50, tier: 1 },
+    common2: { id: 'common2', name: 'Средний контейнер', icon: '📦', price: 80, tier: 1 },
+    common3: { id: 'common3', name: 'Большой контейнер', icon: '📦', price: 120, tier: 1 },
 
-    rare1: { to: 'epic1', chance: 30 },
-    rare2: { to: 'epic2', chance: 25 },
-    rare3: { to: 'epic3', chance: 20 },
+    rare1: { id: 'rare1', name: 'Элитный контейнер', icon: '🎒', price: 250, tier: 2 },
+    rare2: { id: 'rare2', name: 'Эпический контейнер', icon: '🎒', price: 350, tier: 2 },
+    rare3: { id: 'rare3', name: 'Секретный контейнер', icon: '🎒', price: 500, tier: 2 },
 
-    epic1: { to: 'legendary1', chance: 10 },
-    epic2: { to: 'legendary2', chance: 8 },
-    epic3: { to: 'legendary3', chance: 5 }
+    epic1: { id: 'epic1', name: 'Магический контейнер', icon: '🎁', price: 1000, tier: 3 },
+    epic2: { id: 'epic2', name: 'Легендарный контейнер', icon: '🎁', price: 1500, tier: 3 },
+    epic3: { id: 'epic3', name: 'Мифический контейнер', icon: '🎁', price: 2000, tier: 3 },
+
+    legendary1: { id: 'legendary1', name: 'Божественный контейнер', icon: '✨', price: 3500, tier: 4 },
+    legendary2: { id: 'legendary2', name: 'Великий контейнер', icon: '✨', price: 4000, tier: 4 },
+    legendary3: { id: 'legendary3', name: 'Таинственный контейнер', icon: '✨', price: 5000, tier: 4 }
 };
 
 // Призы колеса фортуны
@@ -534,16 +537,9 @@ function updateWheelTimer(seconds) {
     wheelTimeLeft.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Смена аватарки пользователя в профиле
+// Смена аватарки без пароля
 async function changeAvatar() {
-    const currentPassword = document.getElementById("currentPasswordAvatar").value;
     const message = document.getElementById("avatarChangeMessage");
-
-    if (!currentPassword) {
-        message.innerHTML = "⚠️ Введите пароль";
-        message.style.color = "#fbbf24";
-        return;
-    }
 
     if (!currentAvatarFile) {
         message.innerHTML = "⚠️ Выберите файл аватарки";
@@ -562,7 +558,6 @@ async function changeAvatar() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        password: currentPassword,
                         avatar: e.target.result
                     }),
                     credentials: "include"
@@ -577,7 +572,6 @@ async function changeAvatar() {
                     updateUserProfile();
 
                     setTimeout(() => {
-                        document.getElementById("currentPasswordAvatar").value = "";
                         document.getElementById("avatarPreviewChange").innerHTML = `
                             <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <circle cx="40" cy="40" r="40" fill="#4a5568"/>
@@ -589,7 +583,7 @@ async function changeAvatar() {
                         document.getElementById("avatarChangeMessage").innerHTML = "";
                     }, 2000);
                 } else {
-                    message.innerHTML = `❌ ${data.error === "Invalid password" ? "Неверный пароль" : "Ошибка изменения аватарки"}`;
+                    message.innerHTML = `❌ Ошибка изменения аватарки`;
                     message.style.color = "#f87171";
                 }
             } catch (err) {
@@ -1571,7 +1565,7 @@ function renderInventory() {
 
     grid.innerHTML = "";
 
-    // Добавляем все предметы, которые есть
+    // Добавляем все предметы (CS2 скины + контейнеры)
     Object.values(ITEMS).forEach(item => {
         const quantity = userInventory[item.id] || 0;
         if (quantity > 0) {
@@ -1605,12 +1599,22 @@ function renderInventory() {
         }
     });
 
-    // Показываем кнопки покупки для начальных предметов
+    // Показываем кнопки покупки для скинов CS2
     const hasNoItems = Object.keys(userInventory).length === 0 ||
                        Object.values(userInventory).every(q => q === 0);
 
     if (hasNoItems) {
-        [ITEMS.common1, ITEMS.common2, ITEMS.common3].forEach(item => {
+        // Показываем 6 популярных скинов для покупки
+        const buyItems = [
+            CS2_SKINS.gp25_glock18,
+            CS2_SKINS.p90_p90,
+            CS2_SKINS.ak47_ak47,
+            CS2_SKINS.knife_bayonet,
+            CS2_SKINS.knife_flip,
+            CS2_SKINS.knife_gut
+        ];
+
+        buyItems.forEach(item => {
             const itemEl = document.createElement("div");
             itemEl.className = "inventory-item inventory-item-buy";
             itemEl.onclick = () => buyItem(item.id);
