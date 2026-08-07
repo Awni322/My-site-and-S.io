@@ -147,12 +147,14 @@
 
         <div class="games-panel-inner">
             <h1 class="games-title">🎮 Мини-игры</h1>
+            <p class="games-subtitle-main">Отвлекись на пару минут</p>
 
             <div class="games-grid">
 
                 <!-- Колесо фортуны -->
                 <div class="game-card">
                     <h2>🎡 Колесо фортуны</h2>
+                    <p class="game-subtitle">Испытай удачу</p>
                     <div class="wheel-wrapper">
                         <div class="wheel-pointer"></div>
                         <canvas id="wheelCanvas" width="280" height="280"></canvas>
@@ -164,6 +166,7 @@
                 <!-- Крестики-нолики -->
                 <div class="game-card">
                     <h2>❌⭕ Крестики-нолики</h2>
+                    <p class="game-subtitle">Классика для двоих</p>
                     <div class="ttt-board" id="tttBoard"></div>
                     <div class="game-result" id="tttResult">Ты играешь за ❌. Ходи первым!</div>
                     <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
@@ -172,6 +175,7 @@
                 <!-- Апгрейдер -->
                 <div class="game-card">
                     <h2>🆙 Апгрейдер</h2>
+                    <p class="game-subtitle">Рискни и приумножь</p>
                     <div class="upgrader-balance">
                         <span class="upgrader-balance-label">Баланс</span>
                         <span class="upgrader-balance-value" id="upgraderBalance">100</span>
@@ -198,7 +202,7 @@
                 <!-- Лидерборд -->
                 <div class="game-card">
                     <h2>🏆 Лидерборд</h2>
-                    <p class="game-hint">Лучшие результаты в Апгрейдере</p>
+                    <p class="game-subtitle">Лучшие результаты в Апгрейдере</p>
                     <div class="leaderboard-list" id="leaderboardList">
                         <div class="leaderboard-empty">Загрузка...</div>
                     </div>
@@ -214,7 +218,18 @@
             <h3 id="profileModalTitle">Добро пожаловать!</h3>
             <p id="profileModalSubtitle">Придумай ник и выбери аватарку — это будет видно у твоих записей</p>
             <input type="text" id="profileNameInput" placeholder="Твой ник" maxlength="20">
-            <div class="avatar-grid" id="avatarGrid"></div>
+
+            <div class="avatar-picker">
+                <div class="avatar-preview-wrap">
+                    <img id="avatarPreview" class="avatar-preview" src="" alt="Аватар">
+                </div>
+                <label class="file-upload-button avatar-upload-btn" for="avatarFileInput">
+                    📷 Загрузить фото
+                </label>
+                <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)" style="display: none;">
+                <button type="button" class="avatar-reset-btn" onclick="resetAvatarToDefault()">Сбросить на стандартную</button>
+            </div>
+
             <div class="confirm-actions">
                 <button class="btn-cancel" id="profileCancelBtn" onclick="closeProfileModal()" style="display: none;">Отмена</button>
                 <button class="btn-save" onclick="saveProfile()">Сохранить</button>
