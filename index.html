@@ -195,14 +195,36 @@
 
             <div class="games-grid">
 
+                <!-- Баланс монет -->
+                <div class="game-card balance-card">
+                    <h2>💰 Ваш баланс</h2>
+                    <div class="balance-display">
+                        <span class="balance-amount" id="userBalance">0</span>
+                        <span class="balance-icon">🪙</span>
+                    </div>
+                    <div class="balance-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Лучший выигрыш:</span>
+                            <span class="stat-value" id="bestWin">0 🪙</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Всего выиграно:</span>
+                            <span class="stat-value" id="totalWon">0 🪙</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Колесо фортуны -->
                 <div class="game-card">
                     <h2>🎡 Колесо фортуны</h2>
+                    <div class="wheel-timer" id="wheelTimer" style="display: none;">
+                        Доступно через: <span id="wheelTimeLeft"></span>
+                    </div>
                     <div class="wheel-wrapper">
                         <div class="wheel-pointer"></div>
                         <canvas id="wheelCanvas" width="280" height="280"></canvas>
                     </div>
-                    <button class="btn-save game-btn" onclick="spinWheel()">Крутить</button>
+                    <button class="btn-save game-btn" id="spinWheelBtn" onclick="spinWheel()">Крутить (бесплатно)</button>
                     <div class="game-result" id="wheelResult"></div>
                 </div>
 
@@ -214,18 +236,51 @@
                     <button class="btn-cancel game-btn" onclick="resetTicTacToe()">Заново</button>
                 </div>
 
-                <!-- Угадай число -->
-                <div class="game-card">
-                    <h2>🔢 Угадай число</h2>
-                    <p class="game-hint">Я загадал число от 1 до 100</p>
-                    <div class="guess-input-row">
-                        <input type="text" id="guessInput" placeholder="Введите число" inputmode="numeric">
-                        <button class="btn-save game-btn-inline" onclick="makeGuess()">Проверить</button>
+                <!-- Апгрейдер -->
+                <div class="game-card upgrader-card">
+                    <h2>⚡ Апгрейдер</h2>
+                    <div class="upgrader-container">
+                        <div class="upgrader-items">
+                            <div class="upgrader-slot" id="upgraderSlot1" onclick="selectUpgraderSlot(1)">
+                                <div class="slot-empty">Выбери предмет</div>
+                            </div>
+                            <div class="upgrader-arrow">→</div>
+                            <div class="upgrader-slot" id="upgraderSlot2" onclick="selectUpgraderSlot(2)">
+                                <div class="slot-empty">Выбери предмет</div>
+                            </div>
+                        </div>
+                        <div class="upgrader-chance" id="upgraderChance">
+                            <div class="chance-circle">
+                                <span id="chancePercent">0%</span>
+                            </div>
+                            <div class="chance-label">Шанс успеха</div>
+                        </div>
+                        <button class="btn-save game-btn" id="upgradeBtn" onclick="performUpgrade()" disabled>
+                            Улучшить
+                        </button>
                     </div>
-                    <div class="game-result" id="guessResult"></div>
-                    <button class="btn-cancel game-btn" onclick="resetGuessGame()">Новая игра</button>
+
+                    <!-- Инвентарь -->
+                    <div class="upgrader-inventory">
+                        <h3>📦 Ваши предметы</h3>
+                        <div class="inventory-grid" id="inventoryGrid">
+                            <!-- Предметы будут добавлены через JS -->
+                        </div>
+                    </div>
                 </div>
 
+            </div>
+
+            <!-- Лидерборд -->
+            <div class="leaderboard-section">
+                <h2>🏆 Лидерборд</h2>
+                <div class="leaderboard-tabs">
+                    <button class="leaderboard-tab active" onclick="switchLeaderboard('balance')">💰 По балансу</button>
+                    <button class="leaderboard-tab" onclick="switchLeaderboard('bestwin')">🎯 Лучший выигрыш</button>
+                </div>
+                <div class="leaderboard-list" id="leaderboardList">
+                    <!-- Лидеры будут добавлены через JS -->
+                </div>
             </div>
         </div>
     </div>
