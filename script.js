@@ -1,1356 +1,313 @@
-const WORKER_URL = "https://my-password-check.minecraftpesok.workers.dev/";
+/* ============================================================
+   АРХИВ — слой взаимодействий
+   Работает поверх script.js и ничего в нём не меняет.
+   Всё отключается при prefers-reduced-motion и на тач-экранах.
+   ============================================================ */
 
-let currentImageBase64 = null;
-let currentNotesList = []; 
-let activeCategory = "all";
-let activeSort = "newest"; 
-let noteIdToDelete = null;
+(() => {
+    "use strict";
 
-// ==========================================
-// ПРОФИЛЬ (НИК + АВАТАРКА)
-// ==========================================
-const PROFILE_STORAGE_KEY = "archiveUserProfile";
-const DEFAULT_AVATAR = "data:image/svg+xml," + encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-        <defs><clipPath id="c"><circle cx="100" cy="100" r="100"/></clipPath></defs>
-        <g clip-path="url(#c)">
-            <rect width="200" height="200" fill="#cbd5e1"/>
-            <circle cx="100" cy="80" r="38" fill="#f8fafc"/>
-            <ellipse cx="100" cy="196" rx="72" ry="70" fill="#f8fafc"/>
-        </g>
-    </svg>`
-);
-let selectedAvatar = DEFAULT_AVATAR;
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-function getProfile() {
-    try {
-        const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.name) return { name: parsed.name, avatar: parsed.avatar || DEFAULT_AVATAR };
-        return null;
-    } catch (e) {
-        return null;
-    }
-}
+    /* ---------- Общая позиция указателя (фон, параллакс) ---------- */
 
-function resizeAvatarImage(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const size = 160;
-                const canvas = document.createElement("canvas");
-                canvas.width = size;
-                canvas.height = size;
-                const ctx = canvas.getContext("2d");
-                const scale = Math.max(size / img.width, size / img.height);
-                const w = img.width * scale;
-                const h = img.height * scale;
-                const x = (size - w) / 2;
-                const y = (size - h) / 2;
-                ctx.drawImage(img, x, y, w, h);
-                resolve(canvas.toDataURL("image/jpeg", 0.85));
-            };
-            img.onerror = reject;
-            img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
+    const pointer = { x: innerWidth / 2, y: innerHeight / 2 };
+    const root = document.documentElement;
+    let bgFrame = null;
 
-async function handleAvatarUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    try {
-        const dataUrl = await resizeAvatarImage(file);
-        selectedAvatar = dataUrl;
-        const preview = document.getElementById("avatarPreview");
-        if (preview) preview.src = dataUrl;
-    } catch (e) {
-        showToast("❌ Не удалось загрузить фото", "error");
-    }
-}
-
-function resetAvatarToDefault() {
-    selectedAvatar = DEFAULT_AVATAR;
-    const preview = document.getElementById("avatarPreview");
-    if (preview) preview.src = DEFAULT_AVATAR;
-}
-
-function openProfileModal(closable) {
-    const overlay = document.getElementById("profileOverlay");
-    const title = document.getElementById("profileModalTitle");
-    const subtitle = document.getElementById("profileModalSubtitle");
-    const nameInput = document.getElementById("profileNameInput");
-    const cancelBtn = document.getElementById("profileCancelBtn");
-    const preview = document.getElementById("avatarPreview");
-    if (!overlay) return;
-
-    const existing = getProfile();
-
-    if (title) title.textContent = closable ? "Твой профиль" : "Добро пожаловать!";
-    if (subtitle) subtitle.textContent = closable
-        ? "Можешь поменять ник или фото в любой момент"
-        : "Придумай ник и при желании загрузи фото — это будет видно у твоих записей";
-    if (nameInput) nameInput.value = existing ? existing.name : "";
-    if (cancelBtn) cancelBtn.style.display = closable ? "block" : "none";
-
-    selectedAvatar = existing ? existing.avatar : DEFAULT_AVATAR;
-    if (preview) preview.src = selectedAvatar;
-
-    overlay.onclick = closable ? (e) => { if (e.target === overlay) closeProfileModal(); } : null;
-
-    const settingsDropdown = document.getElementById("settingsDropdown");
-    if (settingsDropdown) settingsDropdown.classList.remove("active");
-
-    overlay.classList.add("active");
-}
-
-function closeProfileModal() {
-    const overlay = document.getElementById("profileOverlay");
-    if (overlay) overlay.classList.remove("active");
-}
-
-function saveProfile() {
-    const nameInput = document.getElementById("profileNameInput");
-    const name = nameInput ? nameInput.value.trim() : "";
-
-    if (!name) {
-        showToast("⚠️ Введи ник", "error");
-        return;
-    }
-
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify({ name, avatar: selectedAvatar }));
-    closeProfileModal();
-    showToast("✅ Профиль сохранён");
-}
-
-function ensureProfileSetup() {
-    if (!getProfile()) {
-        openProfileModal(false);
-    }
-}
-
-// Авторизация
-async function login() {
-    let passwordInput = document.getElementById("password");
-    let message = document.getElementById("message");
-    if (!passwordInput || !message) return;
-
-    let password = passwordInput.value;
-    message.innerHTML = "Проверка...";
-    message.style.color = "#ffffff";
-
-    try {
-        let response = await fetch(WORKER_URL + "login", {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ password: password }),
-            credentials: "include"
+    function onMove(e) {
+        pointer.x = e.clientX;
+        pointer.y = e.clientY;
+        if (bgFrame) return;
+        bgFrame = requestAnimationFrame(() => {
+            bgFrame = null;
+            root.style.setProperty("--px", (pointer.x / innerWidth).toFixed(3));
+            root.style.setProperty("--py", (pointer.y / innerHeight).toFixed(3));
+            root.style.setProperty("--pxp", (pointer.x / innerWidth * 100).toFixed(1) + "%");
+            root.style.setProperty("--pyp", (pointer.y / innerHeight * 100).toFixed(1) + "%");
         });
-
-        if (response.ok) {
-            message.innerHTML = "✅ Пароль верный";
-            message.style.color = "#4ade80";
-            document.getElementById("login").style.display = "none";
-            document.getElementById("content").style.display = "flex";
-            loadNotes();
-            connectNotesSocket();
-            ensureProfileSetup();
-        } else if (response.status === 429) {
-            let data = {};
-            try { data = await response.json(); } catch (_) {}
-            const mins = data.retry_after ? Math.ceil(data.retry_after / 60) : 15;
-            message.innerHTML = `⏳ Слишком много попыток. Подождите ~${mins} мин.`;
-            message.style.color = "#fbbf24";
-        } else {
-            message.innerHTML = "❌ Неверный пароль";
-            message.style.color = "#f87171";
-        }
-    } catch (e) {
-        message.innerHTML = "❌ Ошибка соединения";
-        message.style.color = "#f87171";
     }
-}
+    window.addEventListener("pointermove", onMove, { passive: true });
 
-// Автоматическая привязка кнопки входа и инициализация тем
-document.addEventListener("DOMContentLoaded", () => {
-    const loginBtn = document.getElementById("loginBtn");
-    if (loginBtn) {
-        loginBtn.addEventListener("click", login);
-    }
+    /* ---------- Локальные координаты для подсветки элементов ---------- */
 
-    // Поддержка нажатия Enter в поле ввода пароля
-    const passwordInput = document.getElementById("password");
-    if (passwordInput) {
-        passwordInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                login();
+    const LIT = ".note-card, .game-card, .btn-save, .btn-cancel, .filter-btn," +
+                ".btn-modal-copy, .btn-delete-confirm, .roblox-link-btn," +
+                ".file-upload-button, #login button";
+
+    let litFrame = null;
+    document.addEventListener("pointermove", (e) => {
+        const el = e.target.closest && e.target.closest(LIT);
+        if (!el || litFrame) return;
+        litFrame = requestAnimationFrame(() => {
+            litFrame = null;
+            const r = el.getBoundingClientRect();
+            el.style.setProperty("--mx", ((pointer.x - r.left) / r.width * 100).toFixed(1) + "%");
+            el.style.setProperty("--my", ((pointer.y - r.top) / r.height * 100).toFixed(1) + "%");
+        });
+    }, { passive: true });
+
+    /* ---------- Наклон карточек ---------- */
+
+    if (finePointer && !reduced) {
+        const MAX = 3.2;
+        let tiltFrame = null;
+
+        document.addEventListener("pointermove", (e) => {
+            const card = e.target.closest && e.target.closest(".note-card");
+            if (!card || tiltFrame) return;
+            tiltFrame = requestAnimationFrame(() => {
+                tiltFrame = null;
+                const r = card.getBoundingClientRect();
+                const dx = (pointer.x - r.left) / r.width - .5;
+                const dy = (pointer.y - r.top) / r.height - .5;
+                card.style.setProperty("--ry", (dx * MAX * 2).toFixed(2) + "deg");
+                card.style.setProperty("--rx", (-dy * MAX * 2).toFixed(2) + "deg");
+            });
+        }, { passive: true });
+
+        document.addEventListener("pointerout", (e) => {
+            const card = e.target.closest && e.target.closest(".note-card");
+            if (card && !card.contains(e.relatedTarget)) {
+                card.style.setProperty("--rx", "0deg");
+                card.style.setProperty("--ry", "0deg");
             }
-        });
+        }, { passive: true });
     }
 
-    // Восстановление темы
-    const savedTheme = localStorage.getItem("site_theme");
-    if (savedTheme) {
-        if (savedTheme === "default") {
-            document.documentElement.removeAttribute("data-theme");
-        } else {
-            document.documentElement.setAttribute("data-theme", savedTheme);
-        }
+    /* ---------- Магнитные элементы ---------- */
+
+    const MAGNETIC = ".btn-save, .settings-toggle-btn, .side-arrow, .modal-close," +
+                     ".btn-delete-confirm";
+
+    if (finePointer && !reduced) {
+        let current = null;
+
+        document.addEventListener("pointermove", (e) => {
+            const el = e.target.closest && e.target.closest(MAGNETIC);
+            if (current && current !== el) {
+                current.style.translate = "";
+                current = null;
+            }
+            if (!el) return;
+            current = el;
+            const r = el.getBoundingClientRect();
+            const dx = pointer.x - (r.left + r.width / 2);
+            const dy = pointer.y - (r.top + r.height / 2);
+            const pull = el.classList.contains("side-arrow") ? .18 : .28;
+            el.style.translate = `${(dx * pull).toFixed(1)}px ${(dy * pull).toFixed(1)}px`;
+        }, { passive: true });
+
+        document.addEventListener("pointerleave", () => {
+            if (current) { current.style.translate = ""; current = null; }
+        }, true);
     }
 
-    // Выпадающее меню настроек
-    const menuBtn = document.getElementById("settingsMenuBtn");
-    const dropdown = document.getElementById("settingsDropdown");
+    /* ---------- Курсор-визир ---------- */
 
-    if (menuBtn && dropdown) {
-        menuBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const willOpen = !dropdown.classList.contains("active");
-            dropdown.classList.toggle("active");
-            if (willOpen) updateActiveThemeMark();
-        });
+    if (finePointer && !reduced) {
+        const ring = document.createElement("div");
+        ring.className = "cursor-ring cursor-hidden";
+        ring.innerHTML = "<i></i><i></i><i></i><i></i>";
+        const dot = document.createElement("div");
+        dot.className = "cursor-dot cursor-hidden";
+        document.body.append(ring, dot);
+        root.classList.add("cursor-ready");
 
-        document.addEventListener("click", () => {
-            dropdown.classList.remove("active");
-            const sortMenu = document.getElementById("sortMenu");
-            const sortTrigger = document.getElementById("sortTrigger");
-            if (sortMenu) sortMenu.classList.remove("active");
-            if (sortTrigger) sortTrigger.classList.remove("open");
-            const catMenu = document.getElementById("categoryMenu");
-            const catTrigger = document.getElementById("categoryTrigger");
-            if (catMenu) catMenu.classList.remove("active");
-            if (catTrigger) catTrigger.classList.remove("open");
-        });
+        const SNAP = "button, a, .radio-label, .toggle-container, .file-upload-button," +
+                     ".ttt-cell, .leaderboard-row, .settings-option, .theme-preview";
+        const TEXT = "input:not([type=file]):not([type=checkbox]):not([type=radio]), textarea";
 
-        dropdown.addEventListener("click", (e) => {
-            e.stopPropagation();
-        });
-    }
-});
+        const state = { x: pointer.x, y: pointer.y, w: 34, h: 34, r: 11 };
+        const target = { ...state };
+        let locked = null;
+        let lockedRadius = 12;
 
-function getBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-}
-
-function handleImageUpload(e) {
-    const file = e.target.files[0];
-    const fileNameSpan = document.getElementById("fileName");
-    if (file && fileNameSpan) {
-        fileNameSpan.innerText = "Файл: " + file.name;
-    }
-}
-
-// Сохранение записи
-async function saveNote() {
-    let title = document.getElementById("title").value;
-    let content = document.getElementById("contentInput").value;
-    let robloxUrl = document.getElementById("robloxUrl") ? document.getElementById("robloxUrl").value.trim() : "";
-    let isPinned = document.getElementById("isPinned") ? document.getElementById("isPinned").checked : false;
-    let imageInput = document.getElementById("imageInput");
-
-    let categoryRadio = document.querySelector('input[name="category"]:checked');
-    let category = categoryRadio ? categoryRadio.value : "Заметки";
-
-    if (!title || !content) {
-        alert("Заполните заголовок и текст!");
-        return;
-    }
-
-    let id = document.getElementById("title").dataset.id;
-    let action = id ? "edit" : "save";
-
-    let imageBase64 = currentImageBase64;
-    if (imageInput && imageInput.files[0]) {
-        imageBase64 = await getBase64(imageInput.files[0]);
-    }
-
-    const profile = getProfile();
-
-    let body = {
-        action: action,
-        title: title,
-        content: content,
-        category: category,
-        roblox_url: robloxUrl,
-        image: imageBase64,
-        is_pinned: isPinned,
-        author_name: profile ? profile.name : "Аноним",
-        author_avatar: profile ? profile.avatar : DEFAULT_AVATAR
-    };
-
-    if (id) body.id = id;
-
-    try {
-        let response = await fetch(WORKER_URL, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body),
-            credentials: "include"
-        });
-
-        if (response.ok) {
-            const wasEdit = !!id;
-            resetForm();
-            loadNotes();
-            showToast(wasEdit ? "✅ Запись обновлена" : "✅ Запись сохранена");
-        } else {
-            showToast("❌ Ошибка сохранения", "error");
-        }
-    } catch (err) {
-        console.error("Ошибка при сохранении:", err);
-        showToast("❌ Ошибка соединения", "error");
-    }
-}
-
-// Загрузка записей
-async function loadNotes() {
-    try {
-        let response = await fetch(WORKER_URL, {
-            method: "GET",
-            credentials: "include"
-        });
-        if (response.ok) {
-            const freshNotes = await response.json();
-            // Перерисовываем карточки только если данные реально изменились —
-            // иначе при каждом опросе (раз в 5с) список будет "прыгать" без причины
-            const hasChanged = JSON.stringify(freshNotes) !== JSON.stringify(currentNotesList);
-            currentNotesList = freshNotes;
-            if (hasChanged) {
-                applyFiltersAndRender();
+        function lockOn(el) {
+            locked = el || null;
+            if (locked) {
+                const raw = parseFloat(getComputedStyle(locked).borderRadius);
+                lockedRadius = Math.min((isNaN(raw) ? 6 : raw) + 6, 26);
             }
         }
-    } catch (err) {
-        console.error("Ошибка загрузки:", err);
-    }
-}
 
-function getNoteTimestamp(note) {
-    if (note.created_at) return Number(note.created_at);
-    // Старые записи без даты — fallback по id
-    return Number(note.id) || 0;
-}
+        function measure() {
+            if (locked && document.contains(locked)) {
+                const b = locked.getBoundingClientRect();
+                target.x = b.left + b.width / 2;
+                target.y = b.top + b.height / 2;
+                target.w = Math.min(b.width + 12, 320);
+                target.h = b.height + 12;
+                target.r = lockedRadius;
+            } else {
+                target.x = pointer.x;
+                target.y = pointer.y;
+                target.w = ring.classList.contains("is-text") ? 3 : 34;
+                target.h = ring.classList.contains("is-text") ? 26 : 34;
+                target.r = 11;
+            }
+        }
 
-function formatNoteDate(note) {
-    const ts = getNoteTimestamp(note);
-    // Если это маленький id (старые записи) — не показываем странную дату 1970
-    if (!note.created_at && ts < 1000000000) return "дата неизвестна";
-    const d = new Date(ts * 1000);
-    if (isNaN(d.getTime())) return "дата неизвестна";
-    return d.toLocaleString("ru-RU", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-    });
-}
+        function loop() {
+            measure();
+            const k = locked ? .22 : .16;
+            state.x += (target.x - state.x) * (locked ? .3 : .22);
+            state.y += (target.y - state.y) * (locked ? .3 : .22);
+            state.w += (target.w - state.w) * k;
+            state.h += (target.h - state.h) * k;
+            state.r += (target.r - state.r) * k;
 
-function applyFiltersAndRender() {
-    let filtered = currentNotesList.slice();
-    if (activeCategory !== "all") {
-        filtered = filtered.filter(n => (n.category || "Заметки") === activeCategory);
-    }
+            ring.style.width = state.w.toFixed(1) + "px";
+            ring.style.height = state.h.toFixed(1) + "px";
+            ring.style.margin = `${(-state.h / 2).toFixed(1)}px 0 0 ${(-state.w / 2).toFixed(1)}px`;
+            ring.style.borderRadius = state.r.toFixed(1) + "px";
+            ring.style.transform = `translate(${state.x.toFixed(1)}px, ${state.y.toFixed(1)}px)`;
+            dot.style.transform = `translate(${pointer.x}px, ${pointer.y}px)`;
+            requestAnimationFrame(loop);
+        }
+        requestAnimationFrame(loop);
 
-    filtered.sort((a, b) => {
-        // Закреплённые всегда сверху
-        const pinA = (a.is_pinned === 1 || a.is_pinned === true) ? 1 : 0;
-        const pinB = (b.is_pinned === 1 || b.is_pinned === true) ? 1 : 0;
-        if (pinA !== pinB) return pinB - pinA;
+        document.addEventListener("pointerover", (e) => {
+            const t = e.target;
+            if (!t.closest) return;
+            ring.classList.remove("cursor-hidden");
+            dot.classList.remove("cursor-hidden");
 
-        const ta = getNoteTimestamp(a);
-        const tb = getNoteTimestamp(b);
-        return activeSort === "oldest" ? ta - tb : tb - ta;
-    });
+            const text = t.closest(TEXT);
+            ring.classList.toggle("is-text", !!text);
+            dot.classList.toggle("is-text", !!text);
 
-    renderNotes(filtered);
-}
+            const snap = text ? null : t.closest(SNAP);
+            lockOn(snap);
+            ring.classList.toggle("is-locked", !!snap);
+        }, { passive: true });
 
-function toggleSortMenu(event) {
-    if (event) event.stopPropagation();
-    // закрыть меню категорий
-    const catMenu = document.getElementById("categoryMenu");
-    const catTrigger = document.getElementById("categoryTrigger");
-    if (catMenu) catMenu.classList.remove("active");
-    if (catTrigger) catTrigger.classList.remove("open");
+        document.addEventListener("pointerdown", () => dot.classList.add("is-down"), { passive: true });
+        document.addEventListener("pointerup", () => dot.classList.remove("is-down"), { passive: true });
 
-    const menu = document.getElementById("sortMenu");
-    const trigger = document.getElementById("sortTrigger");
-    if (!menu) return;
-    const open = menu.classList.toggle("active");
-    if (trigger) trigger.classList.toggle("open", open);
-}
+        document.addEventListener("pointerleave", () => {
+            ring.classList.add("cursor-hidden");
+            dot.classList.add("cursor-hidden");
+        });
+        document.addEventListener("pointerenter", () => {
+            ring.classList.remove("cursor-hidden");
+            dot.classList.remove("cursor-hidden");
+        });
 
-function setSort(sort, event) {
-    if (event) event.stopPropagation();
-    activeSort = sort || "newest";
-
-    document.querySelectorAll(".sort-option").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.sort === activeSort);
-    });
-
-    const label = document.getElementById("sortLabel");
-    if (label) {
-        label.textContent = activeSort === "oldest" ? "Сначала старые" : "Сначала новые";
-    }
-
-    const menu = document.getElementById("sortMenu");
-    const trigger = document.getElementById("sortTrigger");
-    if (menu) menu.classList.remove("active");
-    if (trigger) trigger.classList.remove("open");
-
-    const search = document.getElementById("search");
-    if (search && search.value.trim()) {
-        handleSearch();
-    } else {
-        applyFiltersAndRender();
-    }
-}
-
-function handleSort() {
-    setSort(activeSort);
-}
-
-function setCategory(category, event) {
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-    activeCategory = category || "all";
-
-    // Подсветка кнопок категорий
-    document.querySelectorAll(".category-filters .filter-btn").forEach(btn => {
-        const isActive = btn.getAttribute("data-category") === activeCategory;
-        btn.classList.toggle("active", isActive);
-    });
-
-    // Если вдруг остался dropdown-вариант — тоже обновим
-    document.querySelectorAll("#categoryMenu .sort-option").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.category === activeCategory);
-    });
-    const labels = { all: "📁 Все", "Заметки": "📝 Заметки", "Скрипты": "📜 Скрипты" };
-    const label = document.getElementById("categoryLabel");
-    if (label) label.textContent = labels[activeCategory] || "📁 Все";
-
-    const search = document.getElementById("search");
-    if (search && search.value.trim()) {
-        handleSearch();
-    } else {
-        applyFiltersAndRender();
-    }
-}
-
-function filterCategory(category, event) {
-    setCategory(category, event);
-}
-
-function handleSearch() {
-    let query = document.getElementById("search").value.toLowerCase().trim();
-    let filtered = currentNotesList.slice();
-
-    if (activeCategory !== "all") {
-        filtered = filtered.filter(n => (n.category || "Заметки") === activeCategory);
+        /* Импульс по клику */
+        document.addEventListener("pointerdown", (e) => {
+            const ping = document.createElement("span");
+            ping.className = "click-ping";
+            ping.style.left = e.clientX + "px";
+            ping.style.top = e.clientY + "px";
+            document.body.appendChild(ping);
+            setTimeout(() => ping.remove(), 600);
+        }, { passive: true });
     }
 
-    if (query) {
-        filtered = filtered.filter(n =>
-            (n.title || "").toLowerCase().includes(query) ||
-            (n.content || "").toLowerCase().includes(query)
-        );
+    /* ---------- Шапка: логотип, линия, счётчик ---------- */
+
+    function buildHeader() {
+        const h1 = document.querySelector("#content > h1");
+        if (!h1 || h1.dataset.built) return;
+        h1.dataset.built = "1";
+
+        const text = h1.textContent.trim();
+        h1.textContent = "";
+
+        const word = document.createElement("span");
+        word.className = "wordmark";
+        [...text].forEach((ch, i) => {
+            const s = document.createElement("span");
+            s.className = "wm-letter";
+            s.style.setProperty("--l", i);
+            s.textContent = ch;
+            word.appendChild(s);
+        });
+
+        const rule = document.createElement("span");
+        rule.className = "head-rule";
+
+        const count = document.createElement("span");
+        count.className = "record-count";
+        count.id = "recordCount";
+        count.innerHTML = "записей <b>0</b>";
+
+        h1.append(word, rule, count);
+        if (!reduced) h1.classList.add("wm-animate");
     }
 
-    filtered.sort((a, b) => {
-        const pinA = (a.is_pinned === 1 || a.is_pinned === true) ? 1 : 0;
-        const pinB = (b.is_pinned === 1 || b.is_pinned === true) ? 1 : 0;
-        if (pinA !== pinB) return pinB - pinA;
-        const ta = getNoteTimestamp(a);
-        const tb = getNoteTimestamp(b);
-        return activeSort === "oldest" ? ta - tb : tb - ta;
-    });
+    function updateCount() {
+        const count = document.getElementById("recordCount");
+        const notes = document.getElementById("notes");
+        if (!count || !notes) return;
+        const n = notes.querySelectorAll(".note-card").length;
+        count.innerHTML = `записей <b>${n}</b>`;
+    }
 
-    renderNotes(filtered);
-}
+    /* ---------- Поиск: обёртка и подсказка ---------- */
 
-// Быстрое копирование с карточки
-function copyToClipboard(text, buttonEl) {
-    navigator.clipboard.writeText(text).then(() => {
-        let originalText = buttonEl.innerText;
-        buttonEl.innerText = "✅ Скопировано!";
-        setTimeout(() => {
-            buttonEl.innerText = originalText;
-        }, 1500);
-    }).catch(err => console.error("Ошибка копирования: ", err));
-}
-
-// Копирование из модального окна
-function copyModalContent() {
-    let text = document.getElementById("modalText").innerText;
-    let btn = document.getElementById("btnModalCopy");
-    
-    navigator.clipboard.writeText(text).then(() => {
-        let orig = btn.innerHTML;
-        btn.innerHTML = "✅ Скопировано!";
-        setTimeout(() => { btn.innerHTML = orig; }, 1500);
-    });
-}
-
-// Экранирование HTML — защита от XSS
-function escapeHtml(str) {
-    if (str == null) return "";
-    return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
-
-// Рендер карточек
-function renderNotes(notes) {
-    let output = "";
-
-    notes.forEach(note => {
-        const isPinned = note.is_pinned === 1 || note.is_pinned === true;
-        const categoryName = note.category || "Заметки";
-
-        const safeTitle = escapeHtml(note.title);
-        const safeContent = escapeHtml(note.content);
-        const safeImage = (note.image && note.image.startsWith("data:image/"))
-            ? note.image
-            : null;
-
-        output += `
-        <div class="note-card ${isPinned ? 'pinned' : ''}" onclick="openNoteModal(${note.id})">
-            ${isPinned ? '<div class="pin-badge">📌 Закреплено</div>' : ''}
-            
-            <span class="category-badge">${categoryName === 'Скрипты' ? '📜 Скрипты' : '📝 Заметки'}</span>
-
-            <h3 class="note-title">${safeTitle}</h3>
-            <div class="note-content">${safeContent}</div>
-
-            ${safeImage ? `
-                <div class="note-image-container">
-                    <img src="${safeImage}" class="note-image" alt="Фото">
-                </div>
-            ` : ""}
-
-            <div class="note-date">🕒 ${formatNoteDate(note)}</div>
-            <div class="note-footer">
-                <div class="note-author">
-                    <img class="note-author-avatar" src="${note.author_avatar || DEFAULT_AVATAR}" alt="" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'">
-                    <span class="note-author-name">${escapeHtml(note.author_name || "Аноним")}</span>
-                </div>
-                <div class="note-actions">
-                    <button class="btn-action btn-copy" onclick="event.stopPropagation(); copyNoteById(${note.id}, this)">
-                        📋 Копировать
-                    </button>
-                    <button class="btn-action btn-pin ${isPinned ? 'active' : ''}" onclick="event.stopPropagation(); togglePin(${note.id}, ${!isPinned})">
-                        ${isPinned ? '📌' : '📍'}
-                    </button>
-                    <button class="btn-action btn-edit" onclick="event.stopPropagation(); editNote(${note.id})">
-                        ✏️
-                    </button>
-                    <button class="btn-action btn-delete" onclick="event.stopPropagation(); deleteNote(${note.id})">
-                        🗑
-                    </button>
-                </div>
-            </div>
-        </div>
-        `;
-    });
-
-    const notesEl = document.getElementById("notes");
-    if (!output) {
-        const hasAny = currentNotesList.length > 0;
+    function wrapSearch() {
         const search = document.getElementById("search");
-        const q = search ? search.value.trim() : "";
-        let title, text;
-        if (!hasAny) {
-            title = "Пока пусто";
-            text = "Добавь первую запись — заметку или скрипт";
-        } else if (q) {
-            title = "Ничего не найдено";
-            text = "Попробуй изменить запрос или сбросить поиск";
-        } else {
-            title = "В этой категории пусто";
-            text = "Выбери другую категорию или создай новую запись";
+        if (!search || search.parentElement.classList.contains("search-wrap")) return;
+        const wrap = document.createElement("div");
+        wrap.className = "search-wrap";
+        search.parentNode.insertBefore(wrap, search);
+        wrap.appendChild(search);
+        const hint = document.createElement("span");
+        hint.className = "search-hint";
+        hint.textContent = "/";
+        wrap.appendChild(hint);
+    }
+
+    /* ---------- Порядок появления карточек ---------- */
+
+    function indexCards() {
+        const notes = document.getElementById("notes");
+        if (!notes) return;
+        [...notes.children].forEach((el, i) => el.style.setProperty("--i", Math.min(i, 14)));
+        updateCount();
+    }
+
+    /* ---------- Клавиатура ---------- */
+
+    document.addEventListener("keydown", (e) => {
+        const typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+
+        if (e.key === "/" && !typing) {
+            const search = document.getElementById("search");
+            if (search) { e.preventDefault(); search.focus(); }
         }
-        notesEl.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">📭</div>
-                <div class="empty-title">${title}</div>
-                <div class="empty-text">${text}</div>
-            </div>
-        `;
+
+        if (e.key === "Escape") {
+            const open = document.querySelector(".modal-overlay.active");
+            const games = document.getElementById("gamesPanel");
+            if (open && open.id === "modalOverlay") window.closeModal?.();
+            else if (open && open.id === "confirmOverlay") window.closeConfirmModal?.();
+            else if (open && open.id === "profileOverlay" &&
+                     document.getElementById("profileCancelBtn")?.style.display !== "none") {
+                window.closeProfileModal?.();
+            } else if (games && games.classList.contains("active")) {
+                window.closeGamesPanel?.();
+            }
+        }
+    });
+
+    /* ---------- Запуск ---------- */
+
+    function init() {
+        buildHeader();
+        wrapSearch();
+        indexCards();
+
+        const notes = document.getElementById("notes");
+        if (notes) new MutationObserver(indexCards).observe(notes, { childList: true });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
     } else {
-        notesEl.innerHTML = output;
+        init();
     }
-}
-
-function copyNoteById(id, buttonEl) {
-    const note = currentNotesList.find(n => n.id == id);
-    if (!note) return;
-    copyToClipboard(note.content, buttonEl);
-}
-
-function openNoteModal(id) {
-    let note = currentNotesList.find(n => n.id == id);
-    if (!note) return;
-
-    document.getElementById("modalTitle").innerText = note.title;
-    document.getElementById("modalText").innerText = note.content;
-
-    let dateEl = document.getElementById("modalDate");
-    if (!dateEl) {
-        dateEl = document.createElement("div");
-        dateEl.id = "modalDate";
-        dateEl.className = "modal-date";
-        const modalRight = document.querySelector(".modal-right");
-        if (modalRight) modalRight.appendChild(dateEl);
-    }
-    dateEl.textContent = "🕒 " + formatNoteDate(note);
-
-    let robloxContainer = document.getElementById("modalRobloxContainer");
-    if (!robloxContainer) {
-        robloxContainer = document.createElement("div");
-        robloxContainer.id = "modalRobloxContainer";
-        let modalTextEl = document.getElementById("modalText");
-        modalTextEl.parentNode.insertBefore(robloxContainer, modalTextEl);
-    }
-
-    if (note.roblox_url && note.roblox_url.trim() !== "") {
-        let raw = note.roblox_url.trim();
-        let url = raw.match(/^https?:\/\//i) ? raw : "https://" + raw;
-        if (!/^https?:\/\//i.test(url)) {
-            robloxContainer.innerHTML = "";
-        } else {
-            robloxContainer.innerHTML = `
-                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="roblox-link-btn">
-                    📎 Открыть ссылку  
-                </a>
-            `;
-        }
-    } else {
-        robloxContainer.innerHTML = "";
-    }
-
-    let modalImg = document.getElementById("modalImage");
-    let modalLeft = document.getElementById("modalLeft");
-
-    if (note.image) {
-        modalImg.src = note.image;
-        modalLeft.style.display = "flex";
-    } else {
-        modalLeft.style.display = "none";
-    }
-
-    document.getElementById("modalOverlay").classList.add("active");
-}
-
-// Заполнение формы для редактирования
-function editNote(id) {
-    let note = currentNotesList.find(n => n.id == id);
-    if (!note) return;
-
-    document.getElementById("title").value = note.title;
-    document.getElementById("contentInput").value = note.content;
-    
-    let robloxField = document.getElementById("robloxUrl");
-    if (robloxField) robloxField.value = note.roblox_url || "";
-
-    let catRadio = document.querySelector(`input[name="category"][value="${note.category || 'Заметки'}"]`);
-    if (catRadio) catRadio.checked = true;
-
-    let pinField = document.getElementById("isPinned");
-    if (pinField) pinField.checked = note.is_pinned === 1 || note.is_pinned === true;
-
-    document.getElementById("title").dataset.id = note.id;
-    document.getElementById("formTitle").innerText = "Редактировать запись";
-    document.getElementById("btnCancel").style.display = "block";
-
-    currentImageBase64 = note.image;
-}
-
-// Сброс формы
-function resetForm() {
-    document.getElementById("title").value = "";
-    document.getElementById("contentInput").value = "";
-    let robloxField = document.getElementById("robloxUrl");
-    if (robloxField) robloxField.value = "";
-
-    let defRadio = document.querySelector('input[name="category"][value="Заметки"]');
-    if (defRadio) defRadio.checked = true;
-
-    let imgInput = document.getElementById("imageInput");
-    if (imgInput) imgInput.value = "";
-    let fileName = document.getElementById("fileName");
-    if (fileName) fileName.innerText = "Выберите фото";
-    let pinField = document.getElementById("isPinned");
-    if (pinField) pinField.checked = false;
-    
-    delete document.getElementById("title").dataset.id;
-    currentImageBase64 = null;
-
-    document.getElementById("formTitle").innerText = "Новая запись";
-    document.getElementById("btnCancel").style.display = "none";
-}
-
-// Закрепление
-async function togglePin(id, status) {
-    try {
-        await fetch(WORKER_URL, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ action: "toggle_pin", id: id, is_pinned: status }),
-            credentials: "include"
-        });
-        loadNotes();
-        showToast(status ? "📌 Закреплено" : "📍 Откреплено");
-    } catch (err) {
-        showToast("❌ Не удалось изменить", "error");
-    }
-}
-
-// Универсальное окно подтверждения
-function openConfirmModal({ title, text, confirmLabel, onConfirm }) {
-    const overlay = document.getElementById("confirmOverlay");
-    const titleEl = document.getElementById("confirmTitle");
-    const textEl = document.getElementById("confirmText");
-    const confirmBtn = document.getElementById("btnConfirmAction");
-    if (!overlay || !confirmBtn) return;
-
-    if (titleEl) titleEl.textContent = title || "Подтверждение";
-    if (textEl) textEl.textContent = text || "Вы уверены?";
-    confirmBtn.textContent = confirmLabel || "Подтвердить";
-    confirmBtn.onclick = () => {
-        if (typeof onConfirm === "function") onConfirm();
-    };
-    overlay.classList.add("active");
-}
-
-function closeConfirmModal() {
-    const overlay = document.getElementById("confirmOverlay");
-    if (overlay) overlay.classList.remove("active");
-    noteIdToDelete = null;
-}
-
-// Удаление
-function deleteNote(id) {
-    noteIdToDelete = id;
-    openConfirmModal({
-        title: "Удалить запись?",
-        text: "Это действие нельзя будет отменить.",
-        confirmLabel: "Удалить",
-        onConfirm: confirmDelete
-    });
-}
-
-async function confirmDelete() {
-    if (!noteIdToDelete) return;
-    try {
-        await fetch(WORKER_URL, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ action: "delete", id: noteIdToDelete }),
-            credentials: "include"
-        });
-        closeConfirmModal();
-        loadNotes();
-        showToast("🗑 Запись удалена");
-    } catch (err) {
-        console.error("Ошибка удаления:", err);
-        showToast("❌ Ошибка удаления", "error");
-    }
-}
-
-function closeModal() {
-    document.getElementById("modalOverlay").classList.remove("active");
-}
-
-// Управление темами через выпадающее меню
-function updateActiveThemeMark() {
-    const current = localStorage.getItem("site_theme") || "default";
-    document.querySelectorAll(".settings-option[data-theme-value]").forEach(btn => {
-        btn.classList.toggle("active-theme", btn.dataset.themeValue === current);
-    });
-}
-
-function setTheme(themeName) {
-    const html = document.documentElement;
-    const dropdown = document.getElementById("settingsDropdown");
-
-    if (themeName === "default") {
-        html.removeAttribute("data-theme");
-        localStorage.setItem("site_theme", "default");
-    } else {
-        html.setAttribute("data-theme", themeName);
-        localStorage.setItem("site_theme", themeName);
-    }
-
-    updateActiveThemeMark();
-
-    if (dropdown) {
-        dropdown.classList.remove("active");
-    }
-}
-
-// Автоматическая проверка сессии (входа без пароля) при загрузке страницы
-document.addEventListener("DOMContentLoaded", async () => {
-    const loginContainer = document.getElementById("login");
-    const contentContainer = document.getElementById("content");
-
-    try {
-        let response = await fetch(WORKER_URL, {
-            method: "GET",
-            credentials: "include"
-        });
-
-        if (response.ok) {
-            currentNotesList = await response.json();
-            if (loginContainer) loginContainer.style.display = "none";
-            if (contentContainer) contentContainer.style.display = "flex";
-            applyFiltersAndRender();
-            connectNotesSocket();
-            ensureProfileSetup();
-            
-            // 👉 ВОТ ЗДЕСЬ ТЕПЕРЬ ВЫЗЫВАЕТСЯ УВЕДОМЛЕНИЕ ПРИ АВТОМАТИЧЕСКОМ ВХОДЕ
-            showAutoLoginToast();
-        } else {
-            if (loginContainer) loginContainer.style.display = "block";
-            if (contentContainer) contentContainer.style.display = "none";
-        }
-    } catch (error) {
-        console.error("Ошибка при проверке сессии:", error);
-        if (loginContainer) loginContainer.style.display = "block";
-        if (contentContainer) contentContainer.style.display = "none";
-    }
-});
-
-// Универсальные всплывающие уведомления
-function showToast(message, type = "ok") {
-    let toast = document.getElementById("appToast");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "appToast";
-        toast.className = "toast-notification";
-        toast.innerHTML = `
-            <span class="toast-message"></span>
-            <button class="toast-close" onclick="closeToast()">✕</button>
-        `;
-        document.body.appendChild(toast);
-    }
-
-    const msg = toast.querySelector(".toast-message");
-    if (msg) msg.textContent = message;
-
-    toast.classList.remove("toast-error", "toast-ok", "show");
-    toast.classList.add(type === "error" ? "toast-error" : "toast-ok");
-
-    // перезапуск анимации
-    void toast.offsetWidth;
-    setTimeout(() => toast.classList.add("show"), 10);
-
-    clearTimeout(window.toastTimer);
-    window.toastTimer = setTimeout(() => closeToast(), 3200);
-}
-
-function showAutoLoginToast() {
-    showToast("💡 Пароль уже вводили — повторный вход не нужен");
-}
-
-function closeToast() {
-    const toast = document.getElementById("appToast") || document.getElementById("autoLoginToast");
-    if (toast) {
-        toast.classList.remove("show");
-        clearTimeout(window.toastTimer);
-    }
-}
-
-// Запрос выхода — с подтверждением
-function requestLogout() {
-    const dropdown = document.getElementById("settingsDropdown");
-    if (dropdown) dropdown.classList.remove("active");
-
-    openConfirmModal({
-        title: "Выйти из архива?",
-        text: "Потребуется снова ввести пароль.",
-        confirmLabel: "Выйти",
-        onConfirm: logout
-    });
-}
-
-// Выход из аккаунта
-async function logout() {
-    closeConfirmModal();
-    disconnectNotesSocket();
-
-    try {
-        await fetch(WORKER_URL + "logout", {
-            method: "POST",
-            credentials: "include"
-        });
-    } catch (_) {}
-
-    document.getElementById("content").style.display = "none";
-    document.getElementById("login").style.display = "block";
-    const pass = document.getElementById("password");
-    if (pass) pass.value = "";
-    const msg = document.getElementById("message");
-    if (msg) msg.innerHTML = "";
-    currentNotesList = [];
-    showToast("🚪 Вы вышли");
-}
-
-// ==========================================
-// РЕАЛЬНОЕ ВРЕМЯ — периодический опрос (polling)
-// ==========================================
-const NOTES_POLL_INTERVAL_MS = 5000;
-let notesPollTimer = null;
-
-function connectNotesSocket() {
-    // Название сохранено для совместимости с остальным кодом (login/logout),
-    // но по сути это запуск обычного опроса сервера через равные интервалы.
-    if (notesPollTimer) return;
-    notesPollTimer = setInterval(() => {
-        const contentVisible = document.getElementById("content")?.style.display !== "none";
-        if (document.visibilityState === "visible" && contentVisible) {
-            loadNotes();
-        }
-    }, NOTES_POLL_INTERVAL_MS);
-}
-
-function disconnectNotesSocket() {
-    if (notesPollTimer) {
-        clearInterval(notesPollTimer);
-        notesPollTimer = null;
-    }
-}
-
-// Сразу опрашиваем сервер, когда пользователь возвращается на вкладку —
-// чтобы не ждать до конца текущего интервала
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-        const contentVisible = document.getElementById("content")?.style.display !== "none";
-        if (contentVisible) loadNotes();
-    }
-});
-
-// ==========================================
-// ПАНЕЛЬ МИНИ-ИГР
-// ==========================================
-function openGamesPanel() {
-    const panel = document.getElementById("gamesPanel");
-    const arrowBtn = document.getElementById("gamesArrowBtn");
-    if (panel) panel.classList.add("active");
-    if (arrowBtn) arrowBtn.classList.add("hidden");
-    loadLeaderboard();
-}
-
-function closeGamesPanel() {
-    const panel = document.getElementById("gamesPanel");
-    const arrowBtn = document.getElementById("gamesArrowBtn");
-    if (panel) panel.classList.remove("active");
-    if (arrowBtn) arrowBtn.classList.remove("hidden");
-}
-
-// ─── Колесо фортуны ─────────────────────────────────────────
-const wheelSegments = ["🎉 Приз!", "😢 Мимо", "🔥 Ещё раз", "⭐ Бонус", "💤 Пусто", "🎁 Сюрприз", "🍀 Удача", "💥 Взрыв"];
-const wheelColors = ["#34d399", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#fb7185", "#4ade80", "#f97316"];
-let currentWheelRotation = 0;
-let wheelSpinning = false;
-
-function drawWheel() {
-    const canvas = document.getElementById("wheelCanvas");
-    if (!canvas || !canvas.getContext) return;
-    const ctx = canvas.getContext("2d");
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const radius = canvas.width / 2 - 4;
-    const segAngle = (2 * Math.PI) / wheelSegments.length;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    wheelSegments.forEach((label, i) => {
-        const start = i * segAngle;
-        const end = start + segAngle;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, start, end);
-        ctx.closePath();
-        ctx.fillStyle = wheelColors[i % wheelColors.length];
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255,255,255,0.3)";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(start + segAngle / 2);
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#10151f";
-        ctx.font = "600 13px Inter, sans-serif";
-        ctx.fillText(label, radius - 14, 5);
-        ctx.restore();
-    });
-}
-
-function spinWheel() {
-    if (wheelSpinning) return;
-    const canvas = document.getElementById("wheelCanvas");
-    const resultEl = document.getElementById("wheelResult");
-    if (!canvas) return;
-
-    wheelSpinning = true;
-    if (resultEl) resultEl.textContent = "";
-
-    const segAngle = 360 / wheelSegments.length;
-    const winIndex = Math.floor(Math.random() * wheelSegments.length);
-    const targetCenter = winIndex * segAngle + segAngle / 2;
-
-    // Указатель находится сверху (270° в системе координат canvas)
-    let needed = (270 - targetCenter) % 360;
-    if (needed < 0) needed += 360;
-
-    const extraSpins = 5 + Math.floor(Math.random() * 3);
-    const currentMod = ((currentWheelRotation % 360) + 360) % 360;
-    currentWheelRotation += extraSpins * 360 + ((needed - currentMod) + 360) % 360;
-
-    canvas.style.transform = `rotate(${currentWheelRotation}deg)`;
-
-    setTimeout(() => {
-        wheelSpinning = false;
-        if (resultEl) resultEl.textContent = "Выпало: " + wheelSegments[winIndex];
-    }, 4600);
-}
-
-// ─── Крестики-нолики ────────────────────────────────────────
-let tttBoard = Array(9).fill(null);
-let tttGameOver = false;
-
-function renderTicTacToe() {
-    const boardEl = document.getElementById("tttBoard");
-    if (!boardEl) return;
-    boardEl.innerHTML = "";
-    tttBoard.forEach((val, i) => {
-        const cell = document.createElement("div");
-        cell.className = "ttt-cell" + (val ? " taken" : "");
-        cell.textContent = val || "";
-        cell.onclick = () => tttMove(i);
-        boardEl.appendChild(cell);
-    });
-}
-
-function checkTttWinner(board) {
-    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-    for (const [a, b, c] of lines) {
-        if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
-    }
-    if (board.every(v => v)) return "draw";
-    return null;
-}
-
-function getComputerMove(board) {
-    const empty = board.map((v, i) => (v ? null : i)).filter(v => v !== null);
-    if (empty.length === 0) return -1;
-
-    for (const i of empty) {
-        const copy = board.slice();
-        copy[i] = "⭕";
-        if (checkTttWinner(copy) === "⭕") return i;
-    }
-    for (const i of empty) {
-        const copy = board.slice();
-        copy[i] = "❌";
-        if (checkTttWinner(copy) === "❌") return i;
-    }
-    if (board[4] === null) return 4;
-    return empty[Math.floor(Math.random() * empty.length)];
-}
-
-function tttMove(i) {
-    if (tttGameOver || tttBoard[i]) return;
-    tttBoard[i] = "❌";
-    let winner = checkTttWinner(tttBoard);
-
-    if (!winner) {
-        const compMove = getComputerMove(tttBoard);
-        if (compMove !== -1) tttBoard[compMove] = "⭕";
-        winner = checkTttWinner(tttBoard);
-    }
-
-    renderTicTacToe();
-    const resultEl = document.getElementById("tttResult");
-    if (!resultEl) return;
-
-    if (winner === "draw") {
-        tttGameOver = true;
-        resultEl.textContent = "🤝 Ничья!";
-    } else if (winner === "❌") {
-        tttGameOver = true;
-        resultEl.textContent = "🎉 Ты выиграл!";
-    } else if (winner === "⭕") {
-        tttGameOver = true;
-        resultEl.textContent = "😅 Компьютер выиграл!";
-    } else {
-        resultEl.textContent = "Твой ход!";
-    }
-}
-
-function resetTicTacToe() {
-    tttBoard = Array(9).fill(null);
-    tttGameOver = false;
-    renderTicTacToe();
-    const resultEl = document.getElementById("tttResult");
-    if (resultEl) resultEl.textContent = "Ты играешь за ❌. Ходи первым!";
-}
-
-// ─── Апгрейдер ──────────────────────────────────────────────
-const UPGRADER_BALANCE_KEY = "upgraderBalance";
-const UPGRADER_BEST_KEY = "upgraderBest";
-const UPGRADER_OPTIONS = [
-    { mult: 2, chance: 47 },
-    { mult: 3, chance: 30 },
-    { mult: 5, chance: 18 },
-    { mult: 10, chance: 9 }
-];
-let upgraderBalance = 100;
-let upgraderSelectedIndex = 0;
-let upgraderBusy = false;
-
-function loadUpgraderBalance() {
-    const raw = localStorage.getItem(UPGRADER_BALANCE_KEY);
-    const parsed = raw !== null ? parseInt(raw, 10) : NaN;
-    upgraderBalance = isNaN(parsed) ? 100 : parsed;
-}
-
-function saveUpgraderBalance() {
-    localStorage.setItem(UPGRADER_BALANCE_KEY, String(upgraderBalance));
-}
-
-function renderUpgraderBalance() {
-    const el = document.getElementById("upgraderBalance");
-    if (el) el.textContent = upgraderBalance;
-}
-
-function renderUpgraderMultButtons() {
-    const row = document.getElementById("upgraderMultRow");
-    if (!row) return;
-    row.innerHTML = "";
-    UPGRADER_OPTIONS.forEach((opt, i) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "upgrader-mult-btn" + (i === upgraderSelectedIndex ? " selected" : "");
-        btn.innerHTML = `x${opt.mult}<span>${opt.chance}%</span>`;
-        btn.onclick = () => selectUpgraderMultiplier(i);
-        row.appendChild(btn);
-    });
-}
-
-function selectUpgraderMultiplier(index) {
-    if (upgraderBusy) return;
-    upgraderSelectedIndex = index;
-    renderUpgraderMultButtons();
-    updateUpgraderChanceBar(UPGRADER_OPTIONS[index].chance);
-}
-
-function updateUpgraderChanceBar(chance, markerPos) {
-    const fill = document.getElementById("upgraderChanceFill");
-    const marker = document.getElementById("upgraderMarker");
-    if (fill) fill.style.width = chance + "%";
-    if (marker) marker.style.left = (markerPos !== undefined ? markerPos : chance / 2) + "%";
-}
-
-function setUpgraderStakeMax() {
-    const input = document.getElementById("upgraderStake");
-    if (input) input.value = Math.max(1, upgraderBalance);
-}
-
-function doUpgrade() {
-    if (upgraderBusy) return;
-    const input = document.getElementById("upgraderStake");
-    const resultEl = document.getElementById("upgraderResult");
-    const btn = document.getElementById("upgraderBtn");
-    if (!input || !resultEl) return;
-
-    const stake = parseInt(input.value, 10);
-    if (isNaN(stake) || stake < 1) {
-        resultEl.textContent = "⚠️ Введи корректную ставку";
-        return;
-    }
-    if (stake > upgraderBalance) {
-        resultEl.textContent = "⚠️ Недостаточно коинов";
-        return;
-    }
-
-    const option = UPGRADER_OPTIONS[upgraderSelectedIndex];
-    const roll = Math.random() * 100;
-    const win = roll < option.chance;
-
-    upgraderBusy = true;
-    if (btn) btn.disabled = true;
-    resultEl.textContent = "";
-    updateUpgraderChanceBar(option.chance, roll);
-
-    setTimeout(() => {
-        if (win) {
-            const gain = Math.round(stake * (option.mult - 1));
-            upgraderBalance += gain;
-            resultEl.textContent = `🎉 Апгрейд удался! +${gain} 🪙`;
-        } else {
-            upgraderBalance -= stake;
-            if (upgraderBalance < 0) upgraderBalance = 0;
-            resultEl.textContent = `💥 Не повезло. -${stake} 🪙`;
-        }
-        saveUpgraderBalance();
-        renderUpgraderBalance();
-        checkUpgraderBest();
-
-        upgraderBusy = false;
-        if (btn) btn.disabled = false;
-
-        if (upgraderBalance <= 0) {
-            resultEl.textContent += " Коины закончились — нажми «Сбросить баланс»";
-        }
-    }, 1150);
-}
-
-function checkUpgraderBest() {
-    const raw = localStorage.getItem(UPGRADER_BEST_KEY);
-    const best = raw !== null ? parseInt(raw, 10) : 0;
-    if (upgraderBalance > best) {
-        localStorage.setItem(UPGRADER_BEST_KEY, String(upgraderBalance));
-        submitScore(upgraderBalance);
-    }
-}
-
-function resetUpgrader() {
-    upgraderBalance = 100;
-    saveUpgraderBalance();
-    renderUpgraderBalance();
-    const resultEl = document.getElementById("upgraderResult");
-    if (resultEl) resultEl.textContent = "Баланс сброшен до 100 🪙";
-}
-
-function initUpgrader() {
-    loadUpgraderBalance();
-    renderUpgraderBalance();
-    renderUpgraderMultButtons();
-    updateUpgraderChanceBar(UPGRADER_OPTIONS[upgraderSelectedIndex].chance);
-}
-
-// ─── Лидерборд ──────────────────────────────────────────────
-async function submitScore(score) {
-    const profile = getProfile();
-    if (!profile) return;
-    try {
-        await fetch(WORKER_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-                action: "submit_score",
-                player_name: profile.name,
-                player_avatar: profile.avatar,
-                score: score
-            })
-        });
-    } catch (e) {
-        console.error("Ошибка отправки результата:", e);
-    }
-}
-
-async function loadLeaderboard() {
-    const listEl = document.getElementById("leaderboardList");
-    if (!listEl) return;
-    try {
-        const response = await fetch(WORKER_URL + "leaderboard", {
-            method: "GET",
-            credentials: "include"
-        });
-        if (!response.ok) throw new Error("bad response");
-        const rows = await response.json();
-
-        if (!rows.length) {
-            listEl.innerHTML = `<div class="leaderboard-empty">Пока никто не играл в Апгрейдер</div>`;
-            return;
-        }
-
-        const profile = getProfile();
-        listEl.innerHTML = rows.map((row, i) => `
-            <div class="leaderboard-row ${profile && row.author_name === profile.name ? 'is-you' : ''}">
-                <span class="leaderboard-rank">#${i + 1}</span>
-                <img class="leaderboard-avatar" src="${row.author_avatar || DEFAULT_AVATAR}" alt="" onerror="this.onerror=null;this.src='${DEFAULT_AVATAR}'">
-                <span class="leaderboard-name">${escapeHtml(row.author_name || "Аноним")}</span>
-                <span class="leaderboard-score">${row.score} 🪙</span>
-            </div>
-        `).join("");
-    } catch (e) {
-        listEl.innerHTML = `<div class="leaderboard-empty">Не удалось загрузить лидерборд</div>`;
-    }
-}
-
-// Инициализация игр при загрузке страницы
-document.addEventListener("DOMContentLoaded", () => {
-    drawWheel();
-    renderTicTacToe();
-    initUpgrader();
-});
-
-// Экспорт функций в глобальную область видимости
-window.login = login;
-window.logout = logout;
-window.requestLogout = requestLogout;
-window.saveNote = saveNote;
-window.deleteNote = deleteNote;
-window.editNote = editNote;
-window.handleSearch = handleSearch;
-window.handleSort = handleSort;
-window.setSort = setSort;
-window.toggleSortMenu = toggleSortMenu;
-window.togglePin = togglePin;
-window.resetForm = resetForm;
-window.handleImageUpload = handleImageUpload;
-window.openNoteModal = openNoteModal;
-window.closeModal = closeModal;
-window.filterCategory = filterCategory;
-window.setCategory = setCategory;
-window.closeConfirmModal = closeConfirmModal;
-window.copyToClipboard = copyToClipboard;
-window.copyNoteById = copyNoteById;
-window.copyModalContent = copyModalContent;
-window.setTheme = setTheme;
-window.closeToast = closeToast;
-window.showToast = showToast;
-window.escapeHtml = escapeHtml;
-window.openGamesPanel = openGamesPanel;
-window.closeGamesPanel = closeGamesPanel;
-window.spinWheel = spinWheel;
-window.resetTicTacToe = resetTicTacToe;
-window.setUpgraderStakeMax = setUpgraderStakeMax;
-window.doUpgrade = doUpgrade;
-window.resetUpgrader = resetUpgrader;
-window.openProfileModal = openProfileModal;
-window.closeProfileModal = closeProfileModal;
-window.saveProfile = saveProfile;
-window.handleAvatarUpload = handleAvatarUpload;
-window.resetAvatarToDefault = resetAvatarToDefault;
-window.connectNotesSocket = connectNotesSocket;
-window.disconnectNotesSocket = disconnectNotesSocket;
+})();
